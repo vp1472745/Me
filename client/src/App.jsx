@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import Layout from "./components/dashboard/layout";
+import Layout from "./components/dashboardLayoutComponents/layout";
 
 import ProtectedRoute from "./utils/ProtectedRoute";
 
@@ -14,7 +14,8 @@ import PublicRoute from "./utils/PublicRoute";
 
 import { ToastContainer } from "react-toastify";
 
-import RouteLoader from "./components/commonCommonComponents/RouteLoader/RouteLoader";
+import RouteLoader from "./components/commonComponents/RouteLoader/RouteLoader";
+import Home from "./pages/homePage";
 
 import "react-toastify/dist/ReactToastify.css";
 
@@ -23,19 +24,19 @@ import "react-toastify/dist/ReactToastify.css";
 // ==========================
 
 const AdminOverview = lazy(() =>
-  import("./components/AdminDashboard/AdminOverview"),
+  import("./components/adminDashboardComponents/AdminOverview"),
 );
 
 const AdminUsers = lazy(() =>
-  import("./components/AdminDashboard/AdminUsers"),
+  import("./components/adminDashboardComponents/AdminUsers"),
 );
 
 const AdminSettings = lazy(() =>
-  import("./components/AdminDashboard/AdminSettings"),
+  import("./components/adminDashboardComponents/AdminSettings"),
 );
 
 const AdminAccess = lazy(() =>
-  import("./components/AdminDashboard/AccessTab"),
+  import("./components/adminDashboardComponents/AccessTab"),
 );
 
 // ==========================
@@ -43,15 +44,15 @@ const AdminAccess = lazy(() =>
 // ==========================
 
 const EditorOverview = lazy(() =>
-  import("./components/EditorDashboard/EditorOverview"),
+  import("./components/editorDashboardComponents/EditorOverview"),
 );
 
 const EditorPosts = lazy(() =>
-  import("./components/EditorDashboard/EditorPosts"),
+  import("./components/editorDashboardComponents/EditorPosts"),
 );
 
 const EditorSettings = lazy(() =>
-  import("./components/EditorDashboard/EditorSettings"),
+  import("./components/editorDashboardComponents/EditorSettings"),
 );
 
 // ==========================
@@ -80,6 +81,8 @@ function App() {
         ========================== */}
 
         <Route element={<PublicRoute />}>
+
+         <Route path="/home" element={<Home />} />
 
           <Route
             path="/login"
