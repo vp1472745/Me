@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Italianno&display=swap');
 
-/* LUXURY TITLE */
+/* =========================
+   LUXURY TITLE
+========================= */
 .luxury-title {
   font-family: 'Cormorant Garamond', serif;
   font-weight: 300;
@@ -8,7 +10,9 @@
   text-transform: uppercase;
 }
 
-/* HERO TEXT */
+/* =========================
+   HERO TEXT
+========================= */
 .luxury-text {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
@@ -16,88 +20,158 @@
   line-height: 1.8;
 }
 
-/* CINEMATIC LINE */
+/* =========================
+   PREMIUM WEDDING LINE
+========================= */
 .luxury-line {
-  width: 250px;
+  width: 320px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.7);
-  margin: 30px auto;
+  background: rgba(255, 255, 255, 0.45);
+  margin: 40px auto;
   position: relative;
 }
 
+/* CENTER DESIGN */
+.luxury-line::before {
+  content: "❖";
+  position: absolute;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -55%);
+
+  color: white;
+
+  font-size: 18px;
+
+  text-shadow:
+    -10px 0 0 white,
+    10px 0 0 white;
+}
+
+/* LIGHT GLOW */
 .luxury-line::after {
   content: "";
   position: absolute;
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+
+  opacity: 0.6;
 }
 
-/* EXACT WEDDING STORY QUOTE STYLE */
+/* =========================
+   EXACT WEDDING STORY QUOTE
+========================= */
 .wedding-quote {
   font-family: 'Italianno', cursive;
-  font-size: 35px;
+
+  margin-top: 20px;
+  font-size: 28px;
+
   line-height: 1.1;
+
   color: #8d8479;
+
   text-align: center;
+
   font-weight: 400;
 }
 
-/* AUTHOR */
+/* =========================
+   AUTHOR
+========================= */
 .wedding-author {
   font-family: 'Cormorant Garamond', serif;
+
   letter-spacing: 6px;
+
   text-transform: uppercase;
+
   color: #8d8479;
+
   text-align: center;
-  margin-top: 5px;
+
+  margin-top: 10px;
+
   margin-bottom: 20px;
-  font-size: 18px;
+
+  font-size: 15px;
 }
 
-/* CONTENT SECTION TEXT */
+/* =========================
+   CONTENT TEXT
+========================= */
 .section-text {
   font-family: 'Cormorant Garamond', serif;
+
   color: #8d8479;
+
   text-align: center;
+
   font-weight: 400;
+
   line-height: 1.8;
+
   font-size: 20px;
 }
 
-/* SECTION CONTAINER */
+/* =========================
+   SECTION CONTAINER
+========================= */
 .section-content {
   background: #f4f1eb;
-  padding: 120px 24px;
+
+  padding: 80px;
 }
 
-/* SECTION LINE */
+/* =========================
+   SECTION DIVIDER
+========================= */
 .section-divider {
   width: 100%;
+
   height: 1px;
+
   background: #d8d1c7;
-  margin-bottom: 60px;
+margin-top: 20px;
+  margin-bottom: 20px;
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
+
+  .luxury-title {
+    letter-spacing: 6px;
+  }
+
+  .luxury-line {
+    width: 220px;
+  }
 
   .wedding-quote {
     font-size: 42px;
+
     line-height: 1.2;
   }
 
   .wedding-author {
     font-size: 14px;
+
     letter-spacing: 4px;
   }
 
   .section-text {
     font-size: 18px;
+
     line-height: 1.7;
   }
 
