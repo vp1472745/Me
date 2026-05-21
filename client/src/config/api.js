@@ -48,4 +48,69 @@ export const updateEditorPermissions =
     );
   };
 
+
+
+
+
+
+
+
+
+
+
+
+
+  // ==========================
+// STORY APIs
+// ==========================
+
+
+// CREATE STORY
+
+export const createStory =
+  async (formData) => {
+
+    return API.post(
+      "/story/create",
+      formData,
+
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+  };
+
+
+// GET ALL STORIES
+
+export const getAllStories =
+  async () => {
+
+    return API.get(
+      "/story/all"
+    );
+  };
+
+
+// GET SINGLE STORY
+
+// GET SINGLE STORY
+export const getSingleStory = async (id) => {
+  return API.get(`/story/${id}`);
+};
+
+
+// DELETE STORY
+
+export const deleteStory =
+  async (id) => {
+
+    return API.delete(
+      `/story/delete/${id}`
+    );
+  };
+
 export default API;

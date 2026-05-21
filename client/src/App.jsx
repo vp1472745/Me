@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 import {
   Route,
@@ -19,12 +19,18 @@ import Home from "./pages/homePage";
 
 import "react-toastify/dist/ReactToastify.css";
 
+import StoryManager from "./components/storiesComponents/mainFile";
+import StoryDetails from "./components/storiesComponents/StoryDetails";
+import StoriesList from "./components/storiesComponents/mainFile";
+
+import axios from "axios";
+
 // ==========================
 // Admin Pages
 // ==========================
 
 const AdminOverview = lazy(() =>
-  import("./components/adminDashboardComponents/AdminOverview"),
+  import("./components/adminDashboardComponents/stories/AdminOverview"),
 );
 
 const AdminUsers = lazy(() =>
@@ -71,6 +77,37 @@ function App() {
 
   const roleType = user?.role;
 
+  const [stories, setStories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchStories = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/story/all");
+        setStories(response.data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch stories. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStories();
+  }, []);
+
+  const retryFetchingStories = () => {
+    setError(null);
+    setLoading(true);
+    fetchStories();
+  };
+
+  const handleStoryClick = (story) => {
+    console.log("Story clicked:", story);
+  };
+
   return (
     <Suspense fallback={<RouteLoader />}>
 
@@ -84,7 +121,17 @@ function App() {
 
          <Route path="/" element={<Home />} />
 
-      
+  <Route
+    path="/login"
+    element={<Login />}
+  />
+
+ <Route path="/stories" element={<StoryManager />} />
+        <Route path="/story/:id" element={<StoryDetails />} />
+
+    <Route path="/storyList" element={<StoriesList />} />
+
+
         </Route>
 
         {/* ==========================

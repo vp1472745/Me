@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 
 import authRouter from "./src/router/authRouter.js";
 import accessRouter from "./src/router/accessRoutes.js";
+import storyRoutes from "./src/router/storyRoutes.js";
 
 dotenv.config();
 
@@ -45,6 +46,11 @@ mongoose
 
 app.use("/api/auth", authRouter);
 app.use("/api/access", accessRouter);
+app.use(
+  "/api/story",
+  storyRoutes
+);
+
 // ==========================
 // Server
 // ==========================
