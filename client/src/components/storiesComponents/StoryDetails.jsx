@@ -1,7 +1,8 @@
 // StoryDetails.jsx
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
-import { getSingleStory } from "../../config/api"; // adjust path
+import { getSingleStory } from "../../config/api";
+import { Music, ArrowLeft } from "lucide-react";
 
 const StoryDetails = () => {
   const { id } = useParams();
@@ -29,6 +30,16 @@ const StoryDetails = () => {
     }
   }, [id, story]);
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   if (loading) {
     return (
       <div className="bg-[#f5f1eb] min-h-screen flex items-center justify-center">
@@ -39,14 +50,16 @@ const StoryDetails = () => {
 
   if (error || !story) {
     return (
-      <div className="bg-[#f5f1eb] min-h-screen flex flex-col items-center justify-center">
-        <p className="text-red-500 mb-4">{error || "Story not found"}</p>
-        <button
-          onClick={() => navigate("/stories")}
-          className="border border-[#6d645b] px-6 py-2 hover:bg-[#6d645b] hover:text-white transition"
-        >
-          Go Back
-        </button>
+      <div className="bg-[#f5f1eb] min-h-screen flex flex-col items-center justify-center px-4">
+        <div className="bg-white/80 p-8 rounded-2xl text-center max-w-md">
+          <p className="text-red-500 mb-4">{error || "Story not found"}</p>
+          <button
+            onClick={() => navigate("/stories")}
+            className="inline-flex items-center gap-2 border border-[#6d645b] px-6 py-2 hover:bg-[#6d645b] hover:text-white transition rounded-full"
+          >
+            <ArrowLeft size={16} /> Back to Stories
+          </button>
+        </div>
       </div>
     );
   }
@@ -63,42 +76,57 @@ const StoryDetails = () => {
     galleryVideos = [],
   } = story;
 
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
-
-  // Combine images and videos for gallery (videos shown with video tag)
+  // Combine media
   const allMedia = [
     ...galleryImages.map((src, idx) => ({ type: "image", src, id: idx })),
     ...galleryVideos.map((src, idx) => ({ type: "video", src, id: idx })),
   ];
 
-  // Helper to render media items in a pattern: two side-by-side, one full-width, etc.
+  // Responsive gallery layout: on mobile simple grid, on desktop alternating pattern
   const renderGallery = () => {
     if (allMedia.length === 0) return null;
 
+    // For mobile: simple 2-column grid
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      return (
+        <div className="grid grid-cols-2 gap-3">
+          {allMedia.map((media, idx) => (
+            <div key={idx} className="aspect-square overflow-hidden rounded-xl shadow-md">
+              {media.type === "image" ? (
+                <img src={media.src} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <video src={media.src} controls className="w-full h-full object-cover" />
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Desktop: alternating full‑width and two‑column sections
     const items = [];
     for (let i = 0; i < allMedia.length; i++) {
       if (i % 3 === 0 && i + 1 < allMedia.length) {
-        // Two side-by-side
+        // two side‑by‑side
         items.push(
-          <div key={`pair-${i}`} className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-            {renderMediaItem(allMedia[i])}
-            {renderMediaItem(allMedia[i + 1])}
+          <div key={`pair-${i}`} className="grid grid-cols-2 gap-6 my-6">
+            <div className="aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
+              {renderMediaItem(allMedia[i])}
+            </div>
+            <div className="aspect-[4/3] overflow-hidden rounded-2xl shadow-lg">
+              {renderMediaItem(allMedia[i + 1])}
+            </div>
           </div>
         );
-        i++; // skip next because we used it
+        i++;
       } else {
-        // Full width
+        // full width
         items.push(
-          <div key={`full-${i}`} className="mt-4">
-            {renderMediaItem(allMedia[i])}
+          <div key={`full-${i}`} className="my-6">
+            <div className="aspect-[16/9] overflow-hidden rounded-2xl shadow-lg">
+              {renderMediaItem(allMedia[i])}
+            </div>
           </div>
         );
       }
@@ -108,72 +136,78 @@ const StoryDetails = () => {
 
   const renderMediaItem = (media) => {
     if (media.type === "image") {
-      return (
-        <img
-          src={media.src}
-          alt={`gallery-${media.id}`}
-          className="w-full h-[350px] sm:h-[600px] lg:h-[850px] object-cover"
-        />
-      );
+      return <img src={media.src} alt="" className="w-full h-full object-cover" />;
     } else {
-      return (
-        <video
-          src={media.src}
-          controls
-          controlsList="nodownload"
-          className="w-full h-[350px] sm:h-[600px] lg:h-[850px] object-cover bg-black"
-        />
-      );
+      return <video src={media.src} controls className="w-full h-full object-cover" />;
     }
   };
 
   return (
-    <div className="bg-[#f5f1eb] min-h-screen">
-      {/* TOP SECTION */}
-      <div className="px-4 sm:px-8 lg:px-20 py-12">
-        <div className="text-center">
+    <div className="bg-gradient-to-br from-[#fdf8f0] to-[#f4ede3] min-h-screen">
+      {/* Back button */}
+      <div className="px-4 sm:px-8 lg:px-20 pt-8">
+        <button
+          onClick={() => navigate("/stories")}
+          className="inline-flex items-center gap-2 text-[#8b7355] hover:text-[#6b5b4b] transition"
+        >
+          <ArrowLeft size={20} /> Back to all stories
+        </button>
+      </div>
+
+      <div className="px-4 sm:px-8 lg:px-20 py-6">
+        {/* Title section */}
+        <div className="text-center max-w-4xl mx-auto">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-light tracking-[4px] text-[#6d645b] uppercase">
             {title}
           </h1>
           <p className="mt-4 text-[#8c8177] text-lg sm:text-xl">{couple}</p>
-          <p className="mt-2 text-[#a09589] text-base sm:text-lg">
+          <p className="mt-2 text-[#a09589] text-base">
             {formatDate(date)} | {storyLocation}
           </p>
         </div>
 
-        {/* MAIN IMAGE */}
-        <div className="max-w-7xl mx-auto mt-14">
-          <img
-            src={
-              coverImage ||
-              "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600"
-            }
-            alt={title}
-            className="w-full h-[260px] sm:h-[450px] md:h-[650px] object-cover"
-          />
+        {/* Cover image – landscape on desktop, auto on mobile */}
+        <div className="max-w-6xl mx-auto mt-12">
+          <div className="aspect-[16/9] md:aspect-[21/9] overflow-hidden rounded-2xl shadow-2xl">
+            <img
+              src={coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=1600"}
+              alt={title}
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
 
-        {/* DESCRIPTION */}
-        <div className="max-w-4xl mx-auto mt-16 text-center">
-          <p className="text-[#7d7369] leading-[40px] text-base sm:text-lg md:text-xl font-light">
-            {description}
-          </p>
+        {/* Description */}
+        <div className="max-w-6xl mx-auto mt-16 text-center">
+          <div className="bg-white/40 backdrop-blur-sm p-8 rounded-2xl">
+            <p className="text-[#7d7369] leading-relaxed text-base md:text-lg font-light">
+              {description}
+            </p>
+          </div>
         </div>
 
-        {/* AUDIO PLAYER (if audio exists) */}
+        {/* Audio player */}
         {audio && (
           <div className="max-w-2xl mx-auto mt-12">
-            <div className="bg-white shadow-md rounded-full px-4 py-4">
-              <audio controls className="w-full">
+            <div className="bg-white/60 rounded-full px-6 py-3 flex items-center gap-4 shadow-md">
+              <Music className="text-[#8b7355]" size={24} />
+              <audio controls className="flex-1">
                 <source src={audio} type="audio/mpeg" />
               </audio>
             </div>
           </div>
         )}
-      </div>
 
-      {/* DYNAMIC GALLERY */}
-      {allMedia.length > 0 && <div className="mt-20 px-4 sm:px-8 lg:px-20 pb-16">{renderGallery()}</div>}
+        {/* Gallery */}
+        {allMedia.length > 0 && (
+          <div className="mt-20">
+            <h2 className="text-2xl font-light text-[#6d645b] text-center mb-8 tracking-wide">
+              Gallery
+            </h2>
+            {renderGallery()}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

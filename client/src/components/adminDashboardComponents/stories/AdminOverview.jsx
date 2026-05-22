@@ -3,12 +3,12 @@ import React, { useState, useEffect } from "react";
 import { Plus, Trash2, Image, Music, Video, X, Play } from "lucide-react";
 import CommonModal from "../../commonComponents/modelCommonComponents";
 import { createStory, getAllStories } from "../../../config/api";
-import StoriesList from "./getAllStories"; // 👈 import the new component
+import StoriesList from "./getAllStories";
 
 const StoryManager = () => {
   const [activeTab, setActiveTab] = useState("upload");
 
-  // Upload state (unchanged)
+  // Upload state
   const [openModal, setOpenModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -63,7 +63,7 @@ const StoryManager = () => {
     }
   };
 
-  // Upload handlers (all unchanged)
+  // Upload handlers
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -244,7 +244,7 @@ const StoryManager = () => {
         </div>
       </div>
 
-      {/* Upload Modal (unchanged) */}
+      {/* Upload Modal (Complete Form) */}
       <CommonModal
         isOpen={openModal}
         onClose={() => {
@@ -255,9 +255,224 @@ const StoryManager = () => {
         size="xl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* ... all form fields exactly as before ... */}
-          {/* I'm omitting them here for brevity, but you must keep all the input fields 
-              from your original StoryManager inside this modal. */}
+          <div>
+            <label className="block mb-1 font-semibold">Story Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold">Couple Name</label>
+            <input
+              type="text"
+              name="couple"
+              value={formData.couple}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold">Wedding Date</label>
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-semibold">Description</label>
+            <textarea
+              rows={3}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full border rounded-xl p-3"
+              required
+            />
+          </div>
+
+          {/* Cover Image */}
+          <div className="bg-white/50 p-4 rounded-xl">
+            <label className="flex gap-2">📷 Cover Image</label>
+            <div className="flex gap-2 mt-2">
+              <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded">
+                <Plus size={16} /> Choose
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCoverImageChange}
+                  className="hidden"
+                  required={!coverImage}
+                />
+              </label>
+              {coverImage && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCoverImage(null);
+                    if (coverPreview) URL.revokeObjectURL(coverPreview);
+                    setCoverPreview(null);
+                  }}
+                  className="text-red-500"
+                >
+                  <Trash2 />
+                </button>
+              )}
+            </div>
+            {coverPreview && (
+              <img
+                src={coverPreview}
+                className="mt-2 w-32 h-32 object-cover rounded"
+                alt="cover preview"
+              />
+            )}
+          </div>
+
+          {/* Audio */}
+          <div className="bg-white/50 p-4 rounded-xl">
+            <label className="flex gap-2">🎵 Audio (optional)</label>
+            <div className="flex gap-2 mt-2">
+              <label className="cursor-pointer bg-gray-200 px-4 py-2 rounded">
+                <Plus size={16} /> Choose
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioChange}
+                  className="hidden"
+                />
+              </label>
+              {audio && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAudio(null);
+                    if (audioPreview) URL.revokeObjectURL(audioPreview);
+                    setAudioPreview(null);
+                  }}
+                  className="text-red-500"
+                >
+                  <Trash2 />
+                </button>
+              )}
+            </div>
+            {audioPreview && (
+              <audio controls className="mt-2 w-full">
+                <source src={audioPreview} />
+              </audio>
+            )}
+          </div>
+
+          {/* Gallery Images */}
+          <div className="bg-white/50 p-4 rounded-xl">
+            <label>🖼️ Gallery Images (max 10)</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {galleryImages.map((img, i) => (
+                <div key={i} className="relative w-20 h-20">
+                  <img
+                    src={URL.createObjectURL(img)}
+                    className="w-full h-full object-cover rounded"
+                    alt="gallery"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeGalleryImage(i)}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+              <label className="w-20 h-20 bg-gray-200 flex items-center justify-center rounded cursor-pointer">
+                <Plus />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleGalleryImagesChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <p className="text-xs mt-1">{galleryImages.length}/10</p>
+          </div>
+
+          {/* Gallery Videos */}
+          <div className="bg-white/50 p-4 rounded-xl">
+            <label>🎬 Gallery Videos (optional)</label>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {galleryVideos.map((vid, i) => (
+                <div key={i} className="relative w-40 p-1 bg-white rounded shadow">
+                  <video
+                    src={videoPreviews[vid.name]}
+                    className="w-full h-24 object-cover rounded"
+                    controls
+                    controlsList="nodownload"
+                  />
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs truncate w-28">{vid.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryVideo(i)}
+                      className="text-red-500"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+              <label className="w-40 h-40 bg-gray-200 flex flex-col items-center justify-center rounded cursor-pointer">
+                <Plus size={24} />
+                <span className="text-xs">Add Video</span>
+                <input
+                  type="file"
+                  accept="video/*"
+                  multiple
+                  onChange={handleGalleryVideosChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => {
+                resetForm();
+                setOpenModal(false);
+              }}
+              className="px-6 py-2 border rounded"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-[#8b7355] text-white rounded"
+            >
+              {loading ? "Uploading..." : "Publish"}
+            </button>
+          </div>
         </form>
       </CommonModal>
 
@@ -270,7 +485,6 @@ const StoryManager = () => {
       >
         {selectedStory && (
           <div className="space-y-6">
-            {/* Cover Image */}
             <div className="rounded-xl overflow-hidden">
               <img
                 src={selectedStory.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=1200"}
@@ -278,7 +492,6 @@ const StoryManager = () => {
                 className="w-full h-64 object-cover"
               />
             </div>
-            {/* Title & Couple */}
             <div className="text-center">
               <h2 className="text-3xl font-light text-[#6d645b] uppercase tracking-wider">
                 {selectedStory.title}
@@ -288,13 +501,11 @@ const StoryManager = () => {
                 {formatDate(selectedStory.date)} | {selectedStory.location}
               </p>
             </div>
-            {/* Description */}
             <div className="bg-white/30 p-5 rounded-xl">
               <p className="text-[#7d7369] leading-relaxed text-center">
                 {selectedStory.description}
               </p>
             </div>
-            {/* Audio Player */}
             {selectedStory.audio && (
               <div className="bg-white/50 p-4 rounded-xl">
                 <label className="flex items-center gap-2 mb-2 font-semibold">
@@ -305,7 +516,6 @@ const StoryManager = () => {
                 </audio>
               </div>
             )}
-            {/* Gallery Images */}
             {selectedStory.galleryImages && selectedStory.galleryImages.length > 0 && (
               <div>
                 <label className="flex items-center gap-2 mb-3 font-semibold">
@@ -324,7 +534,6 @@ const StoryManager = () => {
                 </div>
               </div>
             )}
-            {/* Gallery Videos */}
             {selectedStory.galleryVideos && selectedStory.galleryVideos.length > 0 && (
               <div>
                 <label className="flex items-center gap-2 mb-3 font-semibold">

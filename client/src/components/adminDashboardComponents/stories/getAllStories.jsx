@@ -77,10 +77,9 @@ const StoriesList = ({ stories, loading, error, onRetry, onStoryClick }) => {
                 e.target.src = "https://via.placeholder.com/400x500?text=No+Image";
               }}
             />
-            {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></div>
             
-            {/* Media Badge (if audio/video present) */}
+            {/* Media Badge */}
             {(story.audio || (story.galleryVideos?.length > 0)) && (
               <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
                 {story.audio && <Music size={12} className="text-white" />}
@@ -95,27 +94,22 @@ const StoriesList = ({ stories, loading, error, onRetry, onStoryClick }) => {
             <h3 className="text-xl font-light text-[#6d645b] tracking-wide mb-1 line-clamp-1">
               {story.title || "Untitled"}
             </h3>
-            
             <div className="flex items-center gap-1 text-[#b0a69b] text-sm mt-2">
               <Users size={14} />
               <span>{story.couple || "Couple"}</span>
             </div>
-            
             <div className="flex items-center gap-1 text-[#b0a69b] text-sm mt-1">
               <MapPin size={14} />
               <span>{story.location || "Location"}</span>
             </div>
-            
             <div className="flex items-center gap-1 text-[#b0a69b] text-sm mt-1">
               <Calendar size={14} />
               <span>{formatDate(story.date)}</span>
             </div>
-
-            {/* Decorative Line */}
             <div className="w-12 h-px bg-[#d4c5b3] mx-auto mt-4 transition-all duration-300 group-hover:w-20 group-hover:bg-[#8b7355]"></div>
           </div>
 
-          {/* Hover Reveal Button (optional, but adds elegance) */}
+          {/* Hover Reveal Button */}
           <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-white to-white/90">
             <button className="w-full py-2 text-[#8b7355] border border-[#8b7355] rounded-full hover:bg-[#8b7355] hover:text-white transition text-sm font-medium">
               View Story

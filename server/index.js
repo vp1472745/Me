@@ -7,6 +7,8 @@ import cookieParser from "cookie-parser";
 import authRouter from "./src/router/authRouter.js";
 import accessRouter from "./src/router/accessRoutes.js";
 import storyRoutes from "./src/router/storyRoutes.js";
+import photoBookRouter from "./src/router/photoBookRouter.js";
+import ImageRouter from "./src/router/imageRoute.js";
 
 dotenv.config();
 
@@ -49,6 +51,15 @@ app.use("/api/access", accessRouter);
 app.use(
   "/api/story",
   storyRoutes
+);
+app.use(
+  "/api/photo-book",
+  photoBookRouter
+);
+
+app.use(
+  "/api/image",
+  ImageRouter
 );
 
 // ==========================

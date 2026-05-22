@@ -51,10 +51,10 @@ function Sidebar() {
             </Link>
 
             <Link
-              to="/users"
+              to="/photobooks-admin"
               className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
             >
-              Users
+              PhotoBooks
             </Link>
 
             <Link
