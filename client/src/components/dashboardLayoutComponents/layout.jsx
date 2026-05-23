@@ -30,18 +30,53 @@ function Layout({ roleType }) {
   };
 
   // Navigation items mapping
-  const adminNav = [
-    { to: "/admin-overview", label: "Overview", icon: Home, permission: null },
-    { to: "/photobooks-admin", label: "PhotoBooks", icon: Camera, permission: null },
-    { to: "/images-admin", label: "Images", icon: ImageIcon, permission: null },
-    { to: "/admin-settings", label: "Settings", icon: Settings, permission: null },
-  ];
+const adminNav = [
+  {
+    to: "/dashboard/admin-overview",
+    label: "Overview",
+    icon: Home,
+    permission: null,
+  },
+  {
+    to: "/dashboard/photobooks-admin",
+    label: "PhotoBooks",
+    icon: Camera,
+    permission: null,
+  },
+  {
+    to: "/dashboard/images-admin",
+    label: "Images",
+    icon: ImageIcon,
+    permission: null,
+  },
+  {
+    to: "/dashboard/admin-settings",
+    label: "Settings",
+    icon: Settings,
+    permission: null,
+  },
+];
 
-  const editorNav = [
-    { to: "/editor-overview", label: "Overview", icon: Home, permission: "overview" },
-    { to: "/posts", label: "Posts", icon: FileText, permission: "posts" },
-    { to: "/editor-settings", label: "Settings", icon: Settings, permission: "settings" },
-  ];
+const editorNav = [
+  {
+    to: "/dashboard/editor-overview",
+    label: "Overview",
+    icon: Home,
+    permission: "overview",
+  },
+  {
+    to: "/dashboard/posts",
+    label: "Posts",
+    icon: FileText,
+    permission: "posts",
+  },
+  {
+    to: "/dashboard/editor-settings",
+    label: "Settings",
+    icon: Settings,
+    permission: "settings",
+  },
+];
 
   const navItems = roleType === "ADMIN" ? adminNav : editorNav;
 

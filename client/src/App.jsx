@@ -101,11 +101,24 @@ const Login = lazy(() =>
 
 function App() {
 
-  const user = JSON.parse(
-    localStorage.getItem("user"),
-  );
+  const userStr =
+    localStorage.getItem("user");
 
-  const roleType = user?.role;
+  let user = null;
+
+  try {
+
+    user = userStr
+      ? JSON.parse(userStr)
+      : null;
+
+  } catch (e) {
+
+    user = null;
+  }
+
+  const roleType =
+    user?.role;
 
   return (
 
@@ -119,9 +132,7 @@ function App() {
             PUBLIC ROUTES
         ========================== */}
 
-        <Route
-          element={<PublicRoute />}
-        >
+        <Route element={<PublicRoute />}>
 
           <Route
             path="/login"
@@ -177,101 +188,66 @@ function App() {
         />
 
         {/* ==========================
-            ADMIN ROUTES
+            PROTECTED DASHBOARD
         ========================== */}
 
-        {roleType === "ADMIN" && (
+        <Route element={<ProtectedRoute />}>
 
           <Route
-            element={<ProtectedRoute />}
+            path="/dashboard"
+            element={
+              <Layout
+                roleType={roleType}
+              />
+            }
           >
 
-            <Route
-              path="/"
-              element={
-                <Layout
-                  roleType={roleType}
-                />
-              }
-            >
-
-              <Route
-                path="admin-overview"
-                element={
-                  <AdminOverview />
-                }
-              />
-
-              <Route
-                path="photobooks-admin"
-                element={
-                  <PhotoBooksAdmin />
-                }
-              />
-
-              <Route
-                path="images-admin"
-                element={
-                  <ImageAdminDashboard />
-                }
-              />
-
-              <Route
-                path="admin-settings"
-                element={
-                  <AdminSettings />
-                }
-              />
-
-            </Route>
-
-          </Route>
-        )}
-
-        {/* ==========================
-            EDITOR ROUTES
-        ========================== */}
-
-        {roleType === "EDITOR" && (
-
-          <Route
-            element={<ProtectedRoute />}
-          >
+            {/* ==========================
+                ADMIN ROUTES
+            ========================== */}
 
             <Route
-              path="/"
-              element={
-                <Layout
-                  roleType={roleType}
-                />
-              }
-            >
+              path="admin-overview"
+              element={<AdminOverview />}
+            />
 
-              <Route
-                path="editor-overview"
-                element={
-                  <EditorOverview />
-                }
-              />
+            <Route
+              path="photobooks-admin"
+              element={<PhotoBooksAdmin />}
+            />
 
-              <Route
-                path="posts"
-                element={
-                  <EditorPosts />
-                }
-              />
+            <Route
+              path="images-admin"
+              element={<ImageAdminDashboard />}
+            />
 
-              <Route
-                path="editor-settings"
-                element={
-                  <EditorSettings />
-                }
-              />
+            <Route
+              path="admin-settings"
+              element={<AdminSettings />}
+            />
 
-            </Route>
+            {/* ==========================
+                EDITOR ROUTES
+            ========================== */}
+
+            <Route
+              path="editor-overview"
+              element={<EditorOverview />}
+            />
+
+            <Route
+              path="posts"
+              element={<EditorPosts />}
+            />
+
+            <Route
+              path="editor-settings"
+              element={<EditorSettings />}
+            />
 
           </Route>
-        )}
+
+        </Route>
 
         {/* ==========================
             DASHBOARD REDIRECT
@@ -285,14 +261,21 @@ function App() {
               roleType === "ADMIN" ? (
 
                 <Navigate
-                  to="/admin-overview"
+                  to="/dashboard/admin-overview"
+                  replace
+                />
+
+              ) : roleType === "EDITOR" ? (
+
+                <Navigate
+                  to="/dashboard/editor-overview"
                   replace
                 />
 
               ) : (
 
                 <Navigate
-                  to="/editor-overview"
+                  to="/login"
                   replace
                 />
 
