@@ -6,7 +6,7 @@ import {
 
 const Footer = () => {
   return (
-    <footer className="bg-[#f4f1eb] py-16">
+    <footer className=" py-16">
       
       <div className="max-w-7xl mx-auto flex flex-col items-center justify-center">
 

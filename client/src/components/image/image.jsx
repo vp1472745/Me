@@ -114,8 +114,8 @@ const GallerySection = () => {
 
       <section
         className="
-          bg-[#f5f2eb]
-          py-24
+  
+          
           px-4
           md:px-10
         "
@@ -133,7 +133,7 @@ const GallerySection = () => {
           <div
             className="
               text-center
-              mb-20
+              mb-2
             "
           >
 
@@ -141,7 +141,7 @@ const GallerySection = () => {
               className="
                 w-full
                 h-[1px]
-                bg-[#d9d4cb]
+              
                 mb-10
               "
             ></div>
@@ -149,8 +149,8 @@ const GallerySection = () => {
             <h1
               className="
                 text-[#8d8479]
-                text-3xl
-                md:text-5xl
+                text-2xl
+                md:text-2xl
                 tracking-[12px]
                 uppercase
                 font-light
@@ -163,7 +163,7 @@ const GallerySection = () => {
               className="
                 w-full
                 h-[1px]
-                bg-[#d9d4cb]
+          
                 mt-10
               "
             ></div>
@@ -192,6 +192,8 @@ const GallerySection = () => {
                     md:grid-cols-3
                     lg:grid-cols-4
                     gap-6
+                
+
                   "
                 >
 
@@ -204,7 +206,9 @@ const GallerySection = () => {
                           overflow-hidden
                           cursor-pointer
                           group
-                          bg-white
+                         
+                         
+                             rounded-2xl
                         "
                         onClick={() =>
                           handleOpenSlider(
@@ -214,19 +218,21 @@ const GallerySection = () => {
                         }
                       >
 
-                        <img
-                          src={image}
-                          alt=""
-                          className="
-                            w-full
-                            h-[220px]
-                            md:h-[350px]
-                            object-cover
-                            transition-all
-                            duration-700
-                            group-hover:scale-110
-                          "
-                        />
+<img
+  src={image}
+  alt=""
+  className="
+    w-full
+    h-[220px]
+    md:h-[350px]
+    object-cover
+    rounded-2xl
+    transition-transform
+    duration-700
+    ease-in-out
+    group-hover:scale-110
+  "
+/>
 
                       </div>
                     )

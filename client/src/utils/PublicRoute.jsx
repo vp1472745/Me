@@ -1,3 +1,7 @@
+// ==========================
+// FILE: PublicRoute.jsx
+// ==========================
+
 import {
   Navigate,
   Outlet,
@@ -21,18 +25,24 @@ function PublicRoute() {
     user = null;
   }
 
+  // ==========================
+  // USER LOGIN HAI
+  // ==========================
+
   if (user) {
 
+    // ADMIN
     if (user?.role === "ADMIN") {
 
       return (
         <Navigate
-          to="/dashboard/admin-overview"
+          to="/dashboard/admin-stories"
           replace
         />
       );
     }
 
+    // EDITOR
     if (user?.role === "EDITOR") {
 
       return (
@@ -43,6 +53,10 @@ function PublicRoute() {
       );
     }
   }
+
+  // ==========================
+  // LOGIN PAGE SHOW
+  // ==========================
 
   return <Outlet />;
 }

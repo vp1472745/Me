@@ -1,21 +1,43 @@
-
-
+// Layout.jsx - Consistent Collapsible Sidebar (Desktop & Mobile)
+import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../../config/api";
-import { 
-  Home, 
-  Settings, 
-  FileText, 
+import {
+  Home,
+  Settings,
+  FileText,
   LogOut,
   Camera,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 function Layout({ roleType }) {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const permissions = user?.permissions || [];
+
+  // Sidebar state: open = expanded, false = collapsed (icons only)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  // On mount, set initial state based on screen width
+  useEffect(() => {
+    const checkWidth = () => {
+      // On small screens (<= 768px), start collapsed to save space
+      if (window.innerWidth <= 768) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+    checkWidth();
+    window.addEventListener("resize", checkWidth);
+    return () => window.removeEventListener("resize", checkWidth);
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const handleLogout = async () => {
     try {
@@ -29,128 +51,125 @@ function Layout({ roleType }) {
     }
   };
 
-  // Navigation items mapping
-const adminNav = [
-  {
-    to: "/dashboard/admin-overview",
-    label: "Overview",
-    icon: Home,
-    permission: null,
-  },
-  {
-    to: "/dashboard/photobooks-admin",
-    label: "PhotoBooks",
-    icon: Camera,
-    permission: null,
-  },
-  {
-    to: "/dashboard/images-admin",
-    label: "Images",
-    icon: ImageIcon,
-    permission: null,
-  },
-  {
-    to: "/dashboard/admin-settings",
-    label: "Settings",
-    icon: Settings,
-    permission: null,
-  },
-];
+  // Navigation items
+  const adminNav = [
+    { to: "/dashboard/admin-stories", label: "Create Stories", icon: Home },
+    { to: "/dashboard/photobooks-admin", label: "Create PhotoBooks", icon: Camera },
+    { to: "/dashboard/images-admin", label: "Create Images", icon: ImageIcon },
+    { to: "/dashboard/admin-Films", label: "Create Films", icon: Settings },
+    { to: "/dashboard/admin-PreWedding", label: "Create PreWedding", icon: Camera },
+  ];
 
-const editorNav = [
-  {
-    to: "/dashboard/editor-overview",
-    label: "Overview",
-    icon: Home,
-    permission: "overview",
-  },
-  {
-    to: "/dashboard/posts",
-    label: "Posts",
-    icon: FileText,
-    permission: "posts",
-  },
-  {
-    to: "/dashboard/editor-settings",
-    label: "Settings",
-    icon: Settings,
-    permission: "settings",
-  },
-];
+  const editorNav = [
+    { to: "/dashboard/editor-overview", label: "Overview", icon: Home, permission: "overview" },
+    { to: "/dashboard/posts", label: "Posts", icon: FileText, permission: "posts" },
+    { to: "/dashboard/editor-settings", label: "Settings", icon: Settings, permission: "settings" },
+  ];
 
   const navItems = roleType === "ADMIN" ? adminNav : editorNav;
 
+  // Sidebar width classes
+  const sidebarWidth = isSidebarOpen ? "w-72" : "w-20";
+  const contentMargin = isSidebarOpen ? "ml-72" : "ml-20";
+
   return (
-    <div className="flex min-h-screen bg-linear-to-br from-stone-50 to-gray-100">
-      {/* ==========================
-          Sidebar - Photography Brand
-      ========================== */}
-      <aside className="w-72 bg-linear-to-b from-gray-900 to-gray-800 text-white shadow-2xl flex flex-col">
-        {/* Brand Header */}
-        <div className="p-6 border-b border-amber-500/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Camera className="w-8 h-8 text-amber-400" />
-            <div>
-              <span className="text-xl font-black tracking-tighter">SHUTTER</span>
-              <span className="text-xl font-light tracking-tighter">STUDIO</span>
+    <div className="flex h-screen overflow-hidden bg-black text-white">
+      {/* Sidebar - Fixed, no overlay, always visible */}
+      <aside
+        className={`
+          ${sidebarWidth}
+          bg-gradient-to-b from-gray-900 to-black
+          text-white shadow-2xl flex flex-col
+          fixed left-0 top-0 h-screen z-50
+          border-r border-gray-800
+          transition-all duration-300 ease-in-out
+        `}
+      >
+        {/* Brand & Toggle Button */}
+        <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+          {isSidebarOpen ? (
+            <div className="flex items-center gap-2">
+              <Camera className="w-7 h-7 text-gray-400" />
+              <div>
+                <span className="text-lg font-black">SHUTTER</span>
+                <span className="text-lg font-light text-gray-400">STUDIO</span>
+                <p className="text-[10px] text-gray-500">Photography Mgmt</p>
+              </div>
             </div>
-          </div>
-          <p className="text-xs text-gray-400 mt-1">Photography Management</p>
+          ) : (
+            <Camera className="w-7 h-7 text-gray-400 mx-auto" />
+          )}
+          {/* Toggle button - always visible */}
+          <button
+            onClick={toggleSidebar}
+            className="p-1 rounded-lg hover:bg-gray-800 transition text-gray-400"
+            aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          >
+            {isSidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+          </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        {/* Navigation Links */}
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            if (item.permission && !permissions.includes(item.permission)) {
-              return null;
-            }
+            if (item.permission && !permissions.includes(item.permission)) return null;
             const Icon = item.icon;
             return (
               <Link
                 key={item.to}
                 to={item.to}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-amber-500/10 transition-all duration-200 group"
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-xl
+                  text-gray-400 hover:text-white hover:bg-gray-800/50
+                  transition-all duration-200 group
+                  ${!isSidebarOpen && "justify-center"}
+                `}
+                title={!isSidebarOpen ? item.label : ""}
               >
-                <Icon className="w-5 h-5 group-hover:text-amber-400" />
-                <span className="font-medium">{item.label}</span>
+                <Icon className="w-5 h-5 group-hover:text-gray-300 flex-shrink-0" />
+                {isSidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        {/* Logout Button (Mobile/Tablet friendly) */}
-        <div className="p-4 border-t border-gray-700">
+        {/* Logout Button */}
+        <div className="p-3 border-t border-gray-800">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-red-500/10 transition-all duration-200"
+            className={`
+              flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
+              text-gray-400 hover:text-white hover:bg-red-900/20
+              transition-all duration-200
+              ${!isSidebarOpen && "justify-center"}
+            `}
+            title={!isSidebarOpen ? "Logout" : ""}
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
+            <LogOut className="w-5 h-5 flex-shrink-0" />
+            {isSidebarOpen && <span className="font-medium text-sm">Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* ==========================
-          Main Content Area
-      ========================== */}
-      <main className="flex-1 flex flex-col overflow-x-hidden">
-        {/* Header Bar */}
-        <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10 border-b border-gray-200">
-          <div className="flex justify-between items-center px-8 py-4">
+      {/* Main Content Area - margin adjusts with sidebar */}
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden bg-black transition-all duration-300 ${contentMargin}`}>
+        {/* Header */}
+        <header className="bg-gray-900/80 backdrop-blur-sm shadow-md border-b border-gray-800 sticky top-0 z-40 flex-shrink-0">
+          <div className="flex justify-between items-center px-6 py-3">
             <div>
-              <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+              <h1 className="text-xl font-bold text-white flex items-center gap-2">
                 {roleType === "ADMIN" ? "Administrator" : "Content Editor"}
-                <span className="text-sm font-normal text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+                <span className="text-xs font-normal text-gray-300 bg-gray-800 px-2 py-0.5 rounded-full">
                   {roleType}
                 </span>
               </h1>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-400 mt-0.5">
                 Welcome back, {user?.name || "Photographer"}
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 bg-gray-900 hover:bg-amber-700 text-white px-5 py-2 rounded-xl transition-all duration-200 shadow-md"
+              className="hidden md:flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-lg transition shadow-md text-sm"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -158,11 +177,11 @@ const editorNav = [
           </div>
         </header>
 
-        {/* Dynamic Page Content */}
-        <div className="flex-1 p-6 lg:p-8">
+        {/* Scrollable Outlet */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden ">
           <Outlet />
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

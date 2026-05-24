@@ -74,7 +74,7 @@ function Login() {
       ) {
 
         navigate(
-          "/dashboard/admin-overview",
+          "/dashboard/admin-stories",
         );
 
       }

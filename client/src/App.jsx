@@ -8,12 +8,19 @@ import {
 
 import Layout from "./components/dashboardLayoutComponents/layout";
 
+import Film from "./components/films/films";
+
 import ProtectedRoute from "./utils/ProtectedRoute";
+
 import PublicRoute from "./utils/PublicRoute";
+
+import PreWeddingGallery from "./components/preWedding/preWedding";
 
 import { ToastContainer } from "react-toastify";
 
 import RouteLoader from "./components/commonComponents/RouteLoader/RouteLoader";
+
+import Contact from "./components/contact/contact";
 
 import Home from "./pages/homePage";
 
@@ -42,31 +49,43 @@ import PhotoBooks from "./components/photoBooks/photoBooks";
 import ImagesPage from "./components/image/image";
 
 /* ==========================
+   FAQ
+========================== */
+
+import FAQ from "./components/FAQ/faq";
+
+/* ==========================
    ADMIN PAGES
 ========================== */
 
 const AdminOverview = lazy(() =>
   import(
     "./components/adminDashboardComponents/stories/AdminOverview"
-  ),
+  )
 );
 
 const PhotoBooksAdmin = lazy(() =>
   import(
     "./components/adminDashboardComponents/photoBook/photoBookadminDashboard"
-  ),
+  )
 );
 
-const AdminSettings = lazy(() =>
+const AdminFilms = lazy(() =>
   import(
-    "./components/adminDashboardComponents/AdminSettings"
-  ),
+    "./components/adminDashboardComponents/Films/AdminFilms"
+  )
 );
 
 const ImageAdminDashboard = lazy(() =>
   import(
     "./components/adminDashboardComponents/image/imageAdminDashboard"
-  ),
+  )
+);
+
+const AdminPreWedding = lazy(() =>
+  import(
+    "./components/adminDashboardComponents/preWedding/preWedding"
+  )
 );
 
 /* ==========================
@@ -76,19 +95,19 @@ const ImageAdminDashboard = lazy(() =>
 const EditorOverview = lazy(() =>
   import(
     "./components/editorDashboardComponents/EditorOverview"
-  ),
+  )
 );
 
 const EditorPosts = lazy(() =>
   import(
     "./components/editorDashboardComponents/EditorPosts"
-  ),
+  )
 );
 
 const EditorSettings = lazy(() =>
   import(
     "./components/editorDashboardComponents/EditorSettings"
-  ),
+  )
 );
 
 /* ==========================
@@ -96,7 +115,7 @@ const EditorSettings = lazy(() =>
 ========================== */
 
 const Login = lazy(() =>
-  import("./components/Login"),
+  import("./components/Login")
 );
 
 function App() {
@@ -170,6 +189,33 @@ function App() {
         />
 
         {/* ==========================
+            FILMS
+        ========================== */}
+
+        <Route
+          path="/films"
+          element={<Film />}
+        />
+
+        {/* ==========================
+            PRE WEDDING
+        ========================== */}
+
+        <Route
+          path="/pre-wedding-stories"
+          element={<PreWeddingGallery />}
+        />
+
+        {/* ==========================
+            CONTACT
+        ========================== */}
+
+        <Route
+          path="/contact"
+          element={<Contact />}
+        />
+
+        {/* ==========================
             PHOTOBOOKS
         ========================== */}
 
@@ -179,12 +225,21 @@ function App() {
         />
 
         {/* ==========================
-            IMAGES PAGE
+            IMAGES
         ========================== */}
 
         <Route
           path="/images"
           element={<ImagesPage />}
+        />
+
+        {/* ==========================
+            FAQ
+        ========================== */}
+
+        <Route
+          path="/faq"
+          element={<FAQ />}
         />
 
         {/* ==========================
@@ -203,11 +258,32 @@ function App() {
           >
 
             {/* ==========================
+                DEFAULT DASHBOARD
+            ========================== */}
+
+            <Route
+              index
+              element={
+                roleType === "ADMIN" ? (
+                  <Navigate
+                    to="admin-stories"
+                    replace
+                  />
+                ) : (
+                  <Navigate
+                    to="editor-overview"
+                    replace
+                  />
+                )
+              }
+            />
+
+            {/* ==========================
                 ADMIN ROUTES
             ========================== */}
 
             <Route
-              path="admin-overview"
+              path="admin-stories"
               element={<AdminOverview />}
             />
 
@@ -222,8 +298,13 @@ function App() {
             />
 
             <Route
-              path="admin-settings"
-              element={<AdminSettings />}
+              path="admin-Films"
+              element={<AdminFilms />}
+            />
+
+            <Route
+              path="admin-PreWedding"
+              element={<AdminPreWedding />}
             />
 
             {/* ==========================
@@ -248,49 +329,6 @@ function App() {
           </Route>
 
         </Route>
-
-        {/* ==========================
-            DASHBOARD REDIRECT
-        ========================== */}
-
-        <Route
-          path="/dashboard"
-          element={
-            user ? (
-
-              roleType === "ADMIN" ? (
-
-                <Navigate
-                  to="/dashboard/admin-overview"
-                  replace
-                />
-
-              ) : roleType === "EDITOR" ? (
-
-                <Navigate
-                  to="/dashboard/editor-overview"
-                  replace
-                />
-
-              ) : (
-
-                <Navigate
-                  to="/login"
-                  replace
-                />
-
-              )
-
-            ) : (
-
-              <Navigate
-                to="/login"
-                replace
-              />
-
-            )
-          }
-        />
 
         {/* ==========================
             404 PAGE

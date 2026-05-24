@@ -4,12 +4,12 @@ const ContainSection = () => {
   return (
     <>
       {/* TOP QUOTE SECTION */}
-      <section className="bg-[#f4f1eb] py-20 md:py-28 px-6">
+      <section className=" py-20 md:py-28 px-6">
         
         <div className="max-w-6xl mx-auto text-center">
           
           {/* TOP LINE */}
-          <div className="w-[180px] md:w-[300px] h-[1px] bg-[#d8d1c7] mx-auto mb-12"></div>
+          <div className="w-[180px] md:w-[300px] h-[1px]  mx-auto mb-12"></div>
 
           {/* QUOTE */}
           <h2
@@ -46,7 +46,7 @@ const ContainSection = () => {
           </p>
 
           {/* BOTTOM LINE */}
-          <div className="w-[180px] md:w-[300px] h-[1px] bg-[#d8d1c7] mx-auto mt-12"></div>
+          <div className="w-[180px] md:w-[300px] h-[1px]  mx-auto mt-12"></div>
         </div>
       </section>
 
@@ -90,8 +90,7 @@ const ContainSection = () => {
           }}
         ></div>
 
-        {/* DARK OVERLAY */}
-        <div className="absolute inset-0 bg-black/45"></div>
+    
 
         {/* CONTENT */}
         <div
@@ -139,7 +138,7 @@ const ContainSection = () => {
             </h1>
 
             {/* LINE */}
-            <div className="w-[180px] md:w-[260px] h-[1px] bg-white/60 mx-auto mt-10"></div>
+            <div className="w-[180px] md:w-[260px] h-[1px] mx-auto mt-10"></div>
           </div>
         </div>
       </section>
@@ -149,7 +148,7 @@ const ContainSection = () => {
         className="
           relative
           z-20
-          bg-[#f4f1eb]
+        
           py-20
           md:py-28
           px-6
@@ -158,7 +157,7 @@ const ContainSection = () => {
         <div className="max-w-5xl mx-auto text-center">
 
           {/* TOP LINE */}
-          <div className="w-full h-[1px] bg-[#d8d1c7] mb-16"></div>
+          <div className="w-full h-[1px] mb-16"></div>
 
           {/* CONTENT */}
           <p

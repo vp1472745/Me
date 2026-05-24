@@ -27,8 +27,7 @@ const HeroSection = () => {
           backgroundPosition: "center 35%",
         }}
       >
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-black/20"></div>
+ 
 
         {/* CONTENT */}
         <div className="relative z-10 text-center px-6">
@@ -72,7 +71,7 @@ const HeroSection = () => {
         </div>
       </section>
 
-      <section className="bg-[#f4f1eb] py-10 px-6">
+      <section className=" py-10 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="wedding-quote">
             Without stories of love, our lives would pass by in the blink of an
@@ -104,8 +103,7 @@ const HeroSection = () => {
              backgroundPosition: "center 30%",
         }}
       >
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-black/50"></div>
+
 
         {/* CONTENT */}
         <div className="relative z-10 text-center px-6">
@@ -166,8 +164,7 @@ const HeroSection = () => {
              backgroundPosition: "center 35%",
         }}
       >
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-black/50"></div>
+    
 
         {/* CONTENT */}
         <div className="relative z-10 text-center px-6">
@@ -227,8 +224,7 @@ const HeroSection = () => {
              backgroundPosition: "center 35%",
         }}
       >
-        {/* OVERLAY */}
-        <div className="absolute inset-0 bg-black/50"></div>
+
 
         {/* CONTENT */}
         <div className="relative z-10 text-center px-6">

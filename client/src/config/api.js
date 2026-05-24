@@ -228,4 +228,174 @@ export const deleteGallery =
       `/image/delete/${id}`
     );
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  // ==============================
+// CREATE VIDEO
+// ==============================
+
+export const createVideo =
+  async (formData) => {
+
+    return await API.post(
+
+      "/film/create",
+
+      formData,
+
+      {
+        headers: {
+
+          "Content-Type":
+            "multipart/form-data",
+        },
+      },
+    );
+  };
+
+
+// ==============================
+// GET ALL VIDEOS
+// ==============================
+
+export const getAllVideos =
+  async () => {
+
+    return await API.get(
+      "/film/all",
+    );
+  };
+
+
+// ==============================
+// GET SINGLE VIDEO
+// ==============================
+
+export const getSingleVideo =
+  async (id) => {
+
+    return await API.get(
+      `/film/${id}`,
+    );
+  };
+
+
+// ==============================
+// UPDATE VIDEO
+// ==============================
+
+export const updateVideo =
+  async (
+    id,
+    formData,
+  ) => {
+
+    return await API.put(
+
+      `/film/update/${id}`,
+
+      formData,
+
+      {
+        headers: {
+
+          "Content-Type":
+            "multipart/form-data",
+        },
+      },
+    );
+  };
+
+
+// ==============================
+// DELETE VIDEO
+// ==============================
+
+export const deleteVideo =
+  async (id) => {
+
+    return await API.delete(
+
+      `/film/delete/${id}`,
+    );
+  };
+
+
+
+
+
+
+
+
+
+  // preWedding api
+
+
+
+
+
+  
+export const createPreWeddingStory =
+  async (formData) => {
+
+    return API.post(
+      "/pre-wedding/create",
+      formData,
+
+      {
+        headers: {
+          "Content-Type":
+            "multipart/form-data",
+        },
+      }
+    );
+  };
+
+
+// GET ALL PRE-WEDDING STORIES
+
+export const getAllPreWeddingStories =
+  async () => {
+
+    return API.get(
+      "/pre-wedding/all"
+    );
+  };
+
+
+// GET SINGLE PRE-WEDDING STORY
+
+export const getSinglePreWeddingStory =
+  async (id) => {
+
+    return API.get(
+      `/pre-wedding/${id}`
+    );
+  };
+
+
+// DELETE PRE-WEDDING STORY
+
+export const deletePreWeddingStory =
+  async (id) => {
+
+    return API.delete(
+      `/pre-wedding/delete/${id}`
+    );
+  };
+
+
+
 export default API;

@@ -1,3 +1,7 @@
+// ==========================
+// FILE: ProtectedRoute.jsx
+// ==========================
+
 import {
   Navigate,
   Outlet,
@@ -20,6 +24,10 @@ function ProtectedRoute() {
 
     user = null;
   }
+
+  // ==========================
+  // LOGIN HAI TO DASHBOARD
+  // ==========================
 
   return user
     ? <Outlet />

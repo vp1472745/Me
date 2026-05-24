@@ -9,6 +9,8 @@ import accessRouter from "./src/router/accessRoutes.js";
 import storyRoutes from "./src/router/storyRoutes.js";
 import photoBookRouter from "./src/router/photoBookRouter.js";
 import ImageRouter from "./src/router/imageRoute.js";
+import filmRoutes from "./src/router/filmsRoutes.js";
+import preWeddingRoutes from "./src/router/preWeddingRoutes.js";
 
 dotenv.config();
 
@@ -60,6 +62,16 @@ app.use(
 app.use(
   "/api/image",
   ImageRouter
+);
+
+app.use(
+  "/api/film",
+  filmRoutes
+);
+
+app.use(
+  "/api/pre-wedding",
+  preWeddingRoutes
 );
 
 // ==========================

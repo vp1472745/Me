@@ -24,7 +24,7 @@ function Sidebar() {
     user?.permissions || [];
 
   return (
-    <div className="w-64 bg-black text-white p-5 min-h-screen">
+    <div className="w-64  text-white p-5 min-h-screen">
 
       {/* Logo */}
 
@@ -44,10 +44,10 @@ function Sidebar() {
           <>
 
             <Link
-              to="/admin-overview"
+              to="/admin-stories"
               className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
             >
-              Overview
+              Create Stories
             </Link>
 
             <Link
@@ -65,10 +65,17 @@ function Sidebar() {
             </Link>
 
             <Link
-              to="/admin-settings"
+              to="/admin-Films"
               className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
             >
-              Settings
+              Create Films
+            </Link>
+
+               <Link
+              to="/admin-PreWedding"
+              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+            >
+              Create PreWedding
             </Link>
 
           </>

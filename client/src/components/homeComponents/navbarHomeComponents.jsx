@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import Logo from "../../assets/Logo.webp";
 
@@ -51,12 +51,9 @@ const Navbar = () => {
     },
     {
       name: "Pre-Weddings",
-      path: "/preweddings",
+      path: "/pre-wedding-stories",
     },
-    {
-      name: "Music",
-      path: "/music",
-    },
+
     {
       name: "FAQ",
       path: "/faq",
@@ -82,8 +79,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="w-full bg-[#f4f1eb] border-b border-gray-200 relative">
-      <div className="max-w-[1920px] mx-auto flex items-center justify-between px-6 lg:px-16 py-6">
+    <nav className="w-full  border-b border-gray-200 relative">
+      <div className="max-w-480 mx-auto flex items-center justify-between px-6 lg:px-16 py-6">
         
         {/* LOGO */}
         <div
@@ -93,7 +90,7 @@ const Navbar = () => {
           <img
             src={Logo}
             alt="logo"
-            className="w-[125px] lg:w-[150px] object-contain"
+            className="w-31.25 lg:w-37.5 object-contain"
           />
         </div>
 
@@ -132,7 +129,7 @@ const Navbar = () => {
           />
 
           {/* PANEL */}
-          <div className="absolute right-0 top-0 h-full w-[280px] bg-[#f4f1eb] shadow-xl animate-slide-in">
+          <div className="absolute right-0 top-0 z-50 h-full w-70 bg-[#f4f1eb] shadow-xl animate-slide-in pointer-events-auto">
             
             {/* CLOSE BUTTON */}
             <div className="flex justify-end p-6">
@@ -145,14 +142,19 @@ const Navbar = () => {
             </div>
 
             {/* MENU ITEMS */}
-            <ul className="flex flex-col items-start gap-6 px-8">
+            <ul className="flex flex-col items-start gap-2 px-8">
               {menuItems.map((item) => (
                 <li
                   key={item.name}
-                  onClick={() => handleNavigate(item.path)}
-                  className="cursor-pointer text-[13px] font-semibold tracking-[3px] uppercase text-[#2f2f2f]"
+                  className="w-full"
                 >
-                  {item.name}
+                  <Link
+                    to={item.path}
+                    onClick={closeMobileMenu}
+                    className="block w-full cursor-pointer rounded-lg px-3 py-3 text-[13px] font-semibold tracking-[3px] uppercase text-[#2f2f2f] transition hover:bg-black/5 hover:translate-x-1"
+                  >
+                    {item.name}
+                  </Link>
                 </li>
               ))}
             </ul>

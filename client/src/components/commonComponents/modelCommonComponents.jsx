@@ -1,9 +1,9 @@
-// CommonModal.jsx
-import  { useEffect, useRef } from "react";
+// CommonModal.jsx - Dark Theme
+import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 /**
- * Professional Modal Component
+ * Professional Modal Component - Dark Theme
  * @param {boolean} isOpen - Controls modal visibility
  * @param {function} onClose - Callback when modal closes
  * @param {string} title - Modal title
@@ -35,7 +35,6 @@ const CommonModal = ({
     full: "max-w-[90vw] w-full",
   };
 
-  // Close handlers
   const handleBackdropClick = (e) => {
     if (closeOnBackdrop && e.target === e.currentTarget) {
       onClose();
@@ -48,7 +47,6 @@ const CommonModal = ({
     }
   };
 
-  // Focus trap: keep focus inside modal
   useEffect(() => {
     if (isOpen) {
       previousFocusRef.current = document.activeElement;
@@ -69,7 +67,7 @@ const CommonModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 transition-all duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
       onClick={handleBackdropClick}
       role="presentation"
     >
@@ -82,17 +80,18 @@ const CommonModal = ({
         aria-labelledby="modal-title"
         className={`
           relative w-full ${sizeClasses[size]} 
-          bg-white dark:bg-gray-900 rounded-2xl shadow-2xl 
+          bg-gray-900 rounded-2xl shadow-2xl 
           transform transition-all duration-300 ease-out
           animate-in fade-in zoom-in
+          border border-gray-800
           ${className}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
           <h2
             id="modal-title"
-            className="text-xl md:text-2xl font-semibold text-gray-800 dark:text-gray-100"
+            className="text-xl md:text-2xl font-semibold text-white"
           >
             {title}
           </h2>
@@ -100,10 +99,10 @@ const CommonModal = ({
           {showCloseButton && (
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="p-2 rounded-full hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-600"
               aria-label="Close modal"
             >
-              <X size={22} className="text-gray-600 dark:text-gray-400" />
+              <X size={22} className="text-gray-400 hover:text-white transition" />
             </button>
           )}
         </div>
@@ -112,8 +111,6 @@ const CommonModal = ({
         <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
           {children}
         </div>
-
-        {/* Optional Footer can be added by passing footer prop, but keeping it flexible */}
       </div>
     </div>
   );

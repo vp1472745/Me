@@ -42,7 +42,7 @@ const StoryDetails = () => {
 
   if (loading) {
     return (
-      <div className="bg-[#f5f1eb] min-h-screen flex items-center justify-center">
+      <div className=" min-h-screen flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-[#6d645b] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
@@ -50,7 +50,7 @@ const StoryDetails = () => {
 
   if (error || !story) {
     return (
-      <div className="bg-[#f5f1eb] min-h-screen flex flex-col items-center justify-center px-4">
+      <div className=" min-h-screen flex flex-col items-center justify-center px-4">
         <div className="bg-white/80 p-8 rounded-2xl text-center max-w-md">
           <p className="text-red-500 mb-4">{error || "Story not found"}</p>
           <button
@@ -143,7 +143,7 @@ const StoryDetails = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#fdf8f0] to-[#f4ede3] min-h-screen">
+    <div className=" min-h-screen">
       {/* Back button */}
       <div className="px-4 sm:px-8 lg:px-20 pt-8">
         <button

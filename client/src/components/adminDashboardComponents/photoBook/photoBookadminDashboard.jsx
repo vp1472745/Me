@@ -26,7 +26,7 @@ const WeddingStoryDashboard = () => {
      FORM STATE
   ========================= */
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+// missing but needed for API – added to fix error
   const [coverImage, setCoverImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
@@ -59,7 +59,7 @@ const WeddingStoryDashboard = () => {
       await createWeddingStory(formData);
       alert("Wedding Story Created Successfully");
       setTitle("");
-      setDescription("");
+  
       setCoverImage(null);
       setGalleryImages([]);
       getStories();
@@ -87,11 +87,13 @@ const WeddingStoryDashboard = () => {
      DELETE
   ========================= */
   const handleDelete = async (id) => {
-    try {
-      await deleteWeddingStory(id);
-      getStories();
-    } catch (error) {
-      console.log(error);
+    if (window.confirm("Delete this story? This action cannot be undone.")) {
+      try {
+        await deleteWeddingStory(id);
+        getStories();
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -153,84 +155,69 @@ const WeddingStoryDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fdf8f0] to-[#f4ede3] px-4 md:px-10 py-10">
-      {/* HEADER */}
-      <div className="max-w-7xl mx-auto">
-        <div className="border-t border-[#cfc6bb] w-20 mb-6"></div>
-        <h1 className="text-4xl md:text-5xl tracking-[6px] text-[#6f655d] font-light uppercase">
-          Wedding Stories
+    <div className="min-h-screen bg-black text-white px-4 sm:px-6 md:px-10 py-8 md:py-10">
+      {/* Page Header */}
+      <div className="max-w-7xl mx-auto text-center mt-10">
+        <h1 className="text-3xl md:text-4xl font-light text-white uppercase tracking-[4px]">
+          PhotoBook
         </h1>
-        <p className="text-[#b1a79d] mt-3 max-w-xl leading-relaxed">
-          Craft and manage cinematic wedding galleries — each story is a timeless treasure.
-        </p>
-        <div className="border-b border-[#cfc6bb] w-full mt-6"></div>
+        <div className="w-20 h-px bg-gray-700 mx-auto mt-3 mb-2"></div>
+        <p className="text-gray-400 text-sm">Curate timeless memories</p>
       </div>
 
-      {/* TABS */}
-      <div className="max-w-7xl mx-auto mt-8 flex gap-2 border-b border-[#e0d6cc]">
+      {/* TABS - Responsive with dark theme */}
+      <div className="max-w-7xl mx-auto mt-8 flex flex-wrap gap-2 border-b border-gray-800">
         <button
           onClick={() => setActiveTab("create")}
-          className={`px-6 py-3 text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
+          className={`px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
             activeTab === "create"
-              ? "bg-white text-[#6f655d] shadow-md"
-              : "text-[#b1a79d] hover:text-[#6f655d]"
+              ? "bg-gray-800 text-white shadow-md"
+              : "text-gray-400 hover:text-white hover:bg-gray-800/50"
           }`}
         >
           Create Story
         </button>
         <button
           onClick={() => setActiveTab("stories")}
-          className={`px-6 py-3 text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
+          className={`px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
             activeTab === "stories"
-              ? "bg-white text-[#6f655d] shadow-md"
-              : "text-[#b1a79d] hover:text-[#6f655d]"
+              ? "bg-gray-800 text-white shadow-md"
+              : "text-gray-400 hover:text-white hover:bg-gray-800/50"
           }`}
         >
           All Wedding Stories
         </button>
       </div>
 
-      <div className="max-w-7xl mx-auto mt-10">
+      <div className="max-w-7xl mx-auto mt-8 md:mt-10">
         {/* CREATE TAB */}
         {activeTab === "create" && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8 border border-[#e8dfd1]">
-            <form onSubmit={handleCreateStory} className="space-y-8">
+          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-800">
+            <form onSubmit={handleCreateStory} className="space-y-6 md:space-y-8">
               {/* TITLE */}
               <div>
-                <label className="block mb-2 text-[#6f655d] uppercase tracking-[2px] text-xs font-semibold">
-                  Story Title
+                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
+                  Couple / Story Title
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g., A Royal Love Affair"
-                  className="w-full border border-[#d4c5b3] rounded-xl px-5 py-3 outline-none focus:border-[#8b7355] focus:ring-1 focus:ring-[#8b7355]/30 transition bg-white/90"
+                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-5 py-3 text-white outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 transition"
                   required
                 />
               </div>
 
-              {/* DESCRIPTION */}
-              <div>
-                <label className="block mb-2 text-[#6f655d] uppercase tracking-[2px] text-xs font-semibold">
-                  Description
-                </label>
-                <textarea
-                  rows="5"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Write a beautiful description of the wedding story..."
-                  className="w-full border border-[#d4c5b3] rounded-xl px-5 py-3 outline-none focus:border-[#8b7355] focus:ring-1 focus:ring-[#8b7355]/30 transition bg-white/90 resize-none"
-                />
-              </div>
+
 
               {/* COVER IMAGE */}
               <div>
-                <label className="block mb-2 text-[#6f655d] uppercase tracking-[2px] text-xs font-semibold">
+                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
                   Cover Image
                 </label>
-                <div className="flex items-center gap-4">
-                  <label className="cursor-pointer bg-[#f4ede3] hover:bg-[#e8dfd1] text-[#6f655d] px-5 py-2 rounded-xl border border-[#d4c5b3] transition text-sm flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-4">
+                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 px-5 py-2 rounded-xl border border-gray-700 transition text-sm flex items-center gap-2">
                     <FaPlus size={12} /> Choose Cover
                     <input
                       type="file"
@@ -241,7 +228,7 @@ const WeddingStoryDashboard = () => {
                     />
                   </label>
                   {coverImage && (
-                    <span className="text-sm text-[#8b7355] truncate max-w-[200px]">
+                    <span className="text-sm text-gray-400 truncate max-w-[200px]">
                       {coverImage.name}
                     </span>
                   )}
@@ -250,22 +237,22 @@ const WeddingStoryDashboard = () => {
 
               {/* GALLERY IMAGES */}
               <div>
-                <label className="block mb-2 text-[#6f655d] uppercase tracking-[2px] text-xs font-semibold">
+                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
                   Gallery Images (multiple)
                 </label>
-                <div className="flex items-center gap-4">
-                  <label className="cursor-pointer bg-[#f4ede3] hover:bg-[#e8dfd1] text-[#6f655d] px-5 py-2 rounded-xl border border-[#d4c5b3] transition text-sm flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-4">
+                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 px-5 py-2 rounded-xl border border-gray-700 transition text-sm flex items-center gap-2">
                     <FaImages size={14} /> Select Images
                     <input
                       type="file"
                       accept="image/*"
                       multiple
-                      onChange={(e) => setGalleryImages(e.target.files)}
+                      onChange={(e) => setGalleryImages([...e.target.files])}
                       className="hidden"
                     />
                   </label>
                   {galleryImages.length > 0 && (
-                    <span className="text-sm text-[#8b7355]">
+                    <span className="text-sm text-gray-400">
                       {galleryImages.length} file(s) selected
                     </span>
                   )}
@@ -276,7 +263,7 @@ const WeddingStoryDashboard = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-[#8b7355] to-[#6b5b4b] hover:from-[#7a6348] hover:to-[#5a4a3a] text-white px-8 py-3 rounded-xl uppercase tracking-[2px] text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                className="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-xl uppercase tracking-[2px] text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
               >
                 <FaPlus size={14} />
                 {loading ? "Creating..." : "Publish Story"}
@@ -289,51 +276,47 @@ const WeddingStoryDashboard = () => {
         {activeTab === "stories" && (
           <>
             {stories.length === 0 ? (
-              <div className="text-center py-20 bg-white/30 rounded-2xl backdrop-blur-sm">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-[#e8dfd1] rounded-full mb-4">
-                  <FaImages size={32} className="text-[#8b7355]" />
+              <div className="text-center py-16 sm:py-20 bg-gray-900/40 rounded-2xl backdrop-blur-sm border border-gray-800 px-4">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-4">
+                  <FaImages size={32} className="text-gray-500" />
                 </div>
-                <p className="text-[#8b7355] text-xl font-light mb-2">No stories yet</p>
-                <p className="text-[#b1a79d]">Create your first wedding story</p>
+                <p className="text-gray-300 text-xl font-light mb-2">No stories yet</p>
+                <p className="text-gray-500">Create your first wedding story</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
                 {stories.map((story) => (
                   <div
                     key={story._id}
-                    className="group bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1"
+                    className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-800"
                   >
-                    <div className="relative overflow-hidden h-72">
+                    <div className="relative overflow-hidden h-64 sm:h-72">
                       <img
                         src={story.coverImage}
                         alt={story.title}
                         className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                       />
                     </div>
-                    <div className="p-6">
-                      <h2 className="text-2xl text-[#6f655d] uppercase tracking-[2px] font-light truncate">
+                    <div className="p-5 sm:p-6">
+                      <h2 className="text-xl sm:text-2xl text-white uppercase tracking-[2px] font-light truncate">
                         {story.title}
                       </h2>
-                      <p className="mt-3 text-[#9b9187] leading-relaxed line-clamp-3">
-                        {story.description}
-                      </p>
-                      <div className="flex items-center gap-2 mt-5 text-[#8b7355] text-sm">
+                
+                      <div className="flex items-center gap-2 mt-4 text-gray-400 text-sm">
                         <FaImages size={16} />
                         <span>{story.galleryImages?.length || 0} Images in gallery</span>
                       </div>
-                      <div className="flex gap-3 mt-6">
-                        {/* VIEW GALLERY BUTTON */}
+                      <div className="flex flex-col sm:flex-row gap-3 mt-6">
                         <button
                           onClick={() => openSlider(story)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-[#8b7355] hover:bg-[#6b5b4b] text-white px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
+                          className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
                         >
                           <FaEye size={14} />
                           View Gallery
                         </button>
-                        {/* DELETE BUTTON */}
                         <button
                           onClick={() => handleDelete(story._id)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
+                          className="flex-1 inline-flex items-center justify-center gap-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-800 px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
                         >
                           <FaTrash size={14} />
                           Delete
@@ -348,65 +331,54 @@ const WeddingStoryDashboard = () => {
         )}
       </div>
 
-      {/* FULLSCREEN SLIDER MODAL */}
+      {/* FULLSCREEN SLIDER MODAL - Dark theme + responsive */}
       {selectedStory && (
         <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md overflow-hidden">
-          {/* Close button */}
           <button
             onClick={closeSlider}
-            className="absolute top-6 right-6 z-50 text-white/80 hover:text-white text-3xl transition"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 text-gray-400 hover:text-white text-2xl sm:text-3xl transition"
             aria-label="Close"
           >
             <FaTimes />
           </button>
 
-          {/* Title */}
-          <h1 className="absolute top-6 left-1/2 -translate-x-1/2 z-40 text-white text-2xl md:text-3xl uppercase tracking-[4px] font-light text-center whitespace-nowrap">
+          <h1 className="absolute top-4 left-4 right-4 sm:top-6 sm:left-1/2 sm:-translate-x-1/2 z-40 text-white text-lg sm:text-2xl md:text-3xl uppercase tracking-[2px] sm:tracking-[4px] font-light text-center truncate px-4">
             {selectedStory.title}
           </h1>
 
-          {/* Description (optional) */}
-          <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-40 text-white/80 text-sm text-center max-w-2xl px-4">
-            {selectedStory.description}
-          </div>
-
           <div className="h-screen flex items-center justify-center relative">
-            {/* Previous button */}
             <button
               onClick={prevImage}
-              className="absolute left-4 md:left-8 z-40 w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl md:text-2xl hover:bg-white/40 transition"
+              className="absolute left-2 sm:left-4 md:left-8 z-40 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-base sm:text-xl md:text-2xl hover:bg-white/30 transition"
               aria-label="Previous"
             >
               <FaChevronLeft />
             </button>
 
-            {/* Current image */}
             {selectedStory.galleryImages?.length > 0 ? (
               <img
                 src={selectedStory.galleryImages[currentImageIndex]}
                 alt={`${selectedStory.title} - ${currentImageIndex + 1}`}
-                className="w-full h-screen object-contain md:object-cover"
+                className="w-full h-full object-contain"
               />
             ) : (
-              <div className="text-white text-center">
-                <FaImages size={64} className="mx-auto mb-4 opacity-50" />
+              <div className="text-white text-center px-4">
+                <FaImages size={48} className="mx-auto mb-4 opacity-50" />
                 <p>No images in this gallery</p>
               </div>
             )}
 
-            {/* Next button */}
             <button
               onClick={nextImage}
-              className="absolute right-4 md:right-8 z-40 w-10 h-10 md:w-14 md:h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl md:text-2xl hover:bg-white/40 transition"
+              className="absolute right-2 sm:right-4 md:right-8 z-40 w-8 h-8 sm:w-10 sm:h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-base sm:text-xl md:text-2xl hover:bg-white/30 transition"
               aria-label="Next"
             >
               <FaChevronRight />
             </button>
           </div>
 
-          {/* Image counter */}
           {selectedStory.galleryImages?.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/80 text-sm md:text-base tracking-wide z-40">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-gray-300 text-xs sm:text-sm md:text-base tracking-wide z-40 bg-black/60 px-3 py-1 rounded-full">
               {currentImageIndex + 1} / {selectedStory.galleryImages.length}
             </div>
           )}
