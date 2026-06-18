@@ -1,8 +1,16 @@
 @import "tailwindcss";
 @import "flyonui/variants.css";
 
-
-
 body {
   background-color: #f3eee6;
+}
+
+/* Hide scrollbar globally */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE & Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }

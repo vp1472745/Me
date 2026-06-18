@@ -1,9 +1,9 @@
-// CommonModal.jsx - Dark Theme
+// CommonModal.jsx - Light Theme (Tesla‑inspired)
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 /**
- * Professional Modal Component - Dark Theme
+ * Professional Modal Component - Light Theme
  * @param {boolean} isOpen - Controls modal visibility
  * @param {function} onClose - Callback when modal closes
  * @param {string} title - Modal title
@@ -67,7 +67,7 @@ const CommonModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 transition-all duration-300"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all duration-300"
       onClick={handleBackdropClick}
       role="presentation"
     >
@@ -80,18 +80,18 @@ const CommonModal = ({
         aria-labelledby="modal-title"
         className={`
           relative w-full ${sizeClasses[size]} 
-          bg-gray-900 rounded-2xl shadow-2xl 
+          bg-white rounded-2xl shadow-2xl 
           transform transition-all duration-300 ease-out
           animate-in fade-in zoom-in
-          border border-gray-800
+          border border-gray-200
           ${className}
         `}
       >
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-800 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2
             id="modal-title"
-            className="text-xl md:text-2xl font-semibold text-white"
+            className="text-xl md:text-2xl font-semibold text-gray-800"
           >
             {title}
           </h2>
@@ -99,10 +99,10 @@ const CommonModal = ({
           {showCloseButton && (
             <button
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-600"
+              className="p-2 rounded-full hover:bg-gray-100 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
               aria-label="Close modal"
             >
-              <X size={22} className="text-gray-400 hover:text-white transition" />
+              <X size={22} className="text-gray-500 hover:text-gray-700 transition" />
             </button>
           )}
         </div>

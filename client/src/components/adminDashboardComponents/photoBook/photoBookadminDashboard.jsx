@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
-
+// WeddingStoryDashboard.jsx - Light Theme with Delete Confirmation Modal
+import React, { useEffect, useState, useRef } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   createWeddingStory,
   getAllWeddingStories,
   deleteWeddingStory,
 } from "../../../config/api";
-
 import {
   FaImages,
   FaTrash,
@@ -15,6 +16,8 @@ import {
   FaEye,
   FaTimes,
 } from "react-icons/fa";
+import LoadingModal from "../../commonComponents/LoadingModal";
+import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal"; // ✅ Import
 
 const WeddingStoryDashboard = () => {
   /* =========================
@@ -26,7 +29,7 @@ const WeddingStoryDashboard = () => {
      FORM STATE
   ========================= */
   const [title, setTitle] = useState("");
-// missing but needed for API – added to fix error
+  const [description, setDescription] = useState("");
   const [coverImage, setCoverImage] = useState(null);
   const [galleryImages, setGalleryImages] = useState([]);
 
@@ -35,6 +38,7 @@ const WeddingStoryDashboard = () => {
   ========================= */
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState("Loading...");
 
   /* =========================
      SLIDER STATE
@@ -43,12 +47,24 @@ const WeddingStoryDashboard = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   /* =========================
+     DELETE CONFIRMATION STATE
+  ========================= */
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null); // { id, title }
+
+  /* =========================
+     REF FOR SCROLL CONTAINER
+  ========================= */
+  const scrollContainerRef = useRef(null);
+
+  /* =========================
      CREATE STORY
   ========================= */
   const handleCreateStory = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setModalMessage("Publishing wedding story...");
     try {
-      setLoading(true);
       const formData = new FormData();
       formData.append("title", title);
       formData.append("description", description);
@@ -57,15 +73,15 @@ const WeddingStoryDashboard = () => {
         formData.append("galleryImages", galleryImages[i]);
       }
       await createWeddingStory(formData);
-      alert("Wedding Story Created Successfully");
+      toast.success("Wedding Story Created Successfully");
       setTitle("");
-  
+      setDescription("");
       setCoverImage(null);
       setGalleryImages([]);
       getStories();
     } catch (error) {
       console.log(error);
-      alert(error?.response?.data?.message || "Something went wrong");
+      toast.error(error?.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -80,21 +96,45 @@ const WeddingStoryDashboard = () => {
       setStories(response.data.data);
     } catch (error) {
       console.log(error);
+      toast.error("Failed to load stories");
     }
   };
 
   /* =========================
-     DELETE
+     DELETE – OPEN CONFIRMATION
   ========================= */
-  const handleDelete = async (id) => {
-    if (window.confirm("Delete this story? This action cannot be undone.")) {
-      try {
-        await deleteWeddingStory(id);
-        getStories();
-      } catch (error) {
-        console.log(error);
-      }
+  const handleDeleteClick = (id, title) => {
+    setItemToDelete({ id, title });
+    setDeleteModalOpen(true);
+  };
+
+  /* =========================
+     CONFIRM DELETE
+  ========================= */
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+    setLoading(true);
+    setModalMessage("Deleting story...");
+    try {
+      await deleteWeddingStory(itemToDelete.id);
+      toast.success("Story deleted successfully");
+      getStories();
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message || "Failed to delete");
+    } finally {
+      setLoading(false);
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
     }
+  };
+
+  /* =========================
+     CLOSE DELETE MODAL
+  ========================= */
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setItemToDelete(null);
   };
 
   /* =========================
@@ -148,6 +188,15 @@ const WeddingStoryDashboard = () => {
   }, [selectedStory]);
 
   /* =========================
+     SCROLL RESET ON TAB CHANGE
+  ========================= */
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0;
+    }
+  }, [activeTab]);
+
+  /* =========================
      USE EFFECT
   ========================= */
   useEffect(() => {
@@ -155,188 +204,208 @@ const WeddingStoryDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 md:px-10 py-8 md:py-10">
-      {/* Page Header */}
-      <div className="max-w-7xl mx-auto text-center mt-10">
-        <h1 className="text-3xl md:text-4xl font-light text-white uppercase tracking-[4px]">
-          PhotoBook
-        </h1>
-        <div className="w-20 h-px bg-gray-700 mx-auto mt-3 mb-2"></div>
-        <p className="text-gray-400 text-sm">Curate timeless memories</p>
-      </div>
-
-      {/* TABS - Responsive with dark theme */}
-      <div className="max-w-7xl mx-auto mt-8 flex flex-wrap gap-2 border-b border-gray-800">
-        <button
-          onClick={() => setActiveTab("create")}
-          className={`px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
-            activeTab === "create"
-              ? "bg-gray-800 text-white shadow-md"
-              : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-          }`}
-        >
-          Create Story
-        </button>
-        <button
-          onClick={() => setActiveTab("stories")}
-          className={`px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm uppercase tracking-[3px] font-medium transition-all duration-300 rounded-t-lg ${
-            activeTab === "stories"
-              ? "bg-gray-800 text-white shadow-md"
-              : "text-gray-400 hover:text-white hover:bg-gray-800/50"
-          }`}
-        >
-          All Wedding Stories
-        </button>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-8 md:mt-10">
-        {/* CREATE TAB */}
-        {activeTab === "create" && (
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-800">
-            <form onSubmit={handleCreateStory} className="space-y-6 md:space-y-8">
-              {/* TITLE */}
-              <div>
-                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
-                  Couple / Story Title
-                </label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., A Royal Love Affair"
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-5 py-3 text-white outline-none focus:border-gray-500 focus:ring-1 focus:ring-gray-500 transition"
-                  required
-                />
-              </div>
-
-
-
-              {/* COVER IMAGE */}
-              <div>
-                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
-                  Cover Image
-                </label>
-                <div className="flex flex-wrap items-center gap-4">
-                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 px-5 py-2 rounded-xl border border-gray-700 transition text-sm flex items-center gap-2">
-                    <FaPlus size={12} /> Choose Cover
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setCoverImage(e.target.files[0])}
-                      className="hidden"
-                      required
-                    />
-                  </label>
-                  {coverImage && (
-                    <span className="text-sm text-gray-400 truncate max-w-[200px]">
-                      {coverImage.name}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* GALLERY IMAGES */}
-              <div>
-                <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs font-semibold">
-                  Gallery Images (multiple)
-                </label>
-                <div className="flex flex-wrap items-center gap-4">
-                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 text-gray-200 px-5 py-2 rounded-xl border border-gray-700 transition text-sm flex items-center gap-2">
-                    <FaImages size={14} /> Select Images
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => setGalleryImages([...e.target.files])}
-                      className="hidden"
-                    />
-                  </label>
-                  {galleryImages.length > 0 && (
-                    <span className="text-sm text-gray-400">
-                      {galleryImages.length} file(s) selected
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* SUBMIT BUTTON */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-xl uppercase tracking-[2px] text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
-              >
-                <FaPlus size={14} />
-                {loading ? "Creating..." : "Publish Story"}
-              </button>
-            </form>
+    <div className="flex flex-col h-full w-full bg-gray-50 text-gray-800">
+      {/* Fixed Header & Tabs */}
+      <div className="flex-shrink-0 px-4 ">
+        {/* Tabs */}
+        <div className="max-w-7xl mx-auto  border-b border-gray-300 bg-white">
+          <div className="flex">
+            <button
+              onClick={() => setActiveTab("create")}
+              className={`px-8 py-4 text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[3px] transition-all duration-200 ${
+                activeTab === "create"
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-700"
+              }`}
+            >
+              Create Story
+            </button>
+            <button
+              onClick={() => setActiveTab("stories")}
+              className={`px-8 py-4 text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[3px] transition-all duration-200 ${
+                activeTab === "stories"
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-700"
+              }`}
+            >
+              All Wedding Stories
+            </button>
           </div>
-        )}
-
-        {/* STORIES TAB */}
-        {activeTab === "stories" && (
-          <>
-            {stories.length === 0 ? (
-              <div className="text-center py-16 sm:py-20 bg-gray-900/40 rounded-2xl backdrop-blur-sm border border-gray-800 px-4">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-800 rounded-full mb-4">
-                  <FaImages size={32} className="text-gray-500" />
-                </div>
-                <p className="text-gray-300 text-xl font-light mb-2">No stories yet</p>
-                <p className="text-gray-500">Create your first wedding story</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
-                {stories.map((story) => (
-                  <div
-                    key={story._id}
-                    className="group bg-gray-900 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-gray-800"
-                  >
-                    <div className="relative overflow-hidden h-64 sm:h-72">
-                      <img
-                        src={story.coverImage}
-                        alt={story.title}
-                        className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    </div>
-                    <div className="p-5 sm:p-6">
-                      <h2 className="text-xl sm:text-2xl text-white uppercase tracking-[2px] font-light truncate">
-                        {story.title}
-                      </h2>
-                
-                      <div className="flex items-center gap-2 mt-4 text-gray-400 text-sm">
-                        <FaImages size={16} />
-                        <span>{story.galleryImages?.length || 0} Images in gallery</span>
-                      </div>
-                      <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                        <button
-                          onClick={() => openSlider(story)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
-                        >
-                          <FaEye size={14} />
-                          View Gallery
-                        </button>
-                        <button
-                          onClick={() => handleDelete(story._id)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 border border-red-800 px-4 py-2 rounded-xl uppercase tracking-[1px] text-sm transition-all duration-300"
-                        >
-                          <FaTrash size={14} />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+        </div>
       </div>
 
-      {/* FULLSCREEN SLIDER MODAL - Dark theme + responsive */}
+      {/* Scrollable Content – with ref */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6"
+      >
+        <div className="max-w-7xl mx-auto mt-6 md:mt-8">
+          {/* CREATE TAB */}
+          {activeTab === "create" && (
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-5 sm:p-6 md:p-8 border border-gray-200">
+              <form onSubmit={handleCreateStory} className="space-y-6 md:space-y-8">
+                {/* TITLE */}
+                <div>
+                  <label className="block mb-2 text-gray-700 uppercase tracking-[2px] text-xs font-semibold">
+                    Couple / Story Title
+                  </label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., A Royal Love Affair"
+                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-3 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                    required
+                  />
+                </div>
+
+                {/* DESCRIPTION */}
+                <div>
+                  <label className="block mb-2 text-gray-700 uppercase tracking-[2px] text-xs font-semibold">
+                    Description
+                  </label>
+                  <textarea
+                    rows="4"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Share the beautiful story..."
+                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-3 text-gray-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+
+                {/* COVER IMAGE */}
+                <div>
+                  <label className="block mb-2 text-gray-700 uppercase tracking-[2px] text-xs font-semibold">
+                    Cover Image
+                  </label>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-xl border border-gray-300 transition text-sm flex items-center gap-2">
+                      <FaPlus size={12} /> Choose Cover
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setCoverImage(e.target.files[0])}
+                        className="hidden"
+                        required
+                      />
+                    </label>
+                    {coverImage && (
+                      <span className="text-sm text-gray-600 truncate max-w-[200px]">
+                        {coverImage.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* GALLERY IMAGES */}
+                <div>
+                  <label className="block mb-2 text-gray-700 uppercase tracking-[2px] text-xs font-semibold">
+                    Gallery Images (multiple)
+                  </label>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2 rounded-xl border border-gray-300 transition text-sm flex items-center gap-2">
+                      <FaImages size={14} /> Select Images
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => setGalleryImages([...e.target.files])}
+                        className="hidden"
+                      />
+                    </label>
+                    {galleryImages.length > 0 && (
+                      <span className="text-sm text-gray-600">
+                        {galleryImages.length} file(s) selected
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* SUBMIT BUTTON */}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 rounded-xl uppercase tracking-[2px] text-xs sm:text-sm font-medium transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                >
+                  <FaPlus size={14} />
+                  {loading ? "Creating..." : "Publish Story"}
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* STORIES TAB */}
+          {activeTab === "stories" && (
+            <>
+              {stories.length === 0 ? (
+                <div className="text-center py-16 sm:py-20 bg-white/60 rounded-2xl backdrop-blur-sm border border-gray-200 px-4">
+                  <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
+                    <FaImages size={32} className="text-gray-400" />
+                  </div>
+                  <p className="text-gray-700 text-xl font-light mb-2">No stories yet</p>
+                  <p className="text-gray-400">Create your first wedding story</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {stories.map((story) => (
+                    <div
+                      key={story._id}
+                      className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-200"
+                    >
+                      {/* Image */}
+                      <div className="relative overflow-hidden h-44 sm:h-52">
+                        <img
+                          src={story.coverImage}
+                          alt={story.title}
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4">
+                        <h2 className="text-lg font-medium text-gray-800 uppercase tracking-[1px] truncate">
+                          {story.title}
+                        </h2>
+
+                        <div className="flex items-center gap-2 mt-2 text-gray-500 text-sm">
+                          <FaImages size={14} />
+                          <span>{story.galleryImages?.length || 0} Images</span>
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex gap-2 mt-4">
+                          <button
+                            onClick={() => openSlider(story)}
+                            className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-xs uppercase tracking-[1px] transition-all duration-300"
+                          >
+                            <FaEye size={12} />
+                            View
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteClick(story._id, story.title)}
+                            className="flex-1 inline-flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-2 rounded-lg text-xs uppercase tracking-[1px] transition-all duration-300"
+                          >
+                            <FaTrash size={12} />
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* FULLSCREEN SLIDER MODAL */}
       {selectedStory && (
-        <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md overflow-hidden">
+        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md overflow-hidden">
           <button
             onClick={closeSlider}
-            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 text-gray-400 hover:text-white text-2xl sm:text-3xl transition"
+            className="absolute top-4 right-4 sm:top-6 sm:right-6 z-50 text-gray-300 hover:text-white text-2xl sm:text-3xl transition"
             aria-label="Close"
           >
             <FaTimes />
@@ -384,6 +453,25 @@ const WeddingStoryDashboard = () => {
           )}
         </div>
       )}
+
+      {/* Global Loading Modal */}
+      <LoadingModal
+        isLoading={loading}
+        message={modalMessage}
+        variant="spinner"
+        showProgress={false}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Story"
+        message={`Are you sure you want to delete "${itemToDelete?.title || 'this story'}"?`}
+        itemName={itemToDelete?.title}
+        isLoading={loading}
+      />
     </div>
   );
 };

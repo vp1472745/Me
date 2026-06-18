@@ -1,6 +1,5 @@
-// Layout.jsx - Consistent Collapsible Sidebar (Desktop & Mobile)
 import { useState, useEffect } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../../config/api";
 import {
@@ -16,6 +15,7 @@ import {
 
 function Layout({ roleType }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const permissions = user?.permissions || [];
 
@@ -25,7 +25,6 @@ function Layout({ roleType }) {
   // On mount, set initial state based on screen width
   useEffect(() => {
     const checkWidth = () => {
-      // On small screens (<= 768px), start collapsed to save space
       if (window.innerWidth <= 768) {
         setIsSidebarOpen(false);
       } else {
@@ -72,37 +71,38 @@ function Layout({ roleType }) {
   const sidebarWidth = isSidebarOpen ? "w-72" : "w-20";
   const contentMargin = isSidebarOpen ? "ml-72" : "ml-20";
 
+  // Helper to check if a path is active (exact match)
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div className="flex h-screen overflow-hidden bg-black text-white">
-      {/* Sidebar - Fixed, no overlay, always visible */}
+    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-800">
+      {/* Sidebar */}
       <aside
         className={`
           ${sidebarWidth}
-          bg-gradient-to-b from-gray-900 to-black
-          text-white shadow-2xl flex flex-col
-          fixed left-0 top-0 h-screen z-50
-          border-r border-gray-800
+          bg-white  flex flex-col
+          fixed left-0 top-0 h-screen 
+          border-r border-gray-200
           transition-all duration-300 ease-in-out
         `}
       >
         {/* Brand & Toggle Button */}
-        <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {isSidebarOpen ? (
             <div className="flex items-center gap-2">
-              <Camera className="w-7 h-7 text-gray-400" />
+              <Camera className="w-7 h-7 text-indigo-600" />
               <div>
-                <span className="text-lg font-black">SHUTTER</span>
-                <span className="text-lg font-light text-gray-400">STUDIO</span>
-                <p className="text-[10px] text-gray-500">Photography Mgmt</p>
+                <span className="text-lg font-black text-gray-800">SHUTTER</span>
+                <span className="text-lg font-light text-indigo-600">STUDIO</span>
+                <p className="text-[10px] text-gray-400">Photography Mgmt</p>
               </div>
             </div>
           ) : (
-            <Camera className="w-7 h-7 text-gray-400 mx-auto" />
+            <Camera className="w-7 h-7 text-indigo-600 mx-auto" />
           )}
-          {/* Toggle button - always visible */}
           <button
             onClick={toggleSidebar}
-            className="p-1 rounded-lg hover:bg-gray-800 transition text-gray-400"
+            className="p-1 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-700"
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
             {isSidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
@@ -114,32 +114,47 @@ function Layout({ roleType }) {
           {navItems.map((item) => {
             if (item.permission && !permissions.includes(item.permission)) return null;
             const Icon = item.icon;
+            const active = isActive(item.to);
+
             return (
               <Link
                 key={item.to}
                 to={item.to}
                 className={`
                   flex items-center gap-3 px-3 py-2.5 rounded-xl
-                  text-gray-400 hover:text-white hover:bg-gray-800/50
                   transition-all duration-200 group
                   ${!isSidebarOpen && "justify-center"}
+                  ${
+                    active
+                      ? "bg-indigo-100 text-indigo-700 shadow-sm"
+                      : "text-gray-600 hover:text-indigo-700 hover:bg-indigo-50"
+                  }
                 `}
                 title={!isSidebarOpen ? item.label : ""}
               >
-                <Icon className="w-5 h-5 group-hover:text-gray-300 flex-shrink-0" />
-                {isSidebarOpen && <span className="font-medium text-sm">{item.label}</span>}
+                <Icon
+                  className={`
+                    w-5 h-5 flex-shrink-0
+                    ${active ? "text-indigo-600" : "group-hover:text-indigo-600"}
+                  `}
+                />
+                {isSidebarOpen && (
+                  <span className={`font-medium text-sm ${active ? "text-indigo-700" : ""}`}>
+                    {item.label}
+                  </span>
+                )}
               </Link>
             );
           })}
         </nav>
 
         {/* Logout Button */}
-        <div className="p-3 border-t border-gray-800">
+        <div className="p-3 border-t border-gray-200">
           <button
             onClick={handleLogout}
             className={`
               flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
-              text-gray-400 hover:text-white hover:bg-red-900/20
+              text-gray-600 hover:text-red-700 hover:bg-red-50
               transition-all duration-200
               ${!isSidebarOpen && "justify-center"}
             `}
@@ -151,25 +166,25 @@ function Layout({ roleType }) {
         </div>
       </aside>
 
-      {/* Main Content Area - margin adjusts with sidebar */}
-      <div className={`flex-1 flex flex-col h-screen overflow-hidden bg-black transition-all duration-300 ${contentMargin}`}>
+      {/* Main Content */}
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden bg-gray-50 transition-all duration-300 ${contentMargin}`}>
         {/* Header */}
-        <header className="bg-gray-900/80 backdrop-blur-sm shadow-md border-b border-gray-800 sticky top-0 z-40 flex-shrink-0">
+        <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-40 flex-shrink-0">
           <div className="flex justify-between items-center px-6 py-3">
             <div>
-              <h1 className="text-xl font-bold text-white flex items-center gap-2">
+              <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 {roleType === "ADMIN" ? "Administrator" : "Content Editor"}
-                <span className="text-xs font-normal text-gray-300 bg-gray-800 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-medium text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
                   {roleType}
                 </span>
               </h1>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-500 mt-0.5">
                 Welcome back, {user?.name || "Photographer"}
               </p>
             </div>
             <button
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-white px-4 py-1.5 rounded-lg transition shadow-md text-sm"
+              className="hidden md:flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-xl transition  text-sm border border-gray-200"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -177,8 +192,8 @@ function Layout({ roleType }) {
           </div>
         </header>
 
-        {/* Scrollable Outlet */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden ">
+        {/* ✅ Scrollable Outlet – only this part scrolls */}
+        <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>
       </div>

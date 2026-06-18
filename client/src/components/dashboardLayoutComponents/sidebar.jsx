@@ -1,129 +1,103 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
-
-  // ==========================
-  // User
-  // ==========================
-
-  const user = JSON.parse(
-    localStorage.getItem("user"),
-  );
-
-  // ==========================
-  // Role
-  // ==========================
-
+  const user = JSON.parse(localStorage.getItem("user"));
   const roleType = user?.role;
+  const permissions = user?.permissions || [];
+  const location = useLocation();
 
-  // ==========================
-  // Permissions
-  // ==========================
+  // Helper to check if a path is active (exact match)
+  const isActive = (path) => location.pathname === path;
 
-  const permissions =
-    user?.permissions || [];
+  // Base link classes – shared for all links
+  const baseLinkClass =
+    "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border";
+
+  // Active & inactive variants
+  const getLinkClass = (path) => {
+    const active = isActive(path);
+    return `
+      ${baseLinkClass}
+      ${
+        active
+          ? "bg-indigo-100 text-indigo-700 border-indigo-300 shadow-sm"
+          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
+      }
+    `;
+  };
 
   return (
-    <div className="w-64  text-white p-5 min-h-screen">
-
+    <div className="w-64 bg-white p-5 min-h-screen border-r border-gray-200">
       {/* Logo */}
-
-      <h1 className="text-2xl font-bold mb-10">
-        Dashboard
-      </h1>
+      <h1 className="text-2xl font-bold mb-10 text-gray-800">Dashboard</h1>
 
       {/* Sidebar Menu */}
-
       <div className="flex flex-col gap-4">
-
-        {/* ==========================
-            ADMIN SIDEBAR
-        ========================== */}
-
+        {/* ADMIN SIDEBAR */}
         {roleType === "ADMIN" && (
           <>
-
             <Link
               to="/admin-stories"
-              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+              className={getLinkClass("/admin-stories")}
             >
               Create Stories
             </Link>
-
             <Link
               to="/photobooks-admin"
-              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+              className={getLinkClass("/photobooks-admin")}
             >
               PhotoBooks
             </Link>
-
             <Link
               to="/access"
-              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+              className={getLinkClass("/access")}
             >
               Access
             </Link>
-
             <Link
               to="/admin-Films"
-              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+              className={getLinkClass("/admin-Films")}
             >
               Create Films
             </Link>
-
-               <Link
+            <Link
               to="/admin-PreWedding"
-              className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+              className={getLinkClass("/admin-PreWedding")}
             >
               Create PreWedding
             </Link>
-
           </>
         )}
 
-        {/* ==========================
-            EDITOR SIDEBAR
-        ========================== */}
-
+        {/* EDITOR SIDEBAR */}
         {roleType === "EDITOR" && (
           <>
-
-            {permissions.includes(
-              "overview",
-            ) && (
+            {permissions.includes("overview") && (
               <Link
                 to="/editor-overview"
-                className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+                className={getLinkClass("/editor-overview")}
               >
                 Overview
               </Link>
             )}
-
-            {permissions.includes(
-              "posts",
-            ) && (
+            {permissions.includes("posts") && (
               <Link
                 to="/posts"
-                className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+                className={getLinkClass("/posts")}
               >
                 Posts
               </Link>
             )}
-
-            {permissions.includes(
-              "settings",
-            ) && (
+            {permissions.includes("settings") && (
               <Link
                 to="/editor-settings"
-                className="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg"
+                className={getLinkClass("/editor-settings")}
               >
                 Settings
               </Link>
             )}
-
           </>
         )}
-
       </div>
     </div>
   );

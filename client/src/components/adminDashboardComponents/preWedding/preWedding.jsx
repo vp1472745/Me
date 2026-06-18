@@ -1,5 +1,5 @@
 // ======================================================
-// FILE: PreWedding.jsx - Professional UI (Dark Theme)
+// FILE: PreWedding.jsx - Professional Light Theme (Scroll Fixed)
 // ======================================================
 
 import React, { useEffect, useState } from "react";
@@ -152,218 +152,222 @@ const PreWedding = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedStory]);
 
+  // ======================================================
+  // RENDER
+  // ======================================================
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 to-black text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      <div className="max-w-7xl mx-auto text-center mt-10 mb-10">
-        <h1 className="text-3xl md:text-4xl font-light text-white uppercase tracking-[4px]">
-        Create Pre-Wedding Stories
-        </h1>
-        <div className="w-20 h-px bg-gray-700 mx-auto mt-3 mb-2"></div>
-        <p className="text-gray-400 text-sm">Curate timeless memories</p>
+    // ✅ FIXED: flex column with full height, no min-h-screen
+    <div className="flex flex-col h-full w-full bg-gray-50 text-gray-800">
+      {/* Fixed Tabs */}
+      <div className="flex-shrink-0 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Tabs */}
+          <div className="flex flex-wrap gap-4 border-b border-gray-200 pb-2">
+            <button
+              onClick={() => setActiveTab("create")}
+              className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+                activeTab === "create"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <Plus size={18} />
+              Create Story
+            </button>
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+                activeTab === "all"
+                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                  : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <ImageIcon size={18} />
+              All Stories
+            </button>
+          </div>
+        </div>
       </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-4 mb-10 border-b border-white/10 pb-2">
-          <button
-            onClick={() => setActiveTab("create")}
-            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
-              activeTab === "create"
-                ? "bg-pink-600 text-white shadow-lg shadow-pink-600/20"
-                : "text-gray-300 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <Plus size={18} />
-            Create Story
-          </button>
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
-              activeTab === "all"
-                ? "bg-pink-600 text-white shadow-lg shadow-pink-600/20"
-                : "text-gray-300 hover:text-white hover:bg-white/5"
-            }`}
-          >
-            <ImageIcon size={18} />
-            All Stories
-          </button>
-        </div>
-
-        {/* CREATE TAB */}
-        {activeTab === "create" && (
-          <div className="bg-gray-900/60 backdrop-blur-sm border border-gray-800 rounded-3xl p-6 md:p-8 shadow-2xl">
-            <form onSubmit={handleCreateStory} className="space-y-7">
-              {/* Title */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-300">
-                  Story Title
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g., Eternal Love"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full bg-gray-800/80 border border-gray-700 rounded-xl px-5 py-4 text-white placeholder-gray-500 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition"
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-300">
-                  Description
-                </label>
-                <textarea
-                  rows="4"
-                  placeholder="Share the beautiful journey..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full bg-gray-800/80 border border-gray-700 rounded-xl px-5 py-4 text-white placeholder-gray-500 outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition"
-                />
-              </div>
-
-              {/* Cover Image */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-300">
-                  Cover Image
-                </label>
-                <div className="flex items-center gap-4">
-                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
-                    <Plus size={16} /> Choose Cover
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => setCoverImage(e.target.files[0])}
-                      className="hidden"
-                      required
-                    />
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-6">
+        <div className="max-w-7xl mx-auto mt-6">
+          {/* CREATE TAB */}
+          {activeTab === "create" && (
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-6 md:p-8 shadow-xl">
+              <form onSubmit={handleCreateStory} className="space-y-7">
+                {/* Title */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Story Title
                   </label>
-                  {coverImage && (
-                    <span className="text-sm text-gray-400 truncate">
-                      {coverImage.name}
-                    </span>
-                  )}
+                  <input
+                    type="text"
+                    placeholder="e.g., Eternal Love"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-4 text-gray-800 placeholder-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                    required
+                  />
                 </div>
-              </div>
 
-              {/* Gallery Images */}
-              <div>
-                <label className="block mb-2 text-sm font-medium text-gray-300">
-                  Gallery Images (multiple)
-                </label>
-                <div className="flex items-center gap-4">
-                  <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
-                    <ImageIcon size={16} /> Select Images
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => setGalleryImages(Array.from(e.target.files))}
-                      className="hidden"
-                    />
+                {/* Description */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Description
                   </label>
+                  <textarea
+                    rows="4"
+                    placeholder="Share the beautiful journey..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-4 text-gray-800 placeholder-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                  />
+                </div>
+
+                {/* Cover Image */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Cover Image
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                      <Plus size={16} /> Choose Cover
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setCoverImage(e.target.files[0])}
+                        className="hidden"
+                        required
+                      />
+                    </label>
+                    {coverImage && (
+                      <span className="text-sm text-gray-600 truncate">
+                        {coverImage.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Gallery Images */}
+                <div>
+                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                    Gallery Images (multiple)
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                      <ImageIcon size={16} /> Select Images
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => setGalleryImages(Array.from(e.target.files))}
+                        className="hidden"
+                      />
+                    </label>
+                    {galleryImages.length > 0 && (
+                      <span className="text-sm text-gray-600">
+                        {galleryImages.length} file(s) selected
+                      </span>
+                    )}
+                  </div>
+                  {/* Image previews */}
                   {galleryImages.length > 0 && (
-                    <span className="text-sm text-gray-400">
-                      {galleryImages.length} file(s) selected
-                    </span>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4">
+                      {galleryImages.map((img, idx) => (
+                        <img
+                          key={idx}
+                          src={URL.createObjectURL(img)}
+                          alt="preview"
+                          className="h-24 w-full object-cover rounded-lg border border-gray-200"
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
-                {/* Image previews */}
-                {galleryImages.length > 0 && (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4">
-                    {galleryImages.map((img, idx) => (
-                      <img
-                        key={idx}
-                        src={URL.createObjectURL(img)}
-                        alt="preview"
-                        className="h-24 w-full object-cover rounded-lg border border-gray-700"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
 
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={uploading}
-                className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-lg shadow-pink-600/20 disabled:opacity-50"
-              >
-                <Upload size={20} />
-                {uploading ? "Creating..." : "Publish Story"}
-              </button>
-            </form>
-          </div>
-        )}
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={uploading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50"
+                >
+                  <Upload size={20} />
+                  {uploading ? "Creating..." : "Publish Story"}
+                </button>
+              </form>
+            </div>
+          )}
 
-        {/* ALL STORIES TAB */}
-        {activeTab === "all" && (
-          <>
-            {loading ? (
-              <div className="flex justify-center items-center h-96">
-                <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : stories.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-96 text-center bg-gray-900/30 rounded-3xl border border-gray-800">
-                <ImageIcon size={64} className="text-gray-600 mb-4" />
-                <h3 className="text-2xl font-light text-gray-400">No stories yet</h3>
-                <p className="text-gray-500 mt-2">Create your first pre‑wedding story</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {stories.map((story) => (
-                  <div
-                    key={story._id}
-                    className="group bg-gray-900/60 border border-gray-800 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1"
-                  >
-                    <div className="relative h-64 overflow-hidden">
-                      <img
-                        src={story.coverImage}
-                        alt={story.title}
-                        className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                      <div className="absolute bottom-4 left-4 right-4">
-                        <h2 className="text-xl font-bold text-white line-clamp-1">
-                          {story.title}
-                        </h2>
+          {/* ALL STORIES TAB */}
+          {activeTab === "all" && (
+            <>
+              {loading ? (
+                <div className="flex justify-center items-center h-64">
+                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : stories.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 text-center bg-white/60 rounded-3xl border border-gray-200">
+                  <ImageIcon size={64} className="text-gray-300 mb-4" />
+                  <h3 className="text-2xl font-light text-gray-500">No stories yet</h3>
+                  <p className="text-gray-400 mt-2">Create your first pre‑wedding story</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {stories.map((story) => (
+                    <div
+                      key={story._id}
+                      className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                    >
+                      <div className="relative h-64 overflow-hidden">
+                        <img
+                          src={story.coverImage}
+                          alt={story.title}
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <h2 className="text-xl font-bold text-white line-clamp-1">
+                            {story.title}
+                          </h2>
+                        </div>
+                      </div>
+                      <div className="p-5">
+                        <p className="text-gray-600 text-sm line-clamp-2 min-h-[44px]">
+                          {story.description}
+                        </p>
+                        <div className="flex items-center gap-3 mt-5">
+                          <button
+                            onClick={() => openModal(story)}
+                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition"
+                          >
+                            <Eye size={16} /> View
+                          </button>
+                          <button
+                            onClick={() => handleDelete(story._id)}
+                            className="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="p-5">
-                      <p className="text-gray-300 text-sm line-clamp-2 min-h-[44px]">
-                        {story.description}
-                      </p>
-                      <div className="flex items-center gap-3 mt-5">
-                        <button
-                          onClick={() => openModal(story)}
-                          className="flex-1 bg-pink-600 hover:bg-pink-700 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition"
-                        >
-                          <Eye size={16} /> View
-                        </button>
-                        <button
-                          onClick={() => handleDelete(story._id)}
-                          className="bg-red-600/80 hover:bg-red-700 text-white px-4 py-2.5 rounded-xl transition"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* FULLSCREEN MODAL / LIGHTBOX */}
       {selectedStory && (
-        <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-6xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="relative w-full max-w-6xl bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
             {/* Close Button */}
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-red-600 p-2.5 rounded-full transition-all"
+              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-red-600 p-2.5 rounded-full transition-all text-white"
             >
               <X size={20} />
             </button>
@@ -384,13 +388,13 @@ const PreWedding = () => {
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition text-white"
                   >
                     <ChevronLeft size={28} />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition text-white"
                   >
                     <ChevronRight size={28} />
                   </button>
@@ -410,7 +414,7 @@ const PreWedding = () => {
 
             {/* Thumbnails */}
             {selectedStory?.galleryImages?.length > 0 && (
-              <div className="flex gap-3 overflow-x-auto p-4 bg-gray-900/80 border-t border-gray-800">
+              <div className="flex gap-3 overflow-x-auto p-4 bg-gray-50 border-t border-gray-200">
                 {selectedStory.galleryImages.map((img, idx) => (
                   <img
                     key={idx}
@@ -419,7 +423,7 @@ const PreWedding = () => {
                     onClick={() => setCurrentImageIndex(idx)}
                     className={`w-20 h-16 object-cover rounded-lg cursor-pointer transition-all duration-200 ${
                       currentImageIndex === idx
-                        ? "ring-2 ring-pink-500 scale-105"
+                        ? "ring-2 ring-blue-500 scale-105"
                         : "opacity-60 hover:opacity-100"
                     }`}
                   />
