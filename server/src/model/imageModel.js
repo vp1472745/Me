@@ -8,7 +8,7 @@ const gallerySchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: true,
+  
     },
 
     images: [

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import Logo from "../../assets/Logo.webp";
 
-const Navbar = () => {
+const Navbar = ({
+  textColor = "text-white",
+  mobileMenuBg = "bg-[#f4f1eb]",
+}) => {
   const navigate = useNavigate();
-
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -16,7 +17,6 @@ const Navbar = () => {
     };
 
     window.addEventListener("resize", handleResize);
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -33,35 +33,13 @@ const Navbar = () => {
   }, [isMobileMenuOpen]);
 
   const menuItems = [
-    {
-      name: "Stories",
-      path: "/storyList",
-    },
-    {
-      name: "Photobooks",
-      path: "/photobooks",
-    },
-    {
-      name: "Images",
-      path: "/images",
-    },
-    {
-      name: "Films",
-      path: "/films",
-    },
-    {
-      name: "Pre-Weddings",
-      path: "/pre-wedding-stories",
-    },
-
-    {
-      name: "FAQ",
-      path: "/faq",
-    },
-    {
-      name: "Contact",
-      path: "/contact",
-    },
+    { name: "Stories", path: "/storyList" },
+    { name: "Photobooks", path: "/photobooks" },
+    { name: "Images", path: "/images" },
+    { name: "Films", path: "/films" },
+    { name: "Pre-Weddings", path: "/pre-wedding-stories" },
+    { name: "FAQ", path: "/faq" },
+    { name: "Contact", path: "/contact" },
   ];
 
   const toggleMobileMenu = () => {
@@ -74,17 +52,16 @@ const Navbar = () => {
 
   const handleNavigate = (path) => {
     navigate(path);
-
     closeMobileMenu();
   };
 
   return (
-    <nav className="w-full  border-b border-gray-200 relative">
+    <nav className="absolute top-0 left-0 w-full z-50 bg-transparent">
       <div className="max-w-480 mx-auto flex items-center justify-between px-6 lg:px-16 py-6">
         
         {/* LOGO */}
         <div
-          className="flex items-center cursor-pointer"
+          className="flex items-center cursor-pointer text-white"
           onClick={() => navigate("/")}
         >
           <img
@@ -95,7 +72,9 @@ const Navbar = () => {
         </div>
 
         {/* DESKTOP MENU */}
-        <ul className="hidden lg:flex items-center gap-5 text-[10px] font-bold tracking-[3px] uppercase text-[#2f2f2f]">
+        <ul
+          className={`hidden lg:flex items-center gap-5 text-[10px] font-bold tracking-[3px] uppercase ${textColor}`}
+        >
           {menuItems.map((item) => (
             <li
               key={item.name}
@@ -111,7 +90,7 @@ const Navbar = () => {
         <div className="lg:hidden">
           <button
             onClick={toggleMobileMenu}
-            className="text-3xl text-[#2f2f2f] focus:outline-none"
+            className={`text-3xl ${textColor} focus:outline-none`}
           >
             ☰
           </button>
@@ -129,13 +108,15 @@ const Navbar = () => {
           />
 
           {/* PANEL */}
-          <div className="absolute right-0 top-0 z-50 h-full w-70 bg-[#f4f1eb] shadow-xl animate-slide-in pointer-events-auto">
+          <div
+            className={`absolute right-0 top-0 z-50 h-full w-70 ${mobileMenuBg} shadow-xl animate-slide-in pointer-events-auto`}
+          >
             
             {/* CLOSE BUTTON */}
             <div className="flex justify-end p-6">
               <button
                 onClick={closeMobileMenu}
-                className="text-2xl text-[#2f2f2f]"
+                className={`text-2xl ${textColor}`}
               >
                 ✕
               </button>

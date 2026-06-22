@@ -1,7 +1,8 @@
+// Sidebar.jsx - Custom Nature-inspired Wedding Dashboard Sidebar
 import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const roleType = user?.role;
   const permissions = user?.permissions || [];
   const location = useLocation();
@@ -11,7 +12,7 @@ function Sidebar() {
 
   // Base link classes – shared for all links
   const baseLinkClass =
-    "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border";
+    "flex items-center gap-3 p-3 rounded-xl transition-all duration-200 border font-semibold text-sm";
 
   // Active & inactive variants
   const getLinkClass = (path) => {
@@ -20,22 +21,36 @@ function Sidebar() {
       ${baseLinkClass}
       ${
         active
-          ? "bg-indigo-100 text-indigo-700 border-indigo-300 shadow-sm"
-          : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200"
+          ? "bg-[#EBF4DD] text-[#5A7863] border-[#90AB8B]/40 shadow-sm"
+          : "bg-[#F7F9F4] text-[#3B4953]/80 border-[#DDE7D8] hover:bg-[#EBF4DD]/50 hover:text-[#5A7863] hover:border-[#90AB8B]/20"
       }
     `;
   };
 
   return (
-    <div className="w-64 bg-white p-5 min-h-screen border-r border-gray-200">
-      {/* Logo */}
-      <h1 className="text-2xl font-bold mb-10 text-gray-800">Dashboard</h1>
+    <div className="w-64 bg-white p-5 min-h-screen border-r border-[#DDE7D8] text-[#3B4953]">
+      {/* Logo Section */}
+      <div className="mb-10 pl-1">
+        <h1 className="text-xl font-extrabold tracking-tight text-[#3B4953]">
+          SHUTTER
+          <span className="font-light text-[#5A7863] ml-0.5">STUDIO</span>
+        </h1>
+        <p className="text-[10px] text-[#3B4953]/60 font-medium tracking-wide uppercase mt-0.5">
+          Dashboard Panel
+        </p>
+      </div>
 
-      {/* Sidebar Menu */}
-      <div className="flex flex-col gap-4">
+      {/* Sidebar Menu Links */}
+      <div className="flex flex-col gap-3">
         {/* ADMIN SIDEBAR */}
         {roleType === "ADMIN" && (
           <>
+            <Link
+              to="/admin-Hero"
+              className={getLinkClass("/admin-Hero")}
+            >
+              Create Hero Section
+            </Link>
             <Link
               to="/admin-stories"
               className={getLinkClass("/admin-stories")}
@@ -48,16 +63,10 @@ function Sidebar() {
             >
               PhotoBooks
             </Link>
-            <Link
-              to="/access"
-              className={getLinkClass("/access")}
-            >
-              Access
+            <Link to="/access" className={getLinkClass("/access")}>
+              Access Management
             </Link>
-            <Link
-              to="/admin-Films"
-              className={getLinkClass("/admin-Films")}
-            >
+            <Link to="/admin-films" className={getLinkClass("/admin-films")}>
               Create Films
             </Link>
             <Link
@@ -81,10 +90,7 @@ function Sidebar() {
               </Link>
             )}
             {permissions.includes("posts") && (
-              <Link
-                to="/posts"
-                className={getLinkClass("/posts")}
-              >
+              <Link to="/posts" className={getLinkClass("/posts")}>
                 Posts
               </Link>
             )}

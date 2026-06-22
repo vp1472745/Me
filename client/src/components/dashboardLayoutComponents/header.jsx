@@ -1,3 +1,5 @@
+// Header.jsx - Nature-inspired palette with micro-animations
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../../config/api";
@@ -22,27 +24,29 @@ function Header() {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-20 border-b border-gray-200">
+    <header className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-20 border-b border-[#DDE7D8]">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-md shadow-indigo-200/50">
-            <Camera className="w-5 h-5 text-white" />
+        
+        {/* Brand with Logo Animation */}
+        <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate("/")}>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#90AB8B] to-[#5A7863] flex items-center justify-center shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <Camera className="w-5 h-5 text-white transition-transform duration-500 group-hover:rotate-12" />
           </div>
-          <div>
-            <span className="text-xl font-bold tracking-tight text-gray-800">SHUTTER</span>
-            <span className="text-xl font-light text-indigo-600 tracking-tight">STUDIO</span>
+          <div className="flex flex-col sm:flex-row sm:gap-1.5 leading-none">
+            <span className="text-xl font-extrabold tracking-tight text-[#3B4953]">SHUTTER</span>
+            <span className="text-xl font-light text-[#5A7863] tracking-tight">STUDIO</span>
           </div>
         </div>
 
-        {/* Logout Button */}
+        {/* Logout Button with Interactive Hover Slide */}
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 bg-gray-100 hover:bg-indigo-100 text-gray-700 hover:text-indigo-700 px-5 py-2 rounded-xl transition-all duration-200 shadow-sm border border-gray-200 hover:border-indigo-300"
+          className="group flex items-center gap-2 bg-[#F7F9F4] hover:bg-[#EBF4DD] text-[#3B4953] hover:text-[#5A7863] px-5 py-2.5 rounded-xl transition-all duration-300 shadow-sm border border-[#DDE7D8] hover:border-[#90AB8B] font-semibold text-sm"
         >
-          <LogOut className="w-4 h-4" />
-          <span className="font-medium">Logout</span>
+          <LogOut className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
+          <span>Logout</span>
         </button>
+        
       </div>
     </header>
   );

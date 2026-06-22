@@ -107,7 +107,7 @@ const GallerySection = () => {
   return (
 
     <>
-      <Navbar />
+<Navbar textColor="text-black/50" />
       {/* =====================================
           GALLERY SECTION
       ===================================== */}
@@ -115,7 +115,7 @@ const GallerySection = () => {
       <section
         className="
   
-          
+          py-20 md:py-20
           px-4
           md:px-10
         "

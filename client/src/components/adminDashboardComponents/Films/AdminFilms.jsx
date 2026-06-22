@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from "react";
-import {
-  createVideo,
-  getAllVideos,
-  deleteVideo,
-} from "../../../config/api";
+// ======================================================
+// FILE: AdminSettings.jsx
+// ======================================================
+import  { useEffect, useState } from "react";
+import { createVideo, getAllVideos, deleteVideo } from "../../../config/api";
+import { FaPlay, FaTrash, FaTimes, FaVideo, FaPlus, FaYoutube } from "react-icons/fa";
+import LoadingModal from "../../commonComponents/LoadingModal"; // Importing your modular loader
 
-function AdminSettings() {
+function AdminFilms() {
   // ==========================
   // STATES
   // ==========================
   const [activeTab, setActiveTab] = useState("create");
- 
   const [category, setCategory] = useState("");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState("Processing...");
   const [selectedVideo, setSelectedVideo] = useState(null);
 
   // ==========================
@@ -25,7 +26,7 @@ function AdminSettings() {
       const res = await getAllVideos();
       setVideos(Array.isArray(res?.data?.videos) ? res.data.videos : []);
     } catch (error) {
-      console.log(error);
+      console.error("Error fetching video assets:", error);
       setVideos([]);
     }
   };
@@ -38,45 +39,54 @@ function AdminSettings() {
   }, []);
 
   // ==========================
-  // CREATE VIDEO (only YouTube URL)
+  // CREATE VIDEO (YouTube URL Handler)
   // ==========================
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoadingMessage("Adding stream reference into tracking database...");
       setLoading(true);
+      
       const formData = new FormData();
-     
       formData.append("category", category);
       formData.append("youtubeUrl", youtubeUrl);
+      
       await createVideo(formData);
-      alert("Video added successfully!");
-      setTitle("");
+      
+      // Reset operational states
       setCategory("");
       setYoutubeUrl("");
-      fetchVideos();
+      await fetchVideos();
       setActiveTab("all");
     } catch (error) {
-      console.log(error);
-      alert("Upload failed");
+      console.error("Video submission sequence interrupted:", error);
+      alert(error.response?.data?.message || "Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
   // ==========================
-  // DELETE VIDEO
+  // DELETE VIDEO RESOURCE
   // ==========================
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this video?")) return;
+    if (!window.confirm("Are you sure you want to completely erase this video resource?")) return;
     try {
+      setLoadingMessage("Purging stream asset mappings...");
+      setLoading(true);
       await deleteVideo(id);
-      fetchVideos();
+      await fetchVideos();
     } catch (error) {
-      console.log(error);
+      console.error("Deletion lifecycle failure:", error);
+      alert("Failed to delete video resource.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Helper: extract YouTube embed URL
+  // ==========================
+  // PARSER HELPER: Extract YouTube ID & Build Clean Embed Path
+  // ==========================
   const getEmbedUrl = (url) => {
     if (!url) return "";
     let videoId = "";
@@ -85,165 +95,234 @@ function AdminSettings() {
     if (match && match[2].length === 11) {
       videoId = match[2];
     } else {
-      // if already embed format or invalid, return as is
       return url;
     }
     return `https://www.youtube.com/embed/${videoId}`;
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 md:px-10 py-8 md:py-10">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="border-t border-gray-800 mb-6" />
-        <h1 className="text-3xl md:text-5xl tracking-[12px] uppercase text-white font-light">
-          INSTACUTS
-        </h1>
-        <div className="border-t border-gray-800 mt-6" />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex flex-wrap justify-center gap-4 mb-12">
-        <button
-          onClick={() => setActiveTab("create")}
-          className={`px-6 sm:px-8 py-2.5 rounded-full uppercase tracking-[2px] text-sm font-medium transition-all ${
-            activeTab === "create"
-              ? "bg-gray-800 text-white shadow-md"
-              : "bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800"
-          }`}
-        >
-          Create Video
-        </button>
-        <button
-          onClick={() => setActiveTab("all")}
-          className={`px-6 sm:px-8 py-2.5 rounded-full uppercase tracking-[2px] text-sm font-medium transition-all ${
-            activeTab === "all"
-              ? "bg-gray-800 text-white shadow-md"
-              : "bg-gray-900 border border-gray-700 text-gray-300 hover:bg-gray-800"
-          }`}
-        >
-          All Videos
-        </button>
-      </div>
-
-      {/* CREATE TAB */}
-      {activeTab === "create" && (
-        <div className="max-w-3xl mx-auto bg-gray-900 rounded-2xl border border-gray-800 p-6 sm:p-10 shadow-xl">
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-
-
-            <div>
-              <label className="block mb-2 text-gray-300 uppercase tracking-[2px] text-xs">
-                YouTube Video URL
-              </label>
-              <input
-                type="url"
-                placeholder="https://www.youtube.com/watch?v=..."
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl p-4 text-white focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition"
-                required
-              />
-            </div>
-
+    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      
+      {/* Structural Navigation Tabs Module */}
+      <div className="flex-shrink-0 px-4 mt-4">
+        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
+          <div className="flex">
             <button
-              type="submit"
-              disabled={loading}
-              className="w-full md:w-auto bg-gray-800 hover:bg-gray-700 text-white px-8 py-4 rounded-xl uppercase tracking-[4px] text-sm font-medium transition-all disabled:opacity-50"
+              onClick={() => setActiveTab("create")}
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${
+                activeTab === "create"
+                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+              }`}
             >
-              {loading ? "Adding..." : "Add Video"}
+              Create Video
             </button>
-          </form>
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${
+                activeTab === "all"
+                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+              }`}
+            >
+              All Videos
+            </button>
+          </div>
         </div>
-      )}
+      </div>
 
-      {/* ALL VIDEOS TAB */}
-      {activeTab === "all" && (
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6 sm:p-10">
-          {videos.length === 0 ? (
-            <div className="text-center text-gray-400 text-xl py-20">
-              No videos found. Create your first video.
-            </div>
-          ) : (
-            <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6">
-              {videos.map((video) => (
-                <div
-                  key={video._id}
-                  className="break-inside-avoid bg-gray-800 rounded-xl overflow-hidden shadow-lg transition-transform hover:-translate-y-1"
-                >
-                  {/* Thumbnail from YouTube (using maxresdefault or hqdefault) */}
-                  {video.youtubeUrl && (
-                    <img
-                      src={`https://img.youtube.com/vi/${getEmbedUrl(video.youtubeUrl).split("/embed/")[1]}/maxresdefault.jpg`}
-                      alt={video.title}
-                      className="w-full h-56 object-cover cursor-pointer"
-                      onClick={() => setSelectedVideo(video)}
-                      onError={(e) => {
-                        e.target.src = `https://img.youtube.com/vi/${getEmbedUrl(video.youtubeUrl).split("/embed/")[1]}/hqdefault.jpg`;
-                      }}
-                    />
-                  )}
-                  <div className="p-5">
-              
-                   
-                    <div className="flex gap-3 mt-4">
-                      <button
-                        onClick={() => setSelectedVideo(video)}
-                        className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg uppercase tracking-[1px] text-sm transition"
-                      >
-                        ▶ Watch
-                      </button>
-                      <button
-                        onClick={() => handleDelete(video._id)}
-                        className="flex-1 inline-flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-800 py-2 rounded-lg uppercase tracking-[1px] text-sm transition"
-                      >
-                        Delete
-                      </button>
+      {/* Dynamic Content Stream Area */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
+        <div className="max-w-7xl mx-auto mt-6">
+          
+          {/* CREATE TAB */}
+          {activeTab === "create" && (
+            <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Category Input Selection Box */}
+                <div>
+                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                    Video Category / Tag
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g., Wedding Teaser, Highlights, Cinematic Film"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
+                  />
+                </div>
+
+                {/* YouTube Link Destination Entry Field */}
+                <div>
+                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                    YouTube Video URL
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-red-600">
+                      <FaYoutube size={16} />
                     </div>
+                    <input
+                      type="url"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 pl-11 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
+                      required
+                    />
                   </div>
                 </div>
-              ))}
+
+                {/* Processing Controls System Commit Trigger */}
+                <div className="pt-4 border-t border-[#DDE7D8]">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                  >
+                    <FaPlus size={11} />
+                    {loading ? "Adding Track..." : "Add Video Resource"}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
-        </div>
-      )}
 
-      {/* VIDEO MODAL (YouTube embed) */}
+          {/* ALL VIDEOS INDEX GRID VIEWS */}
+          {activeTab === "all" && (
+            <>
+              {videos.length === 0 ? (
+                <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
+                    <FaVideo size={22} className="text-[#90AB8B]" />
+                  </div>
+                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No stream assets found</p>
+                  <p className="text-[#3B4953]/60 text-sm">Deploy standalone cloud-linked stream objects here.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {videos.map((video) => {
+                    const embedUrl = getEmbedUrl(video.youtubeUrl);
+                    const videoId = embedUrl.includes("/embed/") ? embedUrl.split("/embed/")[1] : "";
+                    
+                    return (
+                      <div
+                        key={video._id}
+                        className="group bg-white rounded-xl overflow-hidden border border-[#DDE7D8] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
+                      >
+                        {/* Dynamic Stream Image Thumbnail Layout */}
+                        {video.youtubeUrl && videoId && (
+                          <div className="relative overflow-hidden h-52 bg-black cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                            <img
+                              src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
+                              alt={video.title || "Cinema Feed"}
+                              className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                              onError={(e) => {
+                                e.target.onerror = null; // Prevent infinite fallback loops
+                                e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                              }}
+                            />
+                            {/* Floating Overlay Meta Elements */}
+                            {video.category && (
+                              <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]">
+                                {video.category}
+                              </div>
+                            )}
+                            {/* Play HUD Centered Target Icon */}
+                            <div className="absolute inset-0 flex items-center justify-center bg-[#3B4953]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#5A7863] shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                                <FaPlay size={14} className="ml-0.5" />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Video Item Action Control Center Footer */}
+                        <div className="p-4 bg-white border-t border-[#DDE7D8] flex gap-2.5 mt-auto">
+                          <button
+                            onClick={() => setSelectedVideo(video)}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2.5 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
+                          >
+                            <FaPlay size={10} /> Stream
+                          </button>
+                          <button
+                            onClick={() => handleDelete(video._id)}
+                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
+                            title="Erase Stream Resource"
+                          >
+                            <FaTrash size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* ==========================
+          FULLSCREEN VIDEO MODAL (YouTube embed)
+      ========================== */}
       {selectedVideo && selectedVideo.youtubeUrl && (
         <div
-          className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md flex items-center justify-center p-4"
           onClick={() => setSelectedVideo(null)}
         >
           <div
-            className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl border border-[#DDE7D8]"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Dismiss Modal Floating Control */}
             <button
               onClick={() => setSelectedVideo(null)}
-              className="absolute top-3 right-3 z-10 text-white bg-black/50 rounded-full p-2 hover:bg-black/70 transition"
+              className="absolute top-4 right-4 z-50 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 p-2.5 rounded-full transition shadow-md"
+              aria-label="Close Playback"
             >
-              ✕
+              <FaTimes size={14} />
             </button>
-            <div className="aspect-video w-full">
+
+            {/* Embed Stream Window Aspect Frame */}
+            <div className="aspect-video w-full bg-black">
               <iframe
-                src={getEmbedUrl(selectedVideo.youtubeUrl)}
-                title={selectedVideo.title}
+                src={`${getEmbedUrl(selectedVideo.youtubeUrl)}?autoplay=1`}
+                title={selectedVideo.title || "Dynamic Feed Player"}
                 className="w-full h-full"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
             </div>
-            <div className="p-5 text-center">
-              <h3 className="text-2xl font-semibold text-white">{selectedVideo.title}</h3>
-              <p className="text-gray-400 mt-1">{selectedVideo.category}</p>
-            </div>
+
+            {/* Meta Segment Display Footnote */}
+            {(selectedVideo.title || selectedVideo.category) && (
+              <div className="p-5 text-center bg-[#F7F9F4] border-t border-[#DDE7D8]">
+                {selectedVideo.title && (
+                  <h3 className="text-lg font-bold text-[#3B4953] tracking-wide">{selectedVideo.title}</h3>
+                )}
+                {selectedVideo.category && (
+                  <p className="text-[#5A7863] text-xs font-semibold uppercase tracking-[1.5px] mt-1">
+                    {selectedVideo.category}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Dynamic Modular Loader Injection */}
+      <LoadingModal
+        isLoading={loading}
+        message={loadingMessage}
+        showProgress={false}
+        variant="dots"
+      />
     </div>
   );
 }
 
-export default AdminSettings;
+export default AdminFilms;

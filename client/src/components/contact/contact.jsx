@@ -8,8 +8,8 @@ import Navbar from "../homeComponents/navbarHomeComponents"
 const ContactPage = () => {
   return (
 <>
-<Navbar />
-    <div className="w-full  text-[#8d8175] min-h-screen">
+< Navbar textColor="text-black/50" />
+    <div className="w-full  text-[#8d8175] min-h-screen md:py-30 py-25 px-4 md:px-10">
       
       {/* TOP SECTION */}
       <div className="max-w-6xl mx-auto px-6 pt-5 pb-10">

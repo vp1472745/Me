@@ -90,9 +90,9 @@ const WeddingGallery = () => {
 
   return (
     <>
-      <Navbar />
+    <Navbar textColor="text-black/50" />
       {/* GALLERY GRID */}
-      <section className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-8 md:py-12">
+      <section className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-30 md:py-50">
         <div className="max-w-7xl mx-auto">
           {loading && (
             <div className="text-center text-[#8a7f74] py-16">

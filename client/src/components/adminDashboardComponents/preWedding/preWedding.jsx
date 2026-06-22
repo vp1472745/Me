@@ -1,9 +1,4 @@
-// ======================================================
-// FILE: PreWedding.jsx - Professional Light Theme (Scroll Fixed)
-// ======================================================
-
 import React, { useEffect, useState } from "react";
-
 import {
   Heart,
   Trash2,
@@ -16,6 +11,10 @@ import {
   Upload,
 } from "lucide-react";
 
+// ✅ Import the Cloudinary upload helper
+import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+
+// ✅ API calls – these must now accept JSON (not FormData)
 import {
   createPreWeddingStory,
   getAllPreWeddingStories,
@@ -33,9 +32,14 @@ const PreWedding = () => {
   // ======================================================
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [coverImage, setCoverImage] = useState(null);
-  const [galleryImages, setGalleryImages] = useState([]);
+  const [coverImage, setCoverImage] = useState(null);      // File object
+  const [galleryImages, setGalleryImages] = useState([]);  // Array of File objects
   const [uploading, setUploading] = useState(false);
+
+  // ======================================================
+  // UPLOAD PROGRESS STATE
+  // ======================================================
+  const [uploadProgress, setUploadProgress] = useState({}); // { cover: 0, gallery-0: 0, ... }
 
   // ======================================================
   // GET ALL STATES
@@ -69,28 +73,80 @@ const PreWedding = () => {
   }, []);
 
   // ======================================================
-  // CREATE STORY
+  // CREATE STORY – with client‑side Cloudinary upload + progress
   // ======================================================
   const handleCreateStory = async (e) => {
     e.preventDefault();
+
+    if (!title.trim()) {
+      alert("Please enter a story title.");
+      return;
+    }
+    if (!coverImage) {
+      alert("Please select a cover image.");
+      return;
+    }
+
     try {
       setUploading(true);
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("description", description);
-      if (coverImage) formData.append("coverImage", coverImage);
-      galleryImages.forEach((img) => formData.append("galleryImages", img));
-      await createPreWeddingStory(formData);
-      alert("Pre-Wedding Story Created Successfully");
+      // Reset progress
+      setUploadProgress({});
+
+      // 1️⃣ Upload cover image with progress
+      const coverResult = await new Promise((resolve, reject) => {
+        uploadToCloudinary(coverImage, (percent) => {
+          setUploadProgress((prev) => ({ ...prev, cover: percent }));
+        })
+          .then(resolve)
+          .catch(reject);
+      });
+      const coverUrl = coverResult.secure_url;
+      setUploadProgress((prev) => ({ ...prev, cover: 100 }));
+
+      // 2️⃣ Upload all gallery images with progress
+      const galleryResults = await Promise.all(
+        galleryImages.map((file, idx) =>
+          new Promise((resolve, reject) => {
+            uploadToCloudinary(file, (percent) => {
+              setUploadProgress((prev) => ({
+                ...prev,
+                [`gallery-${idx}`]: percent,
+              }));
+            })
+              .then(resolve)
+              .catch(reject);
+          })
+        )
+      );
+      const galleryUrls = galleryResults.map((res) => res.secure_url);
+      // Mark all gallery as done
+      galleryImages.forEach((_, idx) => {
+        setUploadProgress((prev) => ({ ...prev, [`gallery-${idx}`]: 100 }));
+      });
+
+      // 3️⃣ Send URLs to backend (as JSON)
+      const payload = {
+        title: title.trim(),
+        description: description.trim(),
+        coverImage: coverUrl,
+        galleryImages: galleryUrls,
+      };
+
+      await createPreWeddingStory(payload);
+
+      alert("✅ Pre-Wedding Story Created Successfully");
+
+      // Reset form
       setTitle("");
       setDescription("");
       setCoverImage(null);
       setGalleryImages([]);
+      setUploadProgress({});
       fetchStories();
       setActiveTab("all");
     } catch (error) {
-      console.log(error);
-      alert(error?.response?.data?.message || "Something went wrong");
+      console.error("Upload error:", error);
+      alert(error?.response?.data?.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -153,67 +209,75 @@ const PreWedding = () => {
   }, [selectedStory]);
 
   // ======================================================
+  // HELPER: Compute overall progress
+  // ======================================================
+  const getOverallProgress = () => {
+    const values = Object.values(uploadProgress);
+    if (values.length === 0) return 0;
+    const total = values.reduce((acc, val) => acc + val, 0);
+    return Math.round(total / values.length);
+  };
+
+  // ======================================================
   // RENDER
   // ======================================================
   return (
-    // ✅ FIXED: flex column with full height, no min-h-screen
-    <div className="flex flex-col h-full w-full bg-gray-50 text-gray-800">
-      {/* Fixed Tabs */}
-      <div className="flex-shrink-0 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-4 border-b border-gray-200 pb-2">
+    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      {/* ===== TABS ===== */}
+      <div className="flex-shrink-0 px-4 mt-4">
+        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
+          <div className="flex">
             <button
               onClick={() => setActiveTab("create")}
-              className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] flex items-center gap-2 ${
                 activeTab === "create"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
               }`}
             >
-              <Plus size={18} />
+              <Plus size={14} />
               Create Story
             </button>
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-6 py-2.5 rounded-xl font-semibold transition-all duration-200 flex items-center gap-2 ${
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 flex items-center gap-2 ${
                 activeTab === "all"
-                  ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
-                  : "text-gray-600 hover:text-blue-600 hover:bg-blue-50"
+                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
               }`}
             >
-              <ImageIcon size={18} />
+              <ImageIcon size={14} />
               All Stories
             </button>
           </div>
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-6">
+      {/* ===== CONTENT ===== */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
         <div className="max-w-7xl mx-auto mt-6">
-          {/* CREATE TAB */}
+          {/* ---- CREATE TAB ---- */}
           {activeTab === "create" && (
-            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-3xl p-6 md:p-8 shadow-xl">
-              <form onSubmit={handleCreateStory} className="space-y-7">
+            <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
+              <form onSubmit={handleCreateStory} className="space-y-6">
                 {/* Title */}
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
                     Story Title
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g., Eternal Love"
+                    placeholder="e.g., Eternal Love at Sunset"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-4 text-gray-800 placeholder-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
                     required
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
+                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
                     Description
                   </label>
                   <textarea
@@ -221,133 +285,198 @@ const PreWedding = () => {
                     placeholder="Share the beautiful journey..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-white border border-gray-300 rounded-xl px-5 py-4 text-gray-800 placeholder-gray-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition"
+                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm resize-none"
                   />
                 </div>
 
-                {/* Cover Image */}
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Cover Image
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
-                      <Plus size={16} /> Choose Cover
+                {/* Cover & Gallery row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Cover Image */}
+                  <div>
+                    <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                      Cover Image
+                    </label>
+                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-6 text-center transition group min-h-[140px]">
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(e) => setCoverImage(e.target.files[0])}
-                        className="hidden"
-                        required
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        required={!coverImage}
                       />
-                    </label>
+                      <div className="flex flex-col items-center pointer-events-none space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863]">
+                          <Plus size={16} />
+                        </div>
+                        <p className="text-xs font-bold text-[#3B4953]">
+                          {coverImage ? "Change Cover Frame" : "Assign Banner Frame"}
+                        </p>
+                      </div>
+                    </div>
                     {coverImage && (
-                      <span className="text-sm text-gray-600 truncate">
-                        {coverImage.name}
-                      </span>
+                      <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md mt-2 inline-block truncate max-w-full shadow-xs">
+                        ✓ Banner: {coverImage.name}
+                        {uploadProgress.cover !== undefined && uploadProgress.cover < 100 && (
+                          <span className="ml-2 text-xs">({Math.round(uploadProgress.cover)}%)</span>
+                        )}
+                      </p>
                     )}
                   </div>
-                </div>
 
-                {/* Gallery Images */}
-                <div>
-                  <label className="block mb-2 text-sm font-medium text-gray-700">
-                    Gallery Images (multiple)
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <label className="cursor-pointer bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-xl px-5 py-3 text-sm font-medium transition flex items-center gap-2">
-                      <ImageIcon size={16} /> Select Images
+                  {/* Gallery Images */}
+                  <div>
+                    <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                      Gallery Bundles (Multiple)
+                    </label>
+                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-6 text-center transition group min-h-[140px]">
                       <input
                         type="file"
                         accept="image/*"
                         multiple
-                        onChange={(e) => setGalleryImages(Array.from(e.target.files))}
-                        className="hidden"
+                        onChange={(e) => {
+                          setGalleryImages(Array.from(e.target.files));
+                          // Reset progress for new files
+                          setUploadProgress({});
+                        }}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                    </label>
+                      <div className="flex flex-col items-center pointer-events-none space-y-2">
+                        <div className="w-10 h-10 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863]">
+                          <ImageIcon size={16} />
+                        </div>
+                        <p className="text-xs font-bold text-[#3B4953]">Select Bundle Matrix</p>
+                      </div>
+                    </div>
                     {galleryImages.length > 0 && (
-                      <span className="text-sm text-gray-600">
-                        {galleryImages.length} file(s) selected
-                      </span>
+                      <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md mt-2 inline-block shadow-xs">
+                        ✓ {galleryImages.length} Matrix Frame(s) Staged
+                      </p>
                     )}
                   </div>
-                  {/* Image previews */}
-                  {galleryImages.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mt-4">
-                      {galleryImages.map((img, idx) => (
-                        <img
-                          key={idx}
-                          src={URL.createObjectURL(img)}
-                          alt="preview"
-                          className="h-24 w-full object-cover rounded-lg border border-gray-200"
-                        />
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={uploading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50"
-                >
-                  <Upload size={20} />
-                  {uploading ? "Creating..." : "Publish Story"}
-                </button>
+                {/* Local Previews with Progress Overlays */}
+                {galleryImages.length > 0 && (
+                  <div className="p-4 bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl">
+                    <p className="text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]/60 mb-2">Matrix Stream Preview</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
+                      {galleryImages.map((img, idx) => {
+                        const progress = uploadProgress[`gallery-${idx}`] ?? 0;
+                        const isUploading = uploading && progress > 0 && progress < 100;
+                        return (
+                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white border border-[#DDE7D8]">
+                            <img
+                              src={URL.createObjectURL(img)}
+                              alt="preview"
+                              className="w-full h-full object-cover"
+                            />
+                            {/* Progress overlay */}
+                            {isUploading && (
+                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                <div className="w-full h-full relative">
+                                  <div
+                                    className="absolute bottom-0 left-0 h-1 bg-[#5A7863] transition-all duration-300"
+                                    style={{ width: `${progress}%` }}
+                                  />
+                                  <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                                    {Math.round(progress)}%
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                            {progress === 100 && (
+                              <div className="absolute top-1 right-1 bg-green-500/80 text-white text-[8px] px-1.5 py-0.5 rounded-full">
+                                ✓
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Submit */}
+                <div className="pt-4 border-t border-[#DDE7D8]">
+                  <button
+                    type="submit"
+                    disabled={uploading}
+                    className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                  >
+                    <Upload size={12} />
+                    {uploading
+                      ? `Publishing... ${getOverallProgress()}%`
+                      : "Publish Wedding Story"}
+                  </button>
+                  {uploading && (
+                    <span className="ml-4 text-xs text-[#5A7863] font-medium">
+                      {getOverallProgress()}% complete
+                    </span>
+                  )}
+                </div>
               </form>
             </div>
           )}
 
-          {/* ALL STORIES TAB */}
+          {/* ---- ALL STORIES TAB ---- */}
           {activeTab === "all" && (
             <>
               {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                <div className="flex justify-center items-center h-64 bg-white rounded-2xl border border-[#DDE7D8]">
+                  <div className="w-9 h-9 border-2 border-[#5A7863] border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : stories.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center bg-white/60 rounded-3xl border border-gray-200">
-                  <ImageIcon size={64} className="text-gray-300 mb-4" />
-                  <h3 className="text-2xl font-light text-gray-500">No stories yet</h3>
-                  <p className="text-gray-400 mt-2">Create your first pre‑wedding story</p>
+                <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
+                    <Heart size={22} className="text-[#90AB8B]" />
+                  </div>
+                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No stories found</p>
+                  <p className="text-[#3B4953]/60 text-sm">Deploy your first pre‑wedding story now.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {stories.map((story) => (
                     <div
                       key={story._id}
-                      className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                      className="group bg-white rounded-xl overflow-hidden border border-[#DDE7D8] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
                     >
-                      <div className="relative h-64 overflow-hidden">
+                      {/* Cover */}
+                      <div className="relative h-52 bg-[#F7F9F4] overflow-hidden">
                         <img
                           src={story.coverImage}
                           alt={story.title}
-                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-102"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                        <div className="absolute bottom-4 left-4 right-4">
-                          <h2 className="text-xl font-bold text-white line-clamp-1">
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] flex items-center gap-1.5 text-[10px] font-bold text-[#3B4953]">
+                          <ImageIcon size={10} className="text-[#5A7863]" />
+                          <span>{story.galleryImages?.length || 0} Frames</span>
+                        </div>
+                        <div className="absolute bottom-3 left-4 right-4">
+                          <h2 className="text-base font-bold text-white tracking-wide line-clamp-1">
                             {story.title}
                           </h2>
                         </div>
                       </div>
-                      <div className="p-5">
-                        <p className="text-gray-600 text-sm line-clamp-2 min-h-[44px]">
-                          {story.description}
+
+                      {/* Content */}
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
+                        <p className="text-[#3B4953]/70 text-xs tracking-wide leading-relaxed line-clamp-2 min-h-[36px]">
+                          {story.description || "No narrative summary provided."}
                         </p>
-                        <div className="flex items-center gap-3 mt-5">
+                        <div className="flex gap-2.5 pt-1 border-t border-[#DDE7D8]/60">
                           <button
                             onClick={() => openModal(story)}
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-xl font-medium flex items-center justify-center gap-2 transition"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2.5 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
                           >
-                            <Eye size={16} /> View
+                            <Eye size={12} /> Inspect
                           </button>
                           <button
                             onClick={() => handleDelete(story._id)}
-                            className="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2.5 rounded-xl transition"
+                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
+                            title="Delete Story"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={12} />
                           </button>
                         </div>
                       </div>
@@ -360,77 +489,70 @@ const PreWedding = () => {
         </div>
       </div>
 
-      {/* FULLSCREEN MODAL / LIGHTBOX */}
+      {/* ===== LIGHTBOX MODAL ===== */}
       {selectedStory && (
-        <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="relative w-full max-w-6xl bg-white rounded-2xl overflow-hidden shadow-2xl border border-gray-200">
-            {/* Close Button */}
-            <button
-              onClick={closeModal}
-              className="absolute top-4 right-4 z-50 bg-black/60 hover:bg-red-600 p-2.5 rounded-full transition-all text-white"
-            >
-              <X size={20} />
-            </button>
+        <div className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden">
+          <button
+            onClick={closeModal}
+            className="absolute top-6 right-6 z-50 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
+            aria-label="Close Lightbox"
+          >
+            <X size={18} />
+          </button>
 
-            {/* Main Image Area */}
-            <div className="relative h-[70vh] md:h-[80vh] bg-black">
-              <img
-                src={
-                  selectedStory.galleryImages?.[currentImageIndex] ||
-                  selectedStory.coverImage
-                }
-                alt="gallery"
-                className="w-full h-full object-contain"
-              />
+          <div className="absolute top-6 left-6 z-40 text-white max-w-[calc(100%-120px)]">
+            <h1 className="text-lg font-bold uppercase tracking-[2px] line-clamp-1">{selectedStory.title}</h1>
+            <p className="text-xs text-white/60 tracking-wide font-light mt-0.5 line-clamp-1">{selectedStory.description}</p>
+          </div>
 
-              {/* Navigation Buttons */}
-              {selectedStory?.galleryImages?.length > 1 && (
-                <>
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition text-white"
-                  >
-                    <ChevronLeft size={28} />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 p-3 rounded-full transition text-white"
-                  >
-                    <ChevronRight size={28} />
-                  </button>
-                </>
-              )}
+          <div className="h-[82vh] flex items-center justify-center relative px-12 mt-[8vh]">
+            {selectedStory?.galleryImages?.length > 1 && (
+              <button
+                onClick={prevImage}
+                className="absolute left-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+              >
+                <ChevronLeft size={18} />
+              </button>
+            )}
 
-              {/* Overlay Text */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-                <h2 className="text-2xl md:text-3xl font-bold text-white">
-                  {selectedStory.title}
-                </h2>
-                <p className="text-gray-200 mt-2 text-sm md:text-base line-clamp-2">
-                  {selectedStory.description}
-                </p>
-              </div>
-            </div>
+            <img
+              src={selectedStory.galleryImages?.[currentImageIndex] || selectedStory.coverImage}
+              alt={selectedStory.title}
+              className="max-w-full max-h-full object-contain rounded shadow-2xl border border-white/5"
+            />
 
-            {/* Thumbnails */}
-            {selectedStory?.galleryImages?.length > 0 && (
-              <div className="flex gap-3 overflow-x-auto p-4 bg-gray-50 border-t border-gray-200">
+            {selectedStory?.galleryImages?.length > 1 && (
+              <button
+                onClick={nextImage}
+                className="absolute right-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+              >
+                <ChevronRight size={18} />
+              </button>
+            )}
+          </div>
+
+          {selectedStory?.galleryImages?.length > 0 && (
+            <div className="absolute bottom-0 inset-x-0 bg-black/20 border-t border-white/5 py-4 backdrop-blur-xs flex flex-col items-center space-y-2">
+              <div className="flex gap-2 px-6 overflow-x-auto max-w-4xl no-scrollbar">
                 {selectedStory.galleryImages.map((img, idx) => (
                   <img
                     key={idx}
                     src={img}
-                    alt="thumb"
+                    alt="thumbnail"
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-20 h-16 object-cover rounded-lg cursor-pointer transition-all duration-200 ${
+                    className={`w-16 h-12 md:w-20 md:h-14 object-cover rounded-md cursor-pointer transition-all duration-200 flex-shrink-0 ${
                       currentImageIndex === idx
-                        ? "ring-2 ring-blue-500 scale-105"
-                        : "opacity-60 hover:opacity-100"
+                        ? "ring-2 ring-[#90AB8B] scale-102 opacity-100"
+                        : "opacity-40 hover:opacity-80"
                     }`}
                   />
                 ))}
               </div>
-            )}
-          </div>
+              <div className="text-white/80 font-bold text-[10px] tracking-[2px] bg-white/10 border border-white/10 px-3 py-1 rounded-full">
+                {currentImageIndex + 1} / {selectedStory.galleryImages.length}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -44,8 +44,8 @@ function InstaCuts() {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen px-5 md:px-16">
+   < Navbar textColor="text-black/50" />
+      <div className="min-h-screen px-5 md:px-16 py-28 md:py-35">
         {/* HEADER */}
         <div className="text-center mb-20">
           <div className="border-t border-gray-300 mb-10" />

@@ -4,9 +4,9 @@ const BASE_URL = import.meta.env.VITE_API_URL;
 
 const API = axios.create({
   baseURL: BASE_URL,
-timeout: 180000 ,
+  timeout: 0,
   headers: {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json", // Global header default set hai JSON ke liye
   },
   maxContentLength: Infinity,
   maxBodyLength: Infinity,
@@ -32,370 +32,156 @@ export const logoutUser = async () => {
 // Access APIs
 // ==========================
 
-// Get All Editors
-
 export const getEditors = async () => {
   return API.get("/access/editors");
 };
 
-// Update Permissions
+export const updateEditorPermissions = async (data) => {
+  return API.put("/access/permissions", data);
+};
 
-export const updateEditorPermissions =
-  async (data) => {
-    return API.put(
-      "/access/permissions",
-      data,
-    );
-  };
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ==========================
-// STORY APIs
+// ==========================
+// Hero Section APIs
 // ==========================
 
+export const createHeroSection = async (data) => {
+  return API.post("/hero/create", data);
+};
 
-// CREATE STORY
+export const getAllHeroSections = async () => {
+  return API.get("/hero/all");
+};
 
-export const createStory =
-  async (formData) => {
+export const getSingleHeroSection = async (id) => {
+  return API.get(`/hero/${id}`);
+};
 
-    return API.post(
-      "/story/create",
-      formData,
+export const updateHeroSection = async (id, data) => {
+  return API.put(`/hero/update/${id}`, data);
+};
 
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-  };
+export const deleteHeroSection = async (id) => {
+  return API.delete(`/hero/delete/${id}`);
+};
 
+// ==========================
+// Story APIs (UPDATED TO JSON)
+// ==========================
 
-// GET ALL STORIES
+export const createStory = async (data) => {
+  return API.post("/story/create", data);
+};
 
-export const getAllStories =
-  async () => {
+export const getAllStories = async () => {
+  return API.get("/story/all");
+};
 
-    return API.get(
-      "/story/all"
-    );
-  };
-
-
-// GET SINGLE STORY
-
-// GET SINGLE STORY
 export const getSingleStory = async (id) => {
   return API.get(`/story/${id}`);
 };
 
+export const updateStory = async (id, data) => {
+  return API.put(`/story/update/${id}`, data);
+};
 
-// DELETE STORY
+export const deleteStory = async (id) => {
+  return API.delete(`/story/delete/${id}`);
+};
 
-export const deleteStory =
-  async (id) => {
-
-    return API.delete(
-      `/story/delete/${id}`
-    );
-  };
 // ==========================
-// WEDDING STORY APIs
+// Wedding Story APIs (UPDATED TO JSON)
 // ==========================
 
-// CREATE WEDDING STORY
-
-export const createWeddingStory =
-  async (formData) => {
-
-    return API.post(
-      "/photo-book/create",
-      formData,
-
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-  };
-
-
-// GET ALL WEDDING STORIES
-
-export const getAllWeddingStories =
-  async () => {
-
-    return API.get(
-      "/photo-book/all"
-    );
-  };
-
-
-// GET SINGLE WEDDING STORY
-
-export const getSingleWeddingStory =
-  async (id) => {
-
-    return API.get(
-      `/photo-book/${id}`
-    );
-  };
-
-
-// DELETE WEDDING STORY
-
-export const deleteWeddingStory =
-  async (id) => {
-
-    return API.delete(
-      `/photo-book/delete/${id}`
-    );
-  };
-
-
-
-  // ==============================
-// services/api.js
-// ==============================
-
-
-// ==============================
-// GALLERY APIs
-// ==============================
-
-
-// CREATE GALLERY
-
-export const createGallery =
-  async (formData) => {
-
-    return API.post(
-      "/image/create",
-      formData,
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-  };
-
-
-// GET ALL GALLERIES
-
-export const getAllGalleries =
-  async () => {
-
-    return API.get(
-      "/image/all"
-    );
-  };
-
-
-// GET SINGLE GALLERY
-
-export const getSingleGallery =
-  async (id) => {
-
-    return API.get(
-      `/image/${id}`
-    );
-  };
-
-
-// DELETE GALLERY
-
-export const deleteGallery =
-  async (id) => {
-
-    return API.delete(
-      `/image/delete/${id}`
-    );
-  };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ==============================
-// CREATE VIDEO
-// ==============================
-
-export const createVideo =
-  async (formData) => {
-
-    return await API.post(
-
-      "/film/create",
-
-      formData,
-
-      {
-        headers: {
-
-          "Content-Type":
-            "multipart/form-data",
-        },
-      },
-    );
-  };
-
-
-// ==============================
-// GET ALL VIDEOS
-// ==============================
-
-export const getAllVideos =
-  async () => {
-
-    return await API.get(
-      "/film/all",
-    );
-  };
-
-
-// ==============================
-// GET SINGLE VIDEO
-// ==============================
-
-export const getSingleVideo =
-  async (id) => {
-
-    return await API.get(
-      `/film/${id}`,
-    );
-  };
-
-
-// ==============================
-// UPDATE VIDEO
-// ==============================
-
-export const updateVideo =
-  async (
-    id,
-    formData,
-  ) => {
-
-    return await API.put(
-
-      `/film/update/${id}`,
-
-      formData,
-
-      {
-        headers: {
-
-          "Content-Type":
-            "multipart/form-data",
-        },
-      },
-    );
-  };
-
-
-// ==============================
-// DELETE VIDEO
-// ==============================
-
-export const deleteVideo =
-  async (id) => {
-
-    return await API.delete(
-
-      `/film/delete/${id}`,
-    );
-  };
-
-
-
-
-
-
-
-
-
-  // preWedding api
-
-
-
-
-
-  
-export const createPreWeddingStory =
-  async (formData) => {
-
-    return API.post(
-      "/pre-wedding/create",
-      formData,
-
-      {
-        headers: {
-          "Content-Type":
-            "multipart/form-data",
-        },
-      }
-    );
-  };
-
-
-// GET ALL PRE-WEDDING STORIES
-
-export const getAllPreWeddingStories =
-  async () => {
-
-    return API.get(
-      "/pre-wedding/all"
-    );
-  };
-
-
-// GET SINGLE PRE-WEDDING STORY
-
-export const getSinglePreWeddingStory =
-  async (id) => {
-
-    return API.get(
-      `/pre-wedding/${id}`
-    );
-  };
-
-
-// DELETE PRE-WEDDING STORY
-
-export const deletePreWeddingStory =
-  async (id) => {
-
-    return API.delete(
-      `/pre-wedding/delete/${id}`
-    );
-  };
-
-
+export const createWeddingStory = async (data) => {
+  return API.post("/photo-book/create", data);
+};
+
+export const getAllWeddingStories = async () => {
+  return API.get("/photo-book/all");
+};
+
+export const getSingleWeddingStory = async (id) => {
+  return API.get(`/photo-book/${id}`);
+};
+
+export const updateWeddingStory = async (id, data) => {
+  return API.put(`/photo-book/update/${id}`, data);
+};
+
+export const deleteWeddingStory = async (id) => {
+  return API.delete(`/photo-book/delete/${id}`);
+};
+
+// ==========================
+// Gallery APIs (UPDATED TO JSON)
+// ==========================
+
+export const createGallery = async (data) => {
+  return API.post("/image/create", data);
+};
+
+export const getAllGalleries = async () => {
+  return API.get("/image/all");
+};
+
+export const getSingleGallery = async (id) => {
+  return API.get(`/image/${id}`);
+};
+
+export const updateGallery = async (id, data) => {
+  return API.put(`/image/update/${id}`, data);
+};
+
+export const deleteGallery = async (id) => {
+  return API.delete(`/image/delete/${id}`);
+};
+
+// ==========================
+// Video (Film) APIs (UPDATED TO JSON)
+// ==========================
+
+export const createVideo = async (data) => {
+  return API.post("/film/create", data);
+};
+
+export const getAllVideos = async () => {
+  return API.get("/film/all");
+};
+
+export const getSingleVideo = async (id) => {
+  return API.get(`/film/${id}`);
+};
+
+export const updateVideo = async (id, data) => {
+  return API.put(`/film/update/${id}`, data);
+};
+
+export const deleteVideo = async (id) => {
+  return API.delete(`/film/delete/${id}`);
+};
+
+// ==========================
+// Pre-Wedding Story APIs (UPDATED TO JSON)
+// ==========================
+
+export const createPreWeddingStory = async (data) => {
+  return API.post("/pre-wedding/create", data);
+};
+
+export const getAllPreWeddingStories = async () => {
+  return API.get("/pre-wedding/all");
+};
+
+export const getSinglePreWeddingStory = async (id) => {
+  return API.get(`/pre-wedding/${id}`);
+};
+
+export const updatePreWeddingStory = async (id, data) => {
+  return API.put(`/pre-wedding/update/${id}`, data);
+};
+
+export const deletePreWeddingStory = async (id) => {
+  return API.delete(`/pre-wedding/delete/${id}`);
+};
 
 export default API;

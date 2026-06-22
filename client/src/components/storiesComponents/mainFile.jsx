@@ -71,8 +71,8 @@ const Stories = () => {
 
   return (
     <>
-      <Navbar />
-      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 py-6 md:py-10">
+    <Navbar textColor="text-black/50" />
+      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 py-28 md:py-40">
         <div className="max-w-7xl mx-auto">
           {/* Header - responsive text and spacing */}
           <div className="text-center mb-8 md:mb-12">

@@ -40,7 +40,7 @@ import StoriesList from "./components/storiesComponents/mainFile";
    PHOTOBOOKS
 ========================== */
 
-import PhotoBooks from "./components/photoBooks/photoBooks";
+import PhotoBooks from "./pages/photoBookPage";
 
 /* ==========================
    IMAGES PAGE
@@ -61,6 +61,12 @@ import FAQ from "./components/FAQ/faq";
 const AdminOverview = lazy(() =>
   import(
     "./components/adminDashboardComponents/stories/AdminOverview"
+  )
+);
+
+const AdminHero = lazy(() =>
+  import(
+    "./components/adminDashboardComponents/heroSection/AdminHero"
   )
 );
 
@@ -281,6 +287,11 @@ function App() {
             {/* ==========================
                 ADMIN ROUTES
             ========================== */}
+    <Route 
+    path="admin-Hero"
+    element={<AdminHero />}
+  />
+
 
             <Route
               path="admin-stories"

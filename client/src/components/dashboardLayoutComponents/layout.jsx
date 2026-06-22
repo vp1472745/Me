@@ -1,3 +1,4 @@
+// Layout.jsx - Custom Wedding Theme Dashboard Layout
 import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -52,6 +53,7 @@ function Layout({ roleType }) {
 
   // Navigation items
   const adminNav = [
+    { to: "/dashboard/admin-hero", label: "Create Hero Section", icon: Home },
     { to: "/dashboard/admin-stories", label: "Create Stories", icon: Home },
     { to: "/dashboard/photobooks-admin", label: "Create PhotoBooks", icon: Camera },
     { to: "/dashboard/images-admin", label: "Create Images", icon: ImageIcon },
@@ -75,37 +77,39 @@ function Layout({ roleType }) {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50 text-gray-800">
+    <div className="flex h-screen overflow-hidden bg-[#F7F9F4] text-[#3B4953]">
       {/* Sidebar */}
       <aside
         className={`
           ${sidebarWidth}
-          bg-white  flex flex-col
+          bg-white flex flex-col
           fixed left-0 top-0 h-screen 
-          border-r border-gray-200
-          transition-all duration-300 ease-in-out
+          border-r border-[#DDE7D8]
+          transition-all duration-300 ease-in-out z-50
         `}
       >
         {/* Brand & Toggle Button */}
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="p-4 border-b border-[#DDE7D8] flex items-center justify-between min-h-[73px]">
           {isSidebarOpen ? (
-            <div className="flex items-center gap-2">
-              <Camera className="w-7 h-7 text-indigo-600" />
+            <div className="flex items-center gap-2.5 group cursor-pointer" onClick={() => navigate("/")}>
+              <Camera className="w-6 h-6 text-[#5A7863] transition-transform duration-500 group-hover:rotate-12" />
               <div>
-                <span className="text-lg font-black text-gray-800">SHUTTER</span>
-                <span className="text-lg font-light text-indigo-600">STUDIO</span>
-                <p className="text-[10px] text-gray-400">Photography Mgmt</p>
+                <div className="flex items-center leading-none">
+                  <span className="text-md font-extrabold tracking-tight text-[#3B4953]">SHUTTER</span>
+                  <span className="text-md font-light text-[#5A7863] tracking-tight ml-0.5">STUDIO</span>
+                </div>
+                <p className="text-[10px] text-[#3B4953]/60 font-medium mt-0.5">Photography Mgmt</p>
               </div>
             </div>
           ) : (
-            <Camera className="w-7 h-7 text-indigo-600 mx-auto" />
+            <Camera className="w-6 h-6 text-[#5A7863] mx-auto cursor-pointer hover:scale-110 transition-transform" onClick={() => navigate("/")} />
           )}
           <button
             onClick={toggleSidebar}
-            className="p-1 rounded-lg hover:bg-gray-100 transition text-gray-400 hover:text-gray-700"
+            className="p-1.5 rounded-lg bg-[#F7F9F4] hover:bg-[#EBF4DD] transition text-[#5A7863] border border-[#DDE7D8]"
             aria-label={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
           >
-            {isSidebarOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
+            {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
           </button>
         </div>
 
@@ -126,20 +130,20 @@ function Layout({ roleType }) {
                   ${!isSidebarOpen && "justify-center"}
                   ${
                     active
-                      ? "bg-indigo-100 text-indigo-700 shadow-sm"
-                      : "text-gray-600 hover:text-indigo-700 hover:bg-indigo-50"
+                      ? "bg-[#EBF4DD] text-[#5A7863] shadow-sm font-bold"
+                      : "text-[#3B4953]/80 hover:text-[#5A7863] hover:bg-[#F7F9F4] font-medium"
                   }
                 `}
                 title={!isSidebarOpen ? item.label : ""}
               >
                 <Icon
                   className={`
-                    w-5 h-5 flex-shrink-0
-                    ${active ? "text-indigo-600" : "group-hover:text-indigo-600"}
+                    w-5 h-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-105
+                    ${active ? "text-[#5A7863]" : "text-[#3B4953]/60 group-hover:text-[#5A7863]"}
                   `}
                 />
                 {isSidebarOpen && (
-                  <span className={`font-medium text-sm ${active ? "text-indigo-700" : ""}`}>
+                  <span className="text-sm">
                     {item.label}
                   </span>
                 )}
@@ -148,43 +152,45 @@ function Layout({ roleType }) {
           })}
         </nav>
 
-        {/* Logout Button */}
-        <div className="p-3 border-t border-gray-200">
+        {/* Sidebar Footer Logout Button */}
+        <div className="p-3 border-t border-[#DDE7D8]">
           <button
             onClick={handleLogout}
             className={`
               flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
-              text-gray-600 hover:text-red-700 hover:bg-red-50
-              transition-all duration-200
+              text-[#3B4953]/80 hover:text-red-700 hover:bg-red-50
+              transition-all duration-200 font-semibold text-sm
               ${!isSidebarOpen && "justify-center"}
             `}
             title={!isSidebarOpen ? "Logout" : ""}
           >
-            <LogOut className="w-5 h-5 flex-shrink-0" />
-            {isSidebarOpen && <span className="font-medium text-sm">Logout</span>}
+            <LogOut className="w-5 h-5 flex-shrink-0 transition-transform group-hover:-translate-x-0.5" />
+            {isSidebarOpen && <span>Logout</span>}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col h-screen overflow-hidden bg-gray-50 transition-all duration-300 ${contentMargin}`}>
+      {/* Main Content Viewport Wrapper */}
+      <div className={`flex-1 flex flex-col h-screen overflow-hidden bg-[#F7F9F4] transition-all duration-300 ${contentMargin}`}>
+        
         {/* Header */}
-        <header className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-40 flex-shrink-0">
-          <div className="flex justify-between items-center px-6 py-3">
+        <header className="bg-white/80 backdrop-blur-md shadow-sm border-b border-[#DDE7D8] sticky top-0 z-40 flex-shrink-0">
+          <div className="flex justify-between items-center px-6 py-4">
             <div>
-              <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <h1 className="text-xl font-bold text-[#3B4953] flex items-center gap-2">
                 {roleType === "ADMIN" ? "Administrator" : "Content Editor"}
-                <span className="text-xs font-medium text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full border border-indigo-200">
+                <span className="text-xs font-bold text-[#5A7863] bg-[#EBF4DD] px-2.5 py-0.5 rounded-full border border-[#90AB8B]/30 tracking-wide">
                   {roleType}
                 </span>
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[#3B4953]/70 font-medium mt-0.5">
                 Welcome back, {user?.name || "Photographer"}
               </p>
             </div>
+            
             <button
               onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-1.5 rounded-xl transition  text-sm border border-gray-200"
+              className="hidden md:flex items-center gap-2 bg-[#F7F9F4] hover:bg-[#EBF4DD] text-[#3B4953] hover:text-[#5A7863] px-4 py-1.5 rounded-xl transition border border-[#DDE7D8] font-semibold text-sm"
             >
               <LogOut className="w-4 h-4" />
               <span>Logout</span>
@@ -192,7 +198,7 @@ function Layout({ roleType }) {
           </div>
         </header>
 
-        {/* ✅ Scrollable Outlet – only this part scrolls */}
+        {/* ✅ Scrollable Work Area */}
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

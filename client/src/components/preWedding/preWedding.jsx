@@ -97,10 +97,10 @@ const PreWeddingGallery = () => {
 
   return (
     <>
-      <Navbar />
+< Navbar textColor="text-black/50" />
 
       {/* Header - responsive text size */}
-      <div className="text-center mb-1 py-2 px-4">
+      <div className="text-center mb-1  px-4 py-30 md:py-35">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-light tracking-[4px] sm:tracking-[8px] text-[#4d4037] uppercase">
           Pre Wedding Stories
         </h1>

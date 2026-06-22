@@ -1,101 +1,77 @@
 import multer from "multer";
-
-import {
-  CloudinaryStorage,
-} from "multer-storage-cloudinary";
-
+import pkg from "multer-storage-cloudinary";
 import cloudinary from "../config/cloudinary.js";
 
+const { CloudinaryStorage } = pkg;
 
-// IMAGE STORAGE
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const mimeType = file.mimetype;
 
-const imageStorage =
-  new CloudinaryStorage({
-    cloudinary,
+    // IMAGE
+    if (mimeType.startsWith("image/")) {
+      return {
+        folder: "stories/images",
+        resource_type: "image",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      };
+    }
 
-    params: async (
-      req,
-      file
-    ) => ({
-      folder: "stories/images",
+    // VIDEO
+    if (mimeType.startsWith("video/")) {
+      return {
+        folder: "stories/videos",
+        resource_type: "video",
+        allowed_formats: ["mp4", "mov", "avi", "webm", "mkv"],
+      };
+    }
 
-      allowed_formats: [
-        "jpg",
-        "jpeg",
-        "png",
-        "webp",
-      ],
+    // AUDIO
+    if (mimeType.startsWith("audio/")) {
+      return {
+        folder: "stories/audio",
+        resource_type: "video", // Cloudinary treats audio as a 'video' resource type
+        allowed_formats: ["mp3", "wav", "aac", "m4a"],
+      };
+    }
 
-      resource_type: "image",
-    }),
-  });
+    throw new Error("Unsupported file type");
+  },
+});
 
+export const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // Restricted to 10MB to match Cloudinary free tier limitations
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = [
+      // Images
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+      // Videos
+      "video/mp4",
+      "video/quicktime",
+      "video/x-msvideo",
+      "video/webm",
+      "video/x-matroska",
+      // Audio
+      "audio/mpeg",
+      "audio/mp3",
+      "audio/wav",
+      "audio/x-wav",
+      "audio/aac",
+      "audio/mp4",
+      "audio/x-m4a",
+    ];
 
-// VIDEO STORAGE
-
-const videoStorage =
-  new CloudinaryStorage({
-    cloudinary,
-
-    params: async (
-      req,
-      file
-    ) => ({
-      folder: "stories/videos",
-
-      resource_type: "video",
-
-      allowed_formats: [
-        "mp4",
-        "mov",
-        "avi",
-        "webm",
-      ],
-    }),
-  });
-
-
-// AUDIO STORAGE
-
-const audioStorage =
-  new CloudinaryStorage({
-    cloudinary,
-
-    params: async (
-      req,
-      file
-    ) => ({
-      folder: "stories/audio",
-
-      resource_type: "video",
-
-      allowed_formats: [
-        "mp3",
-        "wav",
-      ],
-    }),
-  });
-
-
-// IMAGE UPLOAD
-
-export const uploadImages =
-  multer({
-    storage: imageStorage,
-  });
-
-
-// VIDEO UPLOAD
-
-export const uploadVideos =
-  multer({
-    storage: videoStorage,
-  });
-
-
-// AUDIO UPLOAD
-
-export const uploadAudio =
-  multer({
-    storage: audioStorage,
-  });
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image, video and audio files are allowed"), false);
+    }
+  },
+});

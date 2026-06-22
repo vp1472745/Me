@@ -1,303 +1,675 @@
-// ==============================
-// GalleryUpload.jsx - Dark theme + Responsive + View modal
-// ==============================
-
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
 import { createGallery, getAllGalleries, deleteGallery } from "../../../config/api";
-import { FaEye, FaTrash, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import {
+    FaEye,
+    FaTrash,
+    FaTimes,
+    FaChevronLeft,
+    FaChevronRight,
+    FaImages,
+    FaPlus,
+    FaUpload,
+    FaCheckCircle,
+    FaSpinner,
+    FaFileImage,
+    FaTh, // ✅ correct icon for grid view
+} from "react-icons/fa";
+import { toast, Toaster } from "react-hot-toast";
 
 const GalleryUpload = () => {
-  // ==============================
-  // STATES
-  // ==============================
-  const [activeTab, setActiveTab] = useState("create");
+    // ==============================
+    // STATES
+    // ==============================
+    const [activeTab, setActiveTab] = useState("create");
+    const [files, setFiles] = useState([]);
+    const [previews, setPreviews] = useState([]);
+    const [galleries, setGalleries] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({});
+    const [isDragging, setIsDragging] = useState(false);
 
-  const [images, setImages] = useState([]);
-  const [galleries, setGalleries] = useState([]);
-  const [loading, setLoading] = useState(false);
+    // Modal states
+    const [viewModalOpen, setViewModalOpen] = useState(false);
+    const [selectedGallery, setSelectedGallery] = useState(null);
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Modal / slider states
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedGallery, setSelectedGallery] = useState(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const fileInputRef = useRef(null);
 
-  // ==============================
-  // CREATE GALLERY
-  // ==============================
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      const formData = new FormData();
+    // ==============================
+    // HANDLERS
+    // ==============================
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length === 0) return;
 
-      for (let i = 0; i < images.length; i++) {
-        formData.append("images", images[i]);
-      }
-      await createGallery(formData);
-      alert("Gallery Uploaded Successfully");
+        setFiles(selectedFiles);
+        setPreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
 
-      setImages([]);
-      fetchGalleries();
-      setActiveTab("all");
-    } catch (error) {
-      console.log(error);
-      alert("Something went wrong");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ==============================
-  // GET ALL GALLERIES
-  // ==============================
-  const fetchGalleries = async () => {
-    try {
-      const res = await getAllGalleries();
-      setGalleries(res?.data?.data || []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  // ==============================
-  // DELETE GALLERY
-  // ==============================
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Delete this gallery?");
-    if (!confirmDelete) return;
-    try {
-      await deleteGallery(id);
-      alert("Gallery Deleted");
-      fetchGalleries();
-    } catch (error) {
-      console.log(error);
-      alert("Delete failed");
-    }
-  };
-
-  // ==============================
-  // VIEW GALLERY MODAL FUNCTIONS
-  // ==============================
-  const openViewModal = (gallery) => {
-    setSelectedGallery(gallery);
-    setCurrentImageIndex(0);
-    setViewModalOpen(true);
-    document.body.style.overflow = "hidden";
-  };
-
-  const closeViewModal = () => {
-    setViewModalOpen(false);
-    setSelectedGallery(null);
-    document.body.style.overflow = "auto";
-  };
-
-  const nextImage = () => {
-    if (selectedGallery && selectedGallery.images?.length > 0) {
-      setCurrentImageIndex((prev) =>
-        prev === selectedGallery.images.length - 1 ? 0 : prev + 1
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (selectedGallery && selectedGallery.images?.length > 0) {
-      setCurrentImageIndex((prev) =>
-        prev === 0 ? selectedGallery.images.length - 1 : prev - 1
-      );
-    }
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (!viewModalOpen) return;
-      if (e.key === "ArrowLeft") prevImage();
-      if (e.key === "ArrowRight") nextImage();
-      if (e.key === "Escape") closeViewModal();
+        const initialProgress = {};
+        selectedFiles.forEach((_, index) => {
+            initialProgress[index] = 0;
+        });
+        setUploadProgress(initialProgress);
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [viewModalOpen, selectedGallery]);
 
-  useEffect(() => {
-    fetchGalleries();
-  }, []);
+    const handleDrop = (e) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const droppedFiles = Array.from(e.dataTransfer.files);
+        if (droppedFiles.length === 0) return;
 
-  return (
-    <div className="min-h-screen bg-black text-white px-4 sm:px-6 md:px-10 py-8 md:py-10">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="border-b border-gray-800 pb-6 mb-8 text-center">
-          <h1 className="text-3xl md:text-5xl tracking-[10px] uppercase text-white font-light">
-            Gallery Dashboard
-          </h1>
-        </div>
+        setFiles(droppedFiles);
+        setPreviews(droppedFiles.map((file) => URL.createObjectURL(file)));
 
-        {/* Tabs - responsive */}
-        <div className="flex flex-wrap justify-center gap-3 mb-10">
-          <button
-            onClick={() => setActiveTab("create")}
-            className={`px-6 sm:px-8 py-2.5 uppercase tracking-[3px] text-sm transition-all duration-300 rounded-lg ${
-              activeTab === "create"
-                ? "bg-gray-800 text-white shadow-md"
-                : "border border-gray-700 text-gray-400 hover:bg-gray-800/50 hover:text-white"
-            }`}
-          >
-            Create Gallery
-          </button>
-          <button
-            onClick={() => setActiveTab("all")}
-            className={`px-6 sm:px-8 py-2.5 uppercase tracking-[3px] text-sm transition-all duration-300 rounded-lg ${
-              activeTab === "all"
-                ? "bg-gray-800 text-white shadow-md"
-                : "border border-gray-700 text-gray-400 hover:bg-gray-800/50 hover:text-white"
-            }`}
-          >
-            All Galleries
-          </button>
-        </div>
+        const initialProgress = {};
+        droppedFiles.forEach((_, index) => {
+            initialProgress[index] = 0;
+        });
+        setUploadProgress(initialProgress);
+    };
 
-        {/* CREATE TAB */}
-        {activeTab === "create" && (
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6 sm:p-10 md:p-14 shadow-xl">
-            <form onSubmit={handleSubmit} className="space-y-8">
+    const handleDragOver = (e) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
 
-              {/* Images */}
-              <div>
-                <label className="block mb-3 uppercase tracking-[3px] text-gray-300 text-sm">
-                  Upload Images
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  onChange={(e) => setImages(e.target.files)}
-                  className="w-full border-2 border-dashed border-gray-700 rounded-xl p-6 bg-gray-800 text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-gray-700 file:text-white hover:file:bg-gray-600"
-                  required
-                />
-                {images.length > 0 && (
-                  <p className="text-sm text-gray-400 mt-2">{images.length} file(s) selected</p>
-                )}
-              </div>
+    const handleDragLeave = () => {
+        setIsDragging(false);
+    };
 
-              {/* Submit button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-xl uppercase tracking-[4px] text-sm font-medium transition-all disabled:opacity-50"
-              >
-                {loading ? "Uploading..." : "Upload Gallery"}
-              </button>
-            </form>
-          </div>
-        )}
+    const removeFile = (index) => {
+        const newFiles = [...files];
+        const newPreviews = [...previews];
+        newFiles.splice(index, 1);
+        newPreviews.splice(index, 1);
+        setFiles(newFiles);
+        setPreviews(newPreviews);
 
-        {/* ALL GALLERIES TAB */}
-        {activeTab === "all" && (
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-6 sm:p-10">
-            {galleries.length === 0 ? (
-              <div className="text-center text-gray-400 text-xl py-20">No Galleries Found</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {galleries.map((gallery) => (
-                  <div
-                    key={gallery._id}
-                    className="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 shadow-lg transition-transform hover:-translate-y-1"
-                  >
-                    {/* Cover image (first image) */}
-                    <img
-                      src={gallery?.images?.[0]}
-                      alt={gallery.title || "Gallery"}
-                      className="w-full h-64 object-cover"
-                    />
-                    <div className="p-5">
-                   
-                      <p className="text-gray-400 text-sm mb-4">
-                        {gallery.images?.length || 0} images
-                      </p>
-                      <div className="flex gap-3">
-                        {/* View Button */}
-                        <button
-                          onClick={() => openViewModal(gallery)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white py-2.5 rounded-lg uppercase tracking-[1px] text-sm transition"
-                        >
-                          <FaEye size={14} /> View
-                        </button>
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => handleDelete(gallery._id)}
-                          className="flex-1 inline-flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-red-300 border border-red-800 py-2.5 rounded-lg uppercase tracking-[1px] text-sm transition"
-                        >
-                          <FaTrash size={14} /> Delete
-                        </button>
-                      </div>
+        const newProgress = { ...uploadProgress };
+        delete newProgress[index];
+        const reIndexed = {};
+        Object.keys(newProgress).forEach((key, i) => {
+            reIndexed[i] = newProgress[key];
+        });
+        setUploadProgress(reIndexed);
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (files.length === 0) {
+            toast.error("Please select files first");
+            return;
+        }
+
+        setLoading(true);
+        const progressMap = {};
+
+        try {
+            const uploadedData = await Promise.all(
+                files.map(async (file, index) => {
+                    const result = await uploadToCloudinary(file, (percent) => {
+                        progressMap[index] = percent;
+                        setUploadProgress({ ...progressMap });
+                    });
+                    return result;
+                })
+            );
+
+            const mediaUrls = uploadedData.map((res) => res.secure_url);
+
+            await createGallery({ images: mediaUrls });
+
+            toast.success("Gallery uploaded successfully! 🎉");
+            setFiles([]);
+            setPreviews([]);
+            setUploadProgress({});
+            fetchGalleries();
+            setActiveTab("all");
+        } catch (error) {
+            console.error(error);
+            toast.error("Upload failed. Please try again.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchGalleries = async () => {
+        try {
+            const res = await getAllGalleries();
+            setGalleries(res?.data?.data || []);
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to load galleries");
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this gallery bundle?")) return;
+        try {
+            await deleteGallery(id);
+            toast.success("Gallery deleted successfully");
+            fetchGalleries();
+        } catch (error) {
+            toast.error("Delete failed");
+        }
+    };
+
+    // ==============================
+    // MODAL FUNCTIONS
+    // ==============================
+    const openViewModal = (gallery) => {
+        setSelectedGallery(gallery);
+        setCurrentImageIndex(0);
+        setViewModalOpen(true);
+        document.body.style.overflow = "hidden";
+    };
+
+    const closeViewModal = () => {
+        setViewModalOpen(false);
+        setSelectedGallery(null);
+        document.body.style.overflow = "auto";
+    };
+
+    const nextImage = () => {
+        if (selectedGallery) {
+            setCurrentImageIndex((prev) =>
+                prev === selectedGallery.images.length - 1 ? 0 : prev + 1
+            );
+        }
+    };
+
+    const prevImage = () => {
+        if (selectedGallery) {
+            setCurrentImageIndex((prev) =>
+                prev === 0 ? selectedGallery.images.length - 1 : prev - 1
+            );
+        }
+    };
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (viewModalOpen) {
+                if (e.key === "ArrowRight") nextImage();
+                if (e.key === "ArrowLeft") prevImage();
+                if (e.key === "Escape") closeViewModal();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [viewModalOpen, selectedGallery]);
+
+    useEffect(() => {
+        fetchGalleries();
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            previews.forEach((url) => URL.revokeObjectURL(url));
+        };
+    }, [previews]);
+
+    const getProgressColor = (progress) => {
+        if (progress < 30) return "bg-red-500";
+        if (progress < 70) return "bg-yellow-500";
+        return "bg-green-500";
+    };
+
+    const getFileSize = (bytes) => {
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / 1048576).toFixed(1) + " MB";
+    };
+
+    const totalProgress = Object.values(uploadProgress).length > 0
+        ? Object.values(uploadProgress).reduce((a, b) => a + b, 0) / Object.values(uploadProgress).length
+        : 0;
+
+    const isAllUploaded = Object.values(uploadProgress).length > 0 &&
+        Object.values(uploadProgress).every((p) => p === 100);
+
+    return (
+        <div className="min-h-screen w-full bg-gradient-to-br from-[#F7F9F4] via-[#f0f5eb] to-[#e8efe0] text-[#2d3748] font-sans">
+            <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: "#2d3748",
+                        color: "#fff",
+                        borderRadius: "12px",
+                        padding: "16px",
+                    },
+                    success: {
+                        style: {
+                            background: "#1a7d4a",
+                        },
+                    },
+                    error: {
+                        style: {
+                            background: "#b91c1c",
+                        },
+                    },
+                }}
+            />
+
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-gradient-to-r from-[#3B4953] to-[#5A7863] bg-clip-text text-transparent">
+                            Media Gallery
+                        </h1>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Upload, manage, and organize your media collections
+                        </p>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+                    <button
+                        onClick={() => setActiveTab("create")}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${activeTab === "create"
+                            ? "bg-[#5A7863] text-white hover:bg-[#4a6a53]"
+                            : "bg-white text-[#3B4953] border border-gray-200 hover:border-[#5A7863]"
+                            }`}
+                    >
+                        <FaPlus className="text-sm" />
+                        New Upload
+                    </button>
+                </div>
 
-      {/* ==============================
-          FULLSCREEN VIEW MODAL (Lightbox)
-      ============================== */}
-      {viewModalOpen && selectedGallery && (
-        <div className="fixed inset-0 z-[999] bg-black/95 backdrop-blur-md overflow-hidden">
-          {/* Close button */}
-          <button
-            onClick={closeViewModal}
-            className="absolute top-5 right-5 z-50 text-gray-300 hover:text-white text-3xl transition"
-            aria-label="Close"
-          >
-            <FaTimes />
-          </button>
+                {/* Tabs */}
+                <div className="flex gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50 shadow-sm mb-6 w-full sm:w-auto">
+                    <button
+                        onClick={() => setActiveTab("create")}
+                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "create"
+                            ? "bg-[#5A7863] text-white shadow-md"
+                            : "text-[#3B4953] hover:bg-gray-100"
+                            }`}
+                    >
+                        <FaUpload className="text-xs" />
+                        Upload
+                    </button>
+                    <button
+                        onClick={() => setActiveTab("all")}
+                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "all"
+                            ? "bg-[#5A7863] text-white shadow-md"
+                            : "text-[#3B4953] hover:bg-gray-100"
+                            }`}
+                    >
+                        <FaTh className="text-xs" /> {/* ✅ fixed icon */}
+                        All Galleries
+                        <span className="ml-1 px-2 py-0.5 text-xs bg-white/20 rounded-full">
+                            {galleries.length}
+                        </span>
+                    </button>
+                </div>
 
+                {/* Content */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/50 shadow-xl shadow-black/5 p-6 sm:p-8 min-h-[500px]">
+                    {activeTab === "create" ? (
+                        <div>
+                            <form onSubmit={handleSubmit}>
+                                {/* Drop Zone */}
+                                <div
+                                    className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${isDragging
+                                        ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
+                                        : "border-gray-300 hover:border-[#5A7863]/50"
+                                        } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"
+                                        }`}
+                                    onDrop={handleDrop}
+                                    onDragOver={handleDragOver}
+                                    onDragLeave={handleDragLeave}
+                                >
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        multiple
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                    />
 
+                                    {files.length === 0 ? (
+                                        <div className="text-center py-8">
+                                            <div className="w-20 h-20 mx-auto bg-[#5A7863]/10 rounded-2xl flex items-center justify-center mb-4">
+                                                <FaImages className="text-3xl text-[#5A7863]" />
+                                            </div>
+                                            <h3 className="text-lg font-semibold text-[#3B4953]">
+                                                Drop your images here
+                                            </h3>
+                                            <p className="text-sm text-gray-400 mt-1">
+                                                or click to browse files
+                                            </p>
+                                            <p className="text-xs text-gray-300 mt-3">
+                                                Supports JPG, PNG, WEBP & more
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-sm font-medium text-[#3B4953]">
+                                                    {files.length} file{files.length > 1 ? "s" : ""} selected
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFiles([]);
+                                                        setPreviews([]);
+                                                        setUploadProgress({});
+                                                        if (fileInputRef.current) {
+                                                            fileInputRef.current.value = "";
+                                                        }
+                                                    }}
+                                                    className="text-sm text-red-500 hover:text-red-700 font-medium"
+                                                >
+                                                    Clear all
+                                                </button>
+                                            </div>
 
-          {/* Main slider area */}
-          <div className="h-screen flex items-center justify-center relative">
-            {/* Prev button */}
-            <button
-              onClick={prevImage}
-              className="absolute left-3 sm:left-6 md:left-10 z-40 w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl md:text-2xl hover:bg-white/30 transition"
-            >
-              <FaChevronLeft />
-            </button>
+                                            {Object.values(uploadProgress).length > 0 && (
+                                                <div className="mb-4">
+                                                    <div className="flex justify-between text-sm mb-1">
+                                                        <span className="text-gray-600">Overall Progress</span>
+                                                        <span className="font-semibold text-[#5A7863]">
+                                                            {Math.round(totalProgress)}%
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                                        <div
+                                                            className={`h-full transition-all duration-300 rounded-full ${isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
+                                                                }`}
+                                                            style={{ width: `${totalProgress}%` }}
+                                                        />
+                                                    </div>
+                                                    {isAllUploaded && (
+                                                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                                            <FaCheckCircle /> All files uploaded!
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
 
-            {/* Current image */}
-            {selectedGallery.images?.length > 0 ? (
-              <img
-                src={selectedGallery.images[currentImageIndex]}
-                alt={`${selectedGallery.title} - ${currentImageIndex + 1}`}
-                className="max-h-full max-w-full object-contain p-4"
-              />
-            ) : (
-              <div className="text-white text-center px-4">
-                <p>No images in this gallery</p>
-              </div>
-            )}
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
+                                                {files.map((file, index) => {
+                                                    const progress = uploadProgress[index] || 0;
+                                                    const isDone = progress === 100;
+                                                    return (
+                                                        <div
+                                                            key={index}
+                                                            className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm group hover:shadow-md transition-shadow"
+                                                        >
+                                                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                                                                {previews[index] ? (
+                                                                    <img
+                                                                        src={previews[index]}
+                                                                        alt="preview"
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                        <FaFileImage />
+                                                                    </div>
+                                                                )}
+                                                                {isDone && (
+                                                                    <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
+                                                                        <FaCheckCircle className="text-green-600 text-lg" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-xs font-medium text-gray-700 truncate">
+                                                                    {file.name}
+                                                                </p>
+                                                                <p className="text-[10px] text-gray-400">
+                                                                    {getFileSize(file.size)}
+                                                                </p>
+                                                                {progress > 0 && (
+                                                                    <div className="mt-1 flex items-center gap-2">
+                                                                        <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                                            <div
+                                                                                className={`h-full transition-all duration-300 rounded-full ${getProgressColor(progress)}`}
+                                                                                style={{ width: `${progress}%` }}
+                                                                            />
+                                                                        </div>
+                                                                        <span className="text-[10px] font-medium text-gray-500 min-w-[32px] text-right">
+                                                                            {Math.round(progress)}%
+                                                                        </span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {!loading && progress === 0 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeFile(index)}
+                                                                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                                                >
+                                                                    <FaTimes size={12} />
+                                                                </button>
+                                                            )}
+                                                            {loading && progress > 0 && progress < 100 && (
+                                                                <FaSpinner className="text-[#5A7863] animate-spin text-sm" />
+                                                            )}
+                                                            {isDone && (
+                                                                <FaCheckCircle className="text-green-500 text-sm" />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
-            {/* Next button */}
-            <button
-              onClick={nextImage}
-              className="absolute right-3 sm:right-6 md:right-10 z-40 w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white text-xl md:text-2xl hover:bg-white/30 transition"
-            >
-              <FaChevronRight />
-            </button>
-          </div>
-
-          {/* Image counter */}
-          {selectedGallery.images?.length > 0 && (
-            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 text-gray-300 text-sm md:text-base bg-black/60 px-4 py-1.5 rounded-full">
-              {currentImageIndex + 1} / {selectedGallery.images.length}
+                                <div className="mt-6 flex flex-col sm:flex-row items-center gap-4">
+                                    <button
+                                        type="submit"
+                                        disabled={loading || files.length === 0}
+                                        className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${loading || files.length === 0
+                                            ? "bg-gray-300 cursor-not-allowed"
+                                            : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
+                                            }`}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <FaSpinner className="animate-spin" />
+                                                Uploading... {Math.round(totalProgress)}%
+                                            </>
+                                        ) : (
+                                            <>
+                                                <FaUpload />
+                                                Upload {files.length} File{files.length > 1 ? "s" : ""}
+                                            </>
+                                        )}
+                                    </button>
+                                    {loading && (
+                                        <span className="text-sm text-gray-500">
+                                            Please wait, this may take a moment...
+                                        </span>
+                                    )}
+                                    {files.length > 0 && !loading && (
+                                        <span className="text-sm text-gray-400">
+                                            {getFileSize(files.reduce((acc, f) => acc + f.size, 0))} total
+                                        </span>
+                                    )}
+                                </div>
+                            </form>
+                        </div>
+                    ) : (
+                        <div>
+                            {galleries.length === 0 ? (
+                                <div className="text-center py-16">
+                                    <div className="w-24 h-24 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center mb-4">
+                                        <FaImages className="text-4xl text-gray-300" />
+                                    </div>
+                                    <h3 className="text-lg font-semibold text-[#3B4953]">
+                                        No galleries yet
+                                    </h3>
+                                    <p className="text-sm text-gray-400 mt-1">
+                                        Upload your first media collection to get started
+                                    </p>
+                                    <button
+                                        onClick={() => setActiveTab("create")}
+                                        className="mt-4 px-6 py-2 bg-[#5A7863] text-white rounded-xl hover:bg-[#4a6a53] transition-colors"
+                                    >
+                                        Upload now
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                    {galleries.map((g) => (
+                                        <div
+                                            key={g._id}
+                                            className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                                        >
+                                            <div className="relative h-52 bg-gray-100 overflow-hidden">
+                                                {g.images && g.images.length > 0 ? (
+                                                    <img
+                                                        src={g.images[0]}
+                                                        alt="Gallery cover"
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        loading="lazy"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                        <FaImages size={40} />
+                                                    </div>
+                                                )}
+                                                <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                                                    <FaImages size={10} />
+                                                    {g.images?.length || 0}
+                                                </div>
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                                            </div>
+                                            <div className="p-4">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-sm font-medium text-[#3B4953] truncate">
+                                                            {g.title || "Media Collection"}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            {g.createdAt
+                                                                ? new Date(g.createdAt).toLocaleDateString("en-US", {
+                                                                    month: "short",
+                                                                    day: "numeric",
+                                                                    year: "numeric",
+                                                                })
+                                                                : "Recent"}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex gap-1 ml-2">
+                                                        <button
+                                                            onClick={() => openViewModal(g)}
+                                                            className="p-2 rounded-lg text-gray-500 hover:text-[#5A7863] hover:bg-[#5A7863]/10 transition-all"
+                                                            title="View gallery"
+                                                        >
+                                                            <FaEye size={14} />
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleDelete(g._id)}
+                                                            className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                                                            title="Delete gallery"
+                                                        >
+                                                            <FaTrash size={14} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
+                </div>
             </div>
-          )}
+
+            {/* Lightbox Modal */}
+            {viewModalOpen && selectedGallery && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 animate-fadeIn"
+                    onClick={closeViewModal}
+                >
+                    <div
+                        className="relative max-w-6xl w-full h-full flex flex-col items-center justify-center"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            className="absolute top-4 right-4 z-10 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 rounded-full p-3 transition-all duration-200 backdrop-blur-sm"
+                            onClick={closeViewModal}
+                        >
+                            <FaTimes size={22} />
+                        </button>
+                        <div className="absolute top-4 left-4 z-10 text-white/80 bg-black/30 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                            {currentImageIndex + 1} / {selectedGallery.images.length}
+                        </div>
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <img
+                                src={selectedGallery.images[currentImageIndex]}
+                                alt={`Gallery ${currentImageIndex + 1}`}
+                                className="max-h-[85vh] max-w-[95vw] object-contain rounded-lg shadow-2xl"
+                            />
+                            {selectedGallery.images.length > 1 && (
+                                <>
+                                    <button
+                                        className="absolute left-2 sm:left-6 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 rounded-full p-3 sm:p-4 transition-all duration-200 backdrop-blur-sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            prevImage();
+                                        }}
+                                    >
+                                        <FaChevronLeft size={20} />
+                                    </button>
+                                    <button
+                                        className="absolute right-2 sm:right-6 text-white/70 hover:text-white bg-black/30 hover:bg-black/50 rounded-full p-3 sm:p-4 transition-all duration-200 backdrop-blur-sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            nextImage();
+                                        }}
+                                    >
+                                        <FaChevronRight size={20} />
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        {selectedGallery.images.length > 1 && (
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 max-w-[90vw] overflow-x-auto px-4 py-2 bg-black/30 backdrop-blur-sm rounded-2xl">
+                                {selectedGallery.images.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setCurrentImageIndex(idx);
+                                        }}
+                                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${idx === currentImageIndex
+                                            ? "border-white scale-110 shadow-lg"
+                                            : "border-white/30 hover:border-white/60"
+                                            }`}
+                                    >
+                                        <img
+                                            src={img}
+                                            alt={`Thumb ${idx + 1}`}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            <style jsx>{`
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.98); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+                ::-webkit-scrollbar { width: 4px; height: 4px; }
+                ::-webkit-scrollbar-track { background: transparent; }
+                ::-webkit-scrollbar-thumb { background: #c4cdd5; border-radius: 10px; }
+                ::-webkit-scrollbar-thumb:hover { background: #a0abb8; }
+            `}</style>
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default GalleryUpload;

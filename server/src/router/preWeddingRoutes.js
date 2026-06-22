@@ -1,5 +1,7 @@
 import express from "express";
 
+import { upload } from "../middleware/multer.js";
+
 import {
   createPreWeddingStory,
   getAllPreWeddingStories,
@@ -7,41 +9,7 @@ import {
   deletePreWeddingStory,
 } from "../controller/preWeddingController.js";
 
-import multer from "multer";
-
-import {
-  CloudinaryStorage,
-} from "multer-storage-cloudinary";
-
-import cloudinary from "../config/cloudinary.js";
-
 const router = express.Router();
-
-/* =========================
-   CLOUDINARY STORAGE
-========================= */
-
-const storage =
-  new CloudinaryStorage({
-    cloudinary,
-
-    params: async (req, file) => ({
-      folder: "pre-wedding-stories",
-
-      resource_type: "image",
-
-      allowed_formats: [
-        "jpg",
-        "png",
-        "jpeg",
-        "webp",
-      ],
-    }),
-  });
-
-const upload = multer({
-  storage,
-});
 
 /* =========================
    ROUTES
@@ -57,7 +25,6 @@ router.post(
       name: "coverImage",
       maxCount: 1,
     },
-
     {
       name: "galleryImages",
       maxCount: 20,
