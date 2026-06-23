@@ -37,12 +37,19 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173"||"https://me-1sd4-git-main-vineetpancheshwar1611gmailcoms-projects.vercel.app/"||"https://me-1sd4.vercel.app",
-
+    origin: [
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      "http://localhost:3000",
+      "http://127.0.0.1:3000",
+      "https://me-1sd4.vercel.app",
+      "https://me-1sd4-git-main-vineetpancheshwar1611gmailcoms-projects.vercel.app",
+    ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 // ==========================================
 // DATABASE PERSISTENCE LAYER (MongoDB)
 // ==========================================

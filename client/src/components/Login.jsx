@@ -96,15 +96,18 @@ function Login() {
         navigate("/");
       }
 
-    } catch (error) {
+    }  catch (error) {
+  console.log("ERROR:", error);
+  console.log("STATUS:", error.response?.status);
+  console.log("DATA:", error.response?.data);
+  console.log("MESSAGE:", error.message);
 
-      toast.error(
-        error.response?.data
-          ?.message ||
-          "Login Failed",
-      );
-
-    } finally {
+  toast.error(
+    error.response?.data?.message ||
+    error.message ||
+    "Login Failed"
+  );
+} finally {
 
       setLoading(false);
     }

@@ -1,17 +1,18 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL ||"https://me-1-u6w8.onrender.com/api";
+const BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://me-1-u6w8.onrender.com/api";
+
+console.log("BASE_URL =", BASE_URL);
 
 const API = axios.create({
   baseURL: BASE_URL,
-  timeout: 0,
+  withCredentials: true,
   headers: {
-    "Content-Type": "application/json", // Global header default set hai JSON ke liye
+    "Content-Type": "application/json",
   },
-  maxContentLength: Infinity,
-  maxBodyLength: Infinity,
 });
-
 // ==========================
 // Auth APIs
 // ==========================
