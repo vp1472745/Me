@@ -84,6 +84,10 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.get("/", (req, res) => {
+  res.send("Backend is running successfully 🚀");
+});
+
 // ==========================================
 // SERVER INITIALIZATION & STREAM HOOKS
 // ==========================================
