@@ -18,6 +18,14 @@ router.post("/register", register);
 
 router.post("/login", login);
 
+// GET /login - returns error message (login is POST only)
+router.get("/login", (req, res) => {
+  return res.status(405).json({
+    success: false,
+    message: "Login endpoint requires POST request. Please use the frontend login form.",
+  });
+});
+
 router.get("/logout",  logout);
 
 export default router;
