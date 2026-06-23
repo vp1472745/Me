@@ -1,5 +1,10 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "https://me-1-u6w8.onrender.com/api",
+    "VITE_CLOUDINARY_CLOUD_NAME": "dzopb3luc",
+    "VITE_CLOUDINARY_UPLOAD_PRESET": "roommilega_unsigned"
+  }
 }
