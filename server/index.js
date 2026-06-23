@@ -37,7 +37,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173" ,
+    origin: process.env.CLIENT_URL || "http://localhost:5173"||"https://me-1sd4-git-main-vineetpancheshwar1611gmailcoms-projects.vercel.app/" ,
     credentials: true,
   })
 );
