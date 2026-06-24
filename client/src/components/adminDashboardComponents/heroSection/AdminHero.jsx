@@ -1,143 +1,165 @@
-// ======================================================
-// FILE: HeroManagement.jsx - Professional Earthy Dashboard System
-// ======================================================
 import React, { useEffect, useState } from "react";
+import {
+  Plus,
+  Upload,
+  Trash2,
+  Eye,
+  Image as ImageIcon,
+  Video,
+  X,
+} from "lucide-react";
+
+// ✅ Cloudinary upload helper (client‑side)
+import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+
+// ✅ API functions (from your config/api.js)
 import {
   createHeroSection,
   getAllHeroSections,
   deleteHeroSection,
 } from "../../../config/api";
-import {
-  FaTrash,
-  FaImage,
-  FaVideo,
-  FaPlus,
-  FaCloudUploadAlt,
-} from "react-icons/fa";
+
+// ✅ Common Loading Modal (adjust path to your project)
 import LoadingModal from "../../../components/commonComponents/LoadingModal";
-import uploadToCloudinary from "../../../services/cloudinaryUpload";
 
-const HeroManagement = () => {
-  // ==========================
-  // VIEW, UPLOAD & ASSET STATES
-  // ==========================
+const HeroManager = () => {
+  // ==============================
+  // STATE
+  // ==============================
   const [activeTab, setActiveTab] = useState("create");
-  const [mediaType, setMediaType] = useState("image");
-  const [media, setMedia] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [heroes, setHeroes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Processing...");
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
-  // ==========================
-  // GET ALL ASSETS
-  // ==========================
-  const fetchHeroSections = async () => {
+  // Create form
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [fileType, setFileType] = useState("image");
+
+  // Listing
+  const [heroes, setHeroes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Lightbox
+  const [selectedHero, setSelectedHero] = useState(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  // ==============================
+  // FETCH HEROES
+  // ==============================
+  const fetchHeroes = async () => {
     try {
+      setLoading(true);
       const res = await getAllHeroSections();
       setHeroes(res?.data?.data || []);
     } catch (error) {
-      console.error("Error reading entry portal canvas feeds:", error);
+      console.error("Fetch heroes error:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchHeroSections();
+    fetchHeroes();
   }, []);
 
-  // ==========================
-  // FILE SELECTION HANDLE
-  // ==========================
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    setMedia(file);
-    setPreview(URL.createObjectURL(file));
-  };
-
-  // Helper handling type toggle sanitization
-  const handleTypeChange = (type) => {
-    setMediaType(type);
-    setMedia(null);
-    setPreview("");
-  };
-
-  // ==========================
-  // COMMIT / CREATE (Upload Handling)
-  // ==========================
-  const handleSubmit = async (e) => {
+  // ==============================
+  // CREATE HERO (client‑side upload)
+  // ==============================
+  const handleCreate = async (e) => {
     e.preventDefault();
-
-    if (!media) {
-      alert("Please select media asset first.");
+    if (!selectedFile) {
+      alert("Please select a media file.");
       return;
     }
 
     try {
-      setLoadingMessage(
-        mediaType === "video" 
-          ? "Streaming heavy video payload to Cloudinary. Please wait..." 
-          : "Deploying high-definition still frame scale..."
-      );
-      setLoading(true);
+      setUploading(true);
+      setUploadProgress(0);
 
-      // 1. Direct Cloudinary Client-Side Upload Sequence
-      const uploadResult = await uploadToCloudinary(media, (percent) => {
-        setLoadingMessage(`Uploading to Cloud Provider: ${percent}%`);
+      // 1. Upload directly to Cloudinary with progress
+      const result = await uploadToCloudinary(selectedFile, (percent) => {
+        setUploadProgress(percent);
       });
 
-      if (!uploadResult?.secure_url) {
-        throw new Error("Cloudinary delivery missing valid storage target URL reference.");
-      }
+      const { secure_url, public_id } = result;
+      const mediaType = selectedFile.type.startsWith("video/") ? "video" : "image";
 
-      // 2. Transmit Secured Delivery Blueprint metadata down to App Server Backend
-const payload = {
-  mediaUrl: uploadResult.secure_url,
-  mediaType,
-  public_id: uploadResult.public_id,
-};
+      // 2. Send URL to backend (JSON)
+      await createHeroSection({
+        mediaUrl: secure_url,
+        mediaType,
+        public_id,
+      });
 
-await createHeroSection(payload);
-
-      setMedia(null);
-      setPreview("");
-      await fetchHeroSections();
+      alert("✅ Hero media uploaded successfully!");
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setUploadProgress(0);
+      fetchHeroes();
       setActiveTab("all");
     } catch (error) {
-      console.error("Asset deployment block fault context:", error);
-      alert(error?.response?.data?.message || error?.message || "Upload failed");
+      console.error("Upload error:", error);
+      alert(error?.response?.data?.message || "Upload failed.");
     } finally {
-      setLoading(false);
+      setUploading(false);
     }
   };
 
-  // ==========================
-  // DELETION AGENT (Cloud Purging)
-  // ==========================
+  // ==============================
+  // DELETE HERO
+  // ==============================
   const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to completely delete this entry hero asset?");
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Delete this hero media?")) return;
     try {
-      setLoadingMessage("Purging cloud storage mirrors and record entries...");
-      setLoading(true);
-      
       await deleteHeroSection(id);
-      await fetchHeroSections();
+      fetchHeroes();
     } catch (error) {
-      console.error("Error running drop tracking execution block:", error);
-      alert("Delete transaction dropped by server safety rules.");
-    } finally {
-      setLoading(false);
+      console.error("Delete error:", error);
+      alert("Delete failed.");
     }
   };
 
+  // ==============================
+  // LIGHTBOX
+  // ==============================
+  const openLightbox = (hero) => {
+    setSelectedHero(hero);
+    setLightboxOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeLightbox = () => {
+    setLightboxOpen(false);
+    setSelectedHero(null);
+    document.body.style.overflow = "auto";
+  };
+
+  // ==============================
+  // HANDLE FILE SELECTION
+  // ==============================
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    setFileType(file.type.startsWith("video/") ? "video" : "image");
+    setPreviewUrl(URL.createObjectURL(file));
+  };
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  // ==============================
+  // RENDER
+  // ==============================
   return (
     <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
-      
-      {/* Structural Navigation Tabs Module */}
-      <div className="flex-shrink-0 mt-4">
+      {/* Tabs */}
+      <div className="flex-shrink-0 px-4 mt-4">
         <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
           <div className="flex">
             <button
@@ -148,8 +170,8 @@ await createHeroSection(payload);
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
               }`}
             >
-              <FaPlus size={10} />
-              Deploy Media
+              <Plus size={14} />
+              Upload Hero
             </button>
             <button
               onClick={() => setActiveTab("all")}
@@ -159,169 +181,149 @@ await createHeroSection(payload);
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
               }`}
             >
-              <FaImage size={11} />
-              Active Canvas ({heroes.length})
+              <ImageIcon size={14} />
+              All Heroes
             </button>
           </div>
         </div>
       </div>
 
-      {/* Dynamic Content Stream Area */}
-      <div className="flex-1 overflow-y-auto sm:px-6 pb-6">
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
         <div className="max-w-7xl mx-auto mt-6">
-
-          {/* CREATE / UPLOAD ASSET FORM */}
+          {/* ---- CREATE TAB ---- */}
           {activeTab === "create" && (
             <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                
-                {/* Media Select Strategy Switcher */}
+              <form onSubmit={handleCreate} className="space-y-6">
                 <div>
                   <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
-                    Target Media Pipeline
+                    Select Media (Image or Video)
                   </label>
-                  <select
-                    value={mediaType}
-                    onChange={(e) => handleTypeChange(e.target.value)}
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 focus:outline-none focus:border-[#5A7863] transition text-sm font-medium"
-                  >
-                    <option value="image">Still Frame Matrix (Image)</option>
-                    <option value="video">Kinetic Motion Stream (Video)</option>
-                  </select>
-                </div>
-
-                {/* File Drop Drag Area Zone Frame */}
-                <div>
-                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
-                    Upload Resource Asset
-                  </label>
-                  <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-8 text-center transition min-h-[160px]">
+                  <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-6 text-center transition group min-h-[200px]">
                     <input
                       type="file"
-                      accept={mediaType === "image" ? "image/*" : "video/*"}
+                      accept="image/*,video/*"
                       onChange={handleFileChange}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      required={!selectedFile}
                     />
-                    <div className="flex flex-col items-center pointer-events-none space-y-2 text-[#3B4953]/70">
-                      <div className="w-12 h-12 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863] shadow-xs">
-                        <FaCloudUploadAlt size={20} />
-                      </div>
-                      <p className="text-xs font-bold text-[#3B4953]">
-                        {media ? "Substitute Selected Object" : "Select or Drop Media Asset"}
-                      </p>
-                      <p className="text-[10px] text-[#3B4953]/50">
-                        {mediaType === "image" ? "Supports JPG, PNG, WEBP background scales" : "Supports high-bitrate streaming MP4 channels"}
-                      </p>
-                    </div>
-                  </div>
-                  {media && (
-                    <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md mt-2 inline-block max-w-full truncate shadow-xs">
-                      ✓ Staged Target: {media.name}
-                    </p>
-                  )}
-                </div>
-
-                {/* Local Sandbox Rendering Mirror Box */}
-                {preview && (
-                  <div className="p-4 bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl">
-                    <p className="text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]/60 mb-2.5">Local Display Mirror Preview</p>
-                    <div className="max-w-xl mx-auto rounded-xl overflow-hidden border border-[#DDE7D8] bg-black shadow-inner">
-                      {mediaType === "image" ? (
-                        <img
-                          src={preview}
-                          alt="Local mirror view staging"
-                          className="w-full h-auto max-h-[340px] object-contain mx-auto"
-                        />
+                    <div className="flex flex-col items-center pointer-events-none space-y-2">
+                      {previewUrl ? (
+                        <>
+                          {fileType === "video" ? (
+                            <video
+                              src={previewUrl}
+                              className="max-h-48 rounded-lg"
+                              controls
+                            />
+                          ) : (
+                            <img
+                              src={previewUrl}
+                              alt="Preview"
+                              className="max-h-48 rounded-lg object-contain"
+                            />
+                          )}
+                          <p className="text-xs text-[#5A7863] font-medium">
+                            {selectedFile?.name} ({(selectedFile.size / 1024 / 1024).toFixed(1)} MB)
+                          </p>
+                        </>
                       ) : (
-                        <video
-                          key={preview}
-                          controls
-                          muted
-                          playsInline
-                          className="w-full max-h-[340px] object-contain mx-auto"
-                        >
-                          <source src={preview} type="video/mp4" />
-                          Your browser does not support the video tag.
-                        </video>
+                        <>
+                          <div className="w-14 h-14 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863]">
+                            <Upload size={20} />
+                          </div>
+                          <p className="text-xs font-bold text-[#3B4953]">
+                            Drop or click to select
+                          </p>
+                          <p className="text-[10px] text-[#3B4953]/50">
+                            Supports JPG, PNG, WEBP, MP4, MOV, WEBM
+                          </p>
+                        </>
                       )}
                     </div>
                   </div>
-                )}
+                </div>
 
-                {/* Commit Action Panel Pipeline Trigger */}
                 <div className="pt-4 border-t border-[#DDE7D8]">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={uploading}
                     className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
                   >
-                    <FaCloudUploadAlt size={12} />
-                    {loading ? "Deploying Core Assets..." : "Publish Hero Asset"}
+                    <Upload size={12} />
+                    {uploading ? `Uploading... ${uploadProgress}%` : "Publish Hero Media"}
                   </button>
                 </div>
               </form>
             </div>
           )}
 
-          {/* ACTIVE LIVE HERO CANVASES */}
+          {/* ---- ALL HEROES TAB ---- */}
           {activeTab === "all" && (
             <>
-              {heroes.length === 0 ? (
+              {loading ? (
+                <div className="flex justify-center items-center h-64 bg-white rounded-2xl border border-[#DDE7D8]">
+                  <div className="w-9 h-9 border-2 border-[#5A7863] border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : heroes.length === 0 ? (
                 <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
                   <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
-                    <FaVideo size={20} className="text-[#90AB8B]" />
+                    <ImageIcon size={22} className="text-[#90AB8B]" />
                   </div>
-                  <p className="text-[#3B4953] text-lg font-semibold mb-1">Hero asset matrix empty</p>
-                  <p className="text-[#3B4953]/60 text-sm">Deploy high-definition streams to feed the entry portal canvas.</p>
+                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No hero media found</p>
+                  <p className="text-[#3B4953]/60 text-sm">Upload your first hero image or video now.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {heroes.map((item) => (
+                  {heroes.map((hero) => (
                     <div
-                      key={item._id}
+                      key={hero._id}
                       className="group bg-white rounded-xl overflow-hidden border border-[#DDE7D8] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
                     >
-                      {/* Media Display Window Segment Frame */}
-                      <div className="relative h-56 bg-black overflow-hidden flex items-center justify-center">
-                        {item.mediaType === "image" ? (
-                          <img
-                            src={item.mediaUrl}
-                            alt="Portal canvas target background scale track"
-                            className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
+                      <div className="relative h-52 bg-[#F7F9F4] overflow-hidden">
+                        {hero.mediaType === "video" ? (
+                          <video
+                            src={hero.mediaUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                            playsInline
                           />
                         ) : (
-                          <video
-                            key={item.mediaUrl}
-                            muted
-                            loop
-                            autoPlay
-                            playsInline
-                            controls
-                            className="w-full h-full object-cover"
-                          >
-                            <source src={item.mediaUrl} type="video/mp4" />
-                            Your browser does not support the video tag.
-                          </video>
+                          <img
+                            src={hero.mediaUrl}
+                            alt="Hero"
+                            className="w-full h-full object-cover transition duration-500 group-hover:scale-102"
+                          />
                         )}
-                        
-                        {/* Status Label Floating Meta Pill */}
-                        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#3B4953] z-20">
-                          {item.mediaType === "image" ? <FaImage className="text-[#5A7863]" /> : <FaVideo className="text-[#5A7863]" />}
-                          <span>{item.mediaType} asset</span>
+                        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                          {hero.mediaType === "video" ? (
+                            <Video size={12} />
+                          ) : (
+                            <ImageIcon size={12} />
+                          )}
+                          {hero.mediaType}
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                        <div className="absolute bottom-3 left-4 right-4 flex justify-between items-center">
+                          <span className="text-white text-xs opacity-80">
+                            {new Date(hero.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Control Panel Interaction Block Frame Footer */}
-                      <div className="p-4 bg-white border-t border-[#DDE7D8] flex items-center justify-between mt-auto">
-                        <span className="text-[10px] font-bold text-[#3B4953]/50 uppercase tracking-[1px] truncate max-w-[70%]">
-                          ID: {item._id}
-                        </span>
+                      <div className="p-4 flex gap-2.5 pt-4 border-t border-[#DDE7D8]/60">
                         <button
-                          onClick={() => handleDelete(item._id)}
-                          className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
-                          title="Purge Stream Canvas Asset"
+                          onClick={() => openLightbox(hero)}
+                          className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2.5 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
                         >
-                          <FaTrash size={12} />
+                          <Eye size={12} /> Inspect
+                        </button>
+                        <button
+                          onClick={() => handleDelete(hero._id)}
+                          className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
+                          title="Delete"
+                        >
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </div>
@@ -333,15 +335,51 @@ await createHeroSection(payload);
         </div>
       </div>
 
-      {/* Dynamic Structural Overlay Loader Context */}
+      {/* ===== LIGHTBOX MODAL ===== */}
+      {lightboxOpen && selectedHero && (
+        <div
+          className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden flex items-center justify-center"
+          onClick={closeLightbox}
+        >
+          <button
+            onClick={closeLightbox}
+            className="absolute top-6 right-6 z-50 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
+          >
+            <X size={18} />
+          </button>
+
+          <div
+            className="max-w-5xl max-h-[90vh] flex items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {selectedHero.mediaType === "video" ? (
+              <video
+                src={selectedHero.mediaUrl}
+                className="max-w-full max-h-[85vh] rounded-lg shadow-2xl"
+                controls
+                autoPlay
+              />
+            ) : (
+              <img
+                src={selectedHero.mediaUrl}
+                alt="Hero"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ===== LOADING MODAL ===== */}
       <LoadingModal
-        isLoading={loading}
-        message={loadingMessage}
-        showProgress={false}
-        variant="dots"
+        isLoading={loading || uploading}
+        message={uploading ? `Uploading hero media... ${uploadProgress}%` : "Loading heroes..."}
+        showProgress={uploading}
+        progress={uploadProgress}
+        variant="spinner"
       />
     </div>
   );
 };
 
-export default HeroManagement;
+export default HeroManager;

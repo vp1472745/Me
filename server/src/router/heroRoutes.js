@@ -11,10 +11,8 @@ import {
 const router = express.Router();
 
 // CREATE
-router.post(
-  "/create",
-  createHeroSection
-);
+router.post('/create', createHeroSection);
+
 
 // GET ALL
 router.get(

@@ -25,33 +25,33 @@ const streamUploadToCloudinary = (fileBuffer, mediaType) => {
 };
 
 // ==============================
-// CREATE HERO SECTION (Handles Raw File Uploads)
+// CREATE HERO SECTION (Handles Client-Side Cloudinary Uploads)
 // ==============================
 export const createHeroSection = async (req, res) => {
   try {
 
     console.log("BODY => ", req.body);
-    console.log("FILE => ", req.file);
 
-    const { mediaType } = req.body || {};
+    const {
+      mediaUrl,
+      mediaType,
+      public_id,
+    } = req.body || {};
 
-    // Check if file was uploaded via multer
-    if (!req.file) {
+    console.log("mediaUrl => ", mediaUrl);
+    console.log("mediaType => ", mediaType);
+    console.log("public_id => ", public_id);
+
+    if (!mediaUrl) {
       return res.status(400).json({
         success: false,
-        message: "Media file is required",
+        message: "Media URL is required",
       });
     }
 
-    const mediaUrl = req.file.path || req.file.secure_url;
-    const public_id = req.file.public_id || req.file.filename;
-
-    console.log("mediaUrl => ", mediaUrl);
-    console.log("public_id => ", public_id);
-
     const hero = await HeroSection.create({
       mediaUrl,
-      mediaType: mediaType || (req.file.mimetype?.startsWith('video') ? 'video' : 'image'),
+      mediaType,
       public_id,
     });
 
