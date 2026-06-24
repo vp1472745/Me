@@ -187,14 +187,7 @@ function Layout({ roleType }) {
                 Welcome back, {user?.name || "Photographer"}
               </p>
             </div>
-            
-            <button
-              onClick={handleLogout}
-              className="hidden md:flex items-center gap-2 bg-[#F7F9F4] hover:bg-[#EBF4DD] text-[#3B4953] hover:text-[#5A7863] px-4 py-1.5 rounded-xl transition border border-[#DDE7D8] font-semibold text-sm"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
-            </button>
+         
           </div>
         </header>
 

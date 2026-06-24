@@ -38,14 +38,7 @@ function Header() {
           </div>
         </div>
 
-        {/* Logout Button with Interactive Hover Slide */}
-        <button
-          onClick={handleLogout}
-          className="group flex items-center gap-2 bg-[#F7F9F4] hover:bg-[#EBF4DD] text-[#3B4953] hover:text-[#5A7863] px-5 py-2.5 rounded-xl transition-all duration-300 shadow-sm border border-[#DDE7D8] hover:border-[#90AB8B] font-semibold text-sm"
-        >
-          <LogOut className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-0.5" />
-          <span>Logout</span>
-        </button>
+    
         
       </div>
     </header>
