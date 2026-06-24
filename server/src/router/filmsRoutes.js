@@ -1,7 +1,5 @@
 import express from "express";
-
 import { upload } from "../middleware/multer.js";
-
 import {
   createVideo,
   getAllVideos,
@@ -10,24 +8,8 @@ import {
 
 const router = express.Router();
 
-// ==============================
-// ROUTES
-// ==============================
-
-router.post(
-  "/create",
-  upload.single("video"),
-  createVideo
-);
-
-router.get(
-  "/all",
-  getAllVideos
-);
-
-router.delete(
-  "/delete/:id",
-  deleteVideo
-);
+router.post("/create", upload.single("video"), createVideo);
+router.get("/all", getAllVideos);
+router.delete("/delete/:id", deleteVideo);
 
 export default router;

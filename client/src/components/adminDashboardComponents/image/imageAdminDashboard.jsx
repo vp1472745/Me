@@ -13,14 +13,13 @@ import {
     FaCheckCircle,
     FaSpinner,
     FaFileImage,
-    FaTh, // ✅ correct icon for grid view
+    FaTh,
 } from "react-icons/fa";
 import { toast, Toaster } from "react-hot-toast";
+import LoadingModal from "../../commonComponents/CommonLoadingModal";
+import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 
 const GalleryUpload = () => {
-    // ==============================
-    // STATES
-    // ==============================
     const [activeTab, setActiveTab] = useState("create");
     const [files, setFiles] = useState([]);
     const [previews, setPreviews] = useState([]);
@@ -28,28 +27,26 @@ const GalleryUpload = () => {
     const [loading, setLoading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState({});
     const [isDragging, setIsDragging] = useState(false);
+    const [modalMessage, setModalMessage] = useState("Uploading...");
 
-    // Modal states
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedGallery, setSelectedGallery] = useState(null);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [galleryToDelete, setGalleryToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     const fileInputRef = useRef(null);
 
-    // ==============================
-    // HANDLERS
-    // ==============================
+    // --- Handlers ---
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
         if (selectedFiles.length === 0) return;
-
         setFiles(selectedFiles);
         setPreviews(selectedFiles.map((file) => URL.createObjectURL(file)));
-
         const initialProgress = {};
-        selectedFiles.forEach((_, index) => {
-            initialProgress[index] = 0;
-        });
+        selectedFiles.forEach((_, index) => { initialProgress[index] = 0; });
         setUploadProgress(initialProgress);
     };
 
@@ -58,27 +55,23 @@ const GalleryUpload = () => {
         setIsDragging(false);
         const droppedFiles = Array.from(e.dataTransfer.files);
         if (droppedFiles.length === 0) return;
-
         setFiles(droppedFiles);
         setPreviews(droppedFiles.map((file) => URL.createObjectURL(file)));
-
         const initialProgress = {};
-        droppedFiles.forEach((_, index) => {
-            initialProgress[index] = 0;
-        });
+        droppedFiles.forEach((_, index) => { initialProgress[index] = 0; });
         setUploadProgress(initialProgress);
     };
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
+    const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
+    const handleDragLeave = () => setIsDragging(false);
 
-    const handleDragLeave = () => {
-        setIsDragging(false);
-    };
-
+    // --- Individual file remove ---
     const removeFile = (index) => {
+        // Revoke the object URL to prevent memory leaks
+        if (previews[index]) {
+            URL.revokeObjectURL(previews[index]);
+        }
+
         const newFiles = [...files];
         const newPreviews = [...previews];
         newFiles.splice(index, 1);
@@ -88,6 +81,7 @@ const GalleryUpload = () => {
 
         const newProgress = { ...uploadProgress };
         delete newProgress[index];
+        // Re-index the progress keys to maintain order
         const reIndexed = {};
         Object.keys(newProgress).forEach((key, i) => {
             reIndexed[i] = newProgress[key];
@@ -95,6 +89,22 @@ const GalleryUpload = () => {
         setUploadProgress(reIndexed);
     };
 
+    // --- Clear all files ---
+    const clearAllFiles = () => {
+        // Revoke all object URLs
+        previews.forEach((url) => URL.revokeObjectURL(url));
+
+        setFiles([]);
+        setPreviews([]);
+        setUploadProgress({});
+
+        // Reset the file input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+    };
+
+    // --- Submit with client‑side Cloudinary upload ---
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (files.length === 0) {
@@ -103,34 +113,43 @@ const GalleryUpload = () => {
         }
 
         setLoading(true);
+        setModalMessage("Preparing upload...");
         const progressMap = {};
 
         try {
-            const uploadedData = await Promise.all(
-                files.map(async (file, index) => {
-                    const result = await uploadToCloudinary(file, (percent) => {
-                        progressMap[index] = percent;
-                        setUploadProgress({ ...progressMap });
-                    });
-                    return result;
-                })
-            );
+            const uploadedUrls = [];
 
-            const mediaUrls = uploadedData.map((res) => res.secure_url);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
 
-            await createGallery({ images: mediaUrls });
+                setModalMessage(`Uploading file ${i + 1} of ${files.length}...`);
+
+                const result = await uploadToCloudinary(file, (percent) => {
+                    progressMap[i] = percent;
+                    setUploadProgress({ ...progressMap });
+                    setModalMessage(
+                        `Uploading file ${i + 1} of ${files.length}... ${percent}%`
+                    );
+                });
+
+                uploadedUrls.push(result.secure_url);
+                progressMap[i] = 100;
+                setUploadProgress({ ...progressMap });
+            }
+
+            setModalMessage("Saving gallery to database...");
+            await createGallery({ images: uploadedUrls });
 
             toast.success("Gallery uploaded successfully! 🎉");
-            setFiles([]);
-            setPreviews([]);
-            setUploadProgress({});
+            clearAllFiles(); // reuse clear to reset after successful upload
             fetchGalleries();
             setActiveTab("all");
         } catch (error) {
-            console.error(error);
-            toast.error("Upload failed. Please try again.");
+            console.error("Upload error:", error);
+            toast.error(error?.response?.data?.message || "Upload failed.");
         } finally {
             setLoading(false);
+            setModalMessage("Uploading...");
         }
     };
 
@@ -144,20 +163,32 @@ const GalleryUpload = () => {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Delete this gallery bundle?")) return;
+    const handleDeleteClick = (gallery) => {
+        setGalleryToDelete(gallery);
+        setDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!galleryToDelete) return;
+        setIsDeleting(true);
         try {
-            await deleteGallery(id);
+            await deleteGallery(galleryToDelete._id);
             toast.success("Gallery deleted successfully");
             fetchGalleries();
         } catch (error) {
             toast.error("Delete failed");
+        } finally {
+            setIsDeleting(false);
+            setDeleteModalOpen(false);
+            setGalleryToDelete(null);
         }
     };
 
-    // ==============================
-    // MODAL FUNCTIONS
-    // ==============================
+    const handleCloseDeleteModal = () => {
+        setDeleteModalOpen(false);
+        setGalleryToDelete(null);
+    };
+
     const openViewModal = (gallery) => {
         setSelectedGallery(gallery);
         setCurrentImageIndex(0);
@@ -203,11 +234,12 @@ const GalleryUpload = () => {
         fetchGalleries();
     }, []);
 
+    // Cleanup all previews on unmount
     useEffect(() => {
         return () => {
             previews.forEach((url) => URL.revokeObjectURL(url));
         };
-    }, [previews]);
+    }, []);
 
     const getProgressColor = (progress) => {
         if (progress < 30) return "bg-red-500";
@@ -230,28 +262,29 @@ const GalleryUpload = () => {
 
     return (
         <div className="min-h-screen w-full bg-gradient-to-br from-[#F7F9F4] via-[#f0f5eb] to-[#e8efe0] text-[#2d3748] font-sans">
-            <Toaster
-                position="top-right"
-                toastOptions={{
-                    duration: 4000,
-                    style: {
-                        background: "#2d3748",
-                        color: "#fff",
-                        borderRadius: "12px",
-                        padding: "16px",
-                    },
-                    success: {
-                        style: {
-                            background: "#1a7d4a",
-                        },
-                    },
-                    error: {
-                        style: {
-                            background: "#b91c1c",
-                        },
-                    },
-                }}
-            />
+<Toaster
+  position="top-right"
+  toastOptions={{
+    duration: 4000,
+    className: "custom-toast",
+    style: {
+      background: "#2d3748",
+      color: "#fff",
+      borderRadius: "12px",
+      padding: "16px",
+    },
+    success: {
+      style: {
+        background: "#1a7d4a",
+      },
+    },
+    error: {
+      style: {
+        background: "#b91c1c",
+      },
+    },
+  }}
+/>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
                 {/* Header */}
@@ -266,10 +299,11 @@ const GalleryUpload = () => {
                     </div>
                     <button
                         onClick={() => setActiveTab("create")}
-                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${activeTab === "create"
-                            ? "bg-[#5A7863] text-white hover:bg-[#4a6a53]"
-                            : "bg-white text-[#3B4953] border border-gray-200 hover:border-[#5A7863]"
-                            }`}
+                        className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                            activeTab === "create"
+                                ? "bg-[#5A7863] text-white hover:bg-[#4a6a53]"
+                                : "bg-white text-[#3B4953] border border-gray-200 hover:border-[#5A7863]"
+                        }`}
                     >
                         <FaPlus className="text-sm" />
                         New Upload
@@ -280,22 +314,24 @@ const GalleryUpload = () => {
                 <div className="flex gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50 shadow-sm mb-6 w-full sm:w-auto">
                     <button
                         onClick={() => setActiveTab("create")}
-                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "create"
-                            ? "bg-[#5A7863] text-white shadow-md"
-                            : "text-[#3B4953] hover:bg-gray-100"
-                            }`}
+                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                            activeTab === "create"
+                                ? "bg-[#5A7863] text-white shadow-md"
+                                : "text-[#3B4953] hover:bg-gray-100"
+                        }`}
                     >
                         <FaUpload className="text-xs" />
                         Upload
                     </button>
                     <button
                         onClick={() => setActiveTab("all")}
-                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "all"
-                            ? "bg-[#5A7863] text-white shadow-md"
-                            : "text-[#3B4953] hover:bg-gray-100"
-                            }`}
+                        className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
+                            activeTab === "all"
+                                ? "bg-[#5A7863] text-white shadow-md"
+                                : "text-[#3B4953] hover:bg-gray-100"
+                        }`}
                     >
-                        <FaTh className="text-xs" /> {/* ✅ fixed icon */}
+                        <FaTh className="text-xs" />
                         All Galleries
                         <span className="ml-1 px-2 py-0.5 text-xs bg-white/20 rounded-full">
                             {galleries.length}
@@ -310,11 +346,11 @@ const GalleryUpload = () => {
                             <form onSubmit={handleSubmit}>
                                 {/* Drop Zone */}
                                 <div
-                                    className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${isDragging
-                                        ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
-                                        : "border-gray-300 hover:border-[#5A7863]/50"
-                                        } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"
-                                        }`}
+                                    className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${
+                                        isDragging
+                                            ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
+                                            : "border-gray-300 hover:border-[#5A7863]/50"
+                                    } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"}`}
                                     onDrop={handleDrop}
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}
@@ -342,26 +378,24 @@ const GalleryUpload = () => {
                                             <p className="text-xs text-gray-300 mt-3">
                                                 Supports JPG, PNG, WEBP & more
                                             </p>
+                                            <p className="text-xs text-gray-400 mt-2">
+                                                ⚡ Large images will be automatically compressed
+                                            </p>
                                         </div>
                                     ) : (
                                         <div className="space-y-4">
+                                            {/* File count and Clear All */}
                                             <div className="flex items-center justify-between mb-2">
                                                 <span className="text-sm font-medium text-[#3B4953]">
                                                     {files.length} file{files.length > 1 ? "s" : ""} selected
                                                 </span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => {
-                                                        setFiles([]);
-                                                        setPreviews([]);
-                                                        setUploadProgress({});
-                                                        if (fileInputRef.current) {
-                                                            fileInputRef.current.value = "";
-                                                        }
-                                                    }}
-                                                    className="text-sm text-red-500 hover:text-red-700 font-medium"
+                                                    onClick={clearAllFiles}
+                                                    className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
                                                 >
-                                                    Clear all
+                                                    <FaTrash size={12} />
+                                                    Clear All
                                                 </button>
                                             </div>
 
@@ -375,8 +409,9 @@ const GalleryUpload = () => {
                                                     </div>
                                                     <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
                                                         <div
-                                                            className={`h-full transition-all duration-300 rounded-full ${isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
-                                                                }`}
+                                                            className={`h-full transition-all duration-300 rounded-full ${
+                                                                isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
+                                                            }`}
                                                             style={{ width: `${totalProgress}%` }}
                                                         />
                                                     </div>
@@ -388,16 +423,43 @@ const GalleryUpload = () => {
                                                 </div>
                                             )}
 
+                                            {/* File list */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
                                                 {files.map((file, index) => {
                                                     const progress = uploadProgress[index] || 0;
                                                     const isDone = progress === 100;
+                                                    const isUploading = loading && progress > 0 && progress < 100;
                                                     return (
                                                         <div
                                                             key={index}
-                                                            className="flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm group hover:shadow-md transition-shadow"
+                                                            className="relative group flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
                                                         >
-                                                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden relative">
+                                                            {/* Remove button – always visible when not uploading and not done */}
+                                                            {!loading && progress === 0 && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeFile(index)}
+                                                                    className="absolute top-2 right-2 z-10 w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors shadow-sm"
+                                                                    title="Remove file"
+                                                                >
+                                                                    <FaTimes size={10} />
+                                                                </button>
+                                                            )}
+
+                                                            {/* Upload status indicator */}
+                                                            {isUploading && (
+                                                                <div className="absolute top-2 right-2 z-10">
+                                                                    <FaSpinner className="text-[#5A7863] animate-spin text-sm" />
+                                                                </div>
+                                                            )}
+                                                            {isDone && (
+                                                                <div className="absolute top-2 right-2 z-10">
+                                                                    <FaCheckCircle className="text-green-500 text-sm" />
+                                                                </div>
+                                                            )}
+
+                                                            {/* Thumbnail */}
+                                                            <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
                                                                 {previews[index] ? (
                                                                     <img
                                                                         src={previews[index]}
@@ -409,13 +471,10 @@ const GalleryUpload = () => {
                                                                         <FaFileImage />
                                                                     </div>
                                                                 )}
-                                                                {isDone && (
-                                                                    <div className="absolute inset-0 bg-green-500/20 flex items-center justify-center">
-                                                                        <FaCheckCircle className="text-green-600 text-lg" />
-                                                                    </div>
-                                                                )}
                                                             </div>
-                                                            <div className="flex-1 min-w-0">
+
+                                                            {/* File info */}
+                                                            <div className="flex-1 min-w-0 pr-6">
                                                                 <p className="text-xs font-medium text-gray-700 truncate">
                                                                     {file.name}
                                                                 </p>
@@ -436,21 +495,6 @@ const GalleryUpload = () => {
                                                                     </div>
                                                                 )}
                                                             </div>
-                                                            {!loading && progress === 0 && (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => removeFile(index)}
-                                                                    className="text-gray-400 hover:text-red-500 transition-colors p-1"
-                                                                >
-                                                                    <FaTimes size={12} />
-                                                                </button>
-                                                            )}
-                                                            {loading && progress > 0 && progress < 100 && (
-                                                                <FaSpinner className="text-[#5A7863] animate-spin text-sm" />
-                                                            )}
-                                                            {isDone && (
-                                                                <FaCheckCircle className="text-green-500 text-sm" />
-                                                            )}
                                                         </div>
                                                     );
                                                 })}
@@ -463,10 +507,11 @@ const GalleryUpload = () => {
                                     <button
                                         type="submit"
                                         disabled={loading || files.length === 0}
-                                        className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${loading || files.length === 0
-                                            ? "bg-gray-300 cursor-not-allowed"
-                                            : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
-                                            }`}
+                                        className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${
+                                            loading || files.length === 0
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
+                                        }`}
                                     >
                                         {loading ? (
                                             <>
@@ -494,6 +539,7 @@ const GalleryUpload = () => {
                             </form>
                         </div>
                     ) : (
+                        // All Galleries view
                         <div>
                             {galleries.length === 0 ? (
                                 <div className="text-center py-16">
@@ -564,7 +610,7 @@ const GalleryUpload = () => {
                                                             <FaEye size={14} />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(g._id)}
+                                                            onClick={() => handleDeleteClick(g)}
                                                             className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
                                                             title="Delete gallery"
                                                         >
@@ -582,7 +628,7 @@ const GalleryUpload = () => {
                 </div>
             </div>
 
-            {/* Lightbox Modal */}
+            {/* Lightbox */}
             {viewModalOpen && selectedGallery && (
                 <div
                     className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4 animate-fadeIn"
@@ -639,10 +685,11 @@ const GalleryUpload = () => {
                                             e.stopPropagation();
                                             setCurrentImageIndex(idx);
                                         }}
-                                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${idx === currentImageIndex
-                                            ? "border-white scale-110 shadow-lg"
-                                            : "border-white/30 hover:border-white/60"
-                                            }`}
+                                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                                            idx === currentImageIndex
+                                                ? "border-white scale-110 shadow-lg"
+                                                : "border-white/30 hover:border-white/60"
+                                        }`}
                                     >
                                         <img
                                             src={img}
@@ -656,6 +703,24 @@ const GalleryUpload = () => {
                     </div>
                 </div>
             )}
+
+            {/* ===== LOADING MODAL ===== */}
+            <LoadingModal
+                isLoading={loading}
+                message={modalMessage}
+                variant="spinner"
+                showProgress={false}
+            />
+
+            {/* ===== DELETE CONFIRMATION MODAL ===== */}
+            <DeleteConfirmationModal
+                isOpen={deleteModalOpen}
+                onClose={handleCloseDeleteModal}
+                onConfirm={handleConfirmDelete}
+                title="Delete Gallery"
+                message={`Are you sure you want to delete "${galleryToDelete?.title || 'this gallery'}"? This action cannot be undone.`}
+                isLoading={isDeleting}
+            />
 
             <style jsx>{`
                 @keyframes fadeIn {

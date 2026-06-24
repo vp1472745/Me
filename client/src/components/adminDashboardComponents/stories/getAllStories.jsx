@@ -1,8 +1,14 @@
-// StoriesList.jsx
 import React, { useState } from "react";
 import { Calendar, MapPin, Trash2, Eye, Image as ImageIcon, Music, Video } from "lucide-react";
 import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 
+/**
+ * StoriesList – Displays story cards with cover image, media badges, and quick actions.
+ * 
+ * @param {Array} stories - List of story objects
+ * @param {Function} onStoryClick - Callback when a card is clicked (view details)
+ * @param {Function} onDeleteStory - Async function to delete a story by ID
+ */
 const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [storyToDelete, setStoryToDelete] = useState(null);
@@ -11,12 +17,14 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric", month: "short", day: "numeric",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const handleDeleteClick = (e, storyId, storyTitle) => {
-    e.stopPropagation(); // Prevents launching the view details modal on card click
+    e.stopPropagation(); // Prevent triggering the card's view action
     setStoryToDelete({ id: storyId, title: storyTitle });
     setDeleteModalOpen(true);
   };
@@ -29,7 +37,7 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
       setDeleteModalOpen(false);
       setStoryToDelete(null);
     } catch (error) {
-      console.error(error);
+      console.error("Delete failed:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -44,16 +52,21 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
             onClick={() => onStoryClick(story)}
             className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1 border border-[#DDE7D8]"
           >
-            {/* Image Cover Display */}
+            {/* Cover Image */}
             <div className="relative h-56 bg-[#F7F9F4] overflow-hidden">
               <img
-                src={story.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop"}
+                src={
+                  story.coverImage ||
+                  "https://images.unsplash.com/photo-1519741497674-611481863552?w=600&h=400&fit=crop"
+                }
                 alt={story.title}
                 className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
-                onError={(e) => { e.target.src = "https://via.placeholder.com/600x400?text=No+Image"; }}
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/600x400?text=No+Image";
+                }}
               />
-              
-              {/* Media Badges Overlay */}
+
+              {/* Media Badges (Images, Videos, Audio) */}
               <div className="absolute top-3 left-3 flex gap-1.5 z-10">
                 {story.galleryImages?.length > 0 && (
                   <span className="flex items-center gap-1 bg-black/60 text-white text-[11px] px-2 py-1 rounded-md backdrop-blur-sm">
@@ -72,11 +85,11 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
                 )}
               </div>
 
-              {/* Delete Action Action Overlay */}
+              {/* Delete Button */}
               <button
                 type="button"
                 onClick={(e) => handleDeleteClick(e, story._id, story.title)}
-                className="absolute top-3 right-3 p-2 bg-white/90 text-red-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-50 shadow-sm z-10"
+                className="absolute top-3 right-3 p-2 bg-white/90 text-red-600 rounded-xl shadow-sm z-10 hover:bg-white transition-colors"
               >
                 <Trash2 size={16} />
               </button>
@@ -89,7 +102,7 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
               </div>
             </div>
 
-            {/* Content Specifications Section */}
+            {/* Story Info */}
             <div className="p-5 space-y-3">
               <div>
                 <h4 className="font-bold text-[#3B4953] text-lg leading-snug truncate group-hover:text-[#5A7863] transition-colors">
@@ -115,7 +128,7 @@ const StoriesList = ({ stories, onStoryClick, onDeleteStory }) => {
         ))}
       </div>
 
-      {/* Confirmation Safeguard Modal integration */}
+      {/* Delete Confirmation Modal – no alert used */}
       <DeleteConfirmationModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}

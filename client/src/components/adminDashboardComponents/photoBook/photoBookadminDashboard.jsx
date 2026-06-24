@@ -1,8 +1,8 @@
-// WeddingStoryDashboard.jsx - Light Nature Theme with Auto-Compression
+// WeddingStoryDashboard.jsx - Light Nature Theme with Auto-Compression & Fixed Slider
 import React, { useEffect, useState, useRef } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import imageCompression from "browser-image-compression"; // 1. Import compression library
+import imageCompression from "browser-image-compression";
 import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
 import {
   createWeddingStory,
@@ -18,7 +18,7 @@ import {
   FaEye,
   FaTimes,
 } from "react-icons/fa";
-import LoadingModal from "../../commonComponents/LoadingModal";
+import LoadingModal from "../../commonComponents/CommonLoadingModal";
 import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 
 const WeddingStoryDashboard = () => {
@@ -59,10 +59,10 @@ const WeddingStoryDashboard = () => {
   ========================= */
   const scrollContainerRef = useRef(null);
 
-  // 2. Compression Options Definition (Max 2MB per image)
+  // Compression Options Definition (Max 2MB per image)
   const compressionOptions = {
-    maxSizeMB: 2,          // Image ko compress karke 2MB se chhota banayega
-    maxWidthOrHeight: 1920, // Full HD resolution dimensions maintain rakhega
+    maxSizeMB: 2,
+    maxWidthOrHeight: 1920,
     useWebWorker: true,
   };
 
@@ -77,7 +77,7 @@ const WeddingStoryDashboard = () => {
       // 1. Compress & Upload Cover Image
       setModalMessage("Compressing cover image...");
       let finalCover = coverImage;
-      if (coverImage.size > 2 * 1024 * 1024) { // Agar 2MB se badi hai to compress karo
+      if (coverImage.size > 2 * 1024 * 1024) {
         finalCover = await imageCompression(coverImage, compressionOptions);
       }
 
@@ -117,7 +117,10 @@ const WeddingStoryDashboard = () => {
       };
 
       await createWeddingStory(finalPayload);
-      toast.success("Wedding Story Created Successfully");
+      toast.success("✅ Wedding Story Created Successfully", {
+        style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        icon: false,
+      });
       
       // Reset Form States
       setTitle("");
@@ -128,7 +131,9 @@ const WeddingStoryDashboard = () => {
       getStories();
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Something went wrong during upload");
+      toast.error(error?.response?.data?.message || "Something went wrong during upload", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     } finally {
       setLoading(false);
     }
@@ -143,7 +148,9 @@ const WeddingStoryDashboard = () => {
       setStories(response.data.data);
     } catch (error) {
       console.log(error);
-      toast.error("Failed to load stories");
+      toast.error("Failed to load stories", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     }
   };
 
@@ -164,11 +171,16 @@ const WeddingStoryDashboard = () => {
     setModalMessage("Deleting story...");
     try {
       await deleteWeddingStory(itemToDelete.id);
-      toast.success("Story deleted successfully");
+      toast.success("🗑️ Story deleted successfully", {
+        style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        icon: false,
+      });
       getStories();
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.message || "Failed to delete");
+      toast.error(error?.response?.data?.message || "Failed to delete", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     } finally {
       setLoading(false);
       setDeleteModalOpen(false);
@@ -185,7 +197,7 @@ const WeddingStoryDashboard = () => {
   };
 
   /* =========================
-      OPEN SLIDER
+      OPEN SLIDER (FIXED)
   ========================= */
   const openSlider = (story) => {
     setSelectedStory(story);
@@ -205,19 +217,32 @@ const WeddingStoryDashboard = () => {
       NEXT / PREV IMAGE
   ========================= */
   const nextImage = () => {
-    if (selectedStory) {
-      setCurrentImageIndex((prev) =>
-        prev === selectedStory.galleryImages?.length - 1 ? 0 : prev + 1
-      );
-    }
+    if (!selectedStory) return;
+    const images = getSliderImages(selectedStory);
+    if (images.length === 0) return;
+    setCurrentImageIndex((prev) =>
+      prev === images.length - 1 ? 0 : prev + 1
+    );
   };
 
   const prevImage = () => {
-    if (selectedStory) {
-      setCurrentImageIndex((prev) =>
-        prev === 0 ? selectedStory.galleryImages?.length - 1 : prev - 1
-      );
+    if (!selectedStory) return;
+    const images = getSliderImages(selectedStory);
+    if (images.length === 0) return;
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? images.length - 1 : prev - 1
+    );
+  };
+
+  /* =========================
+      HELPER: Get images for slider (gallery or cover fallback)
+  ========================= */
+  const getSliderImages = (story) => {
+    if (story?.galleryImages?.length > 0) {
+      return story.galleryImages;
     }
+    // Fallback: use cover image if gallery is empty
+    return story?.coverImage ? [story.coverImage] : [];
   };
 
   /* =========================
@@ -252,6 +277,22 @@ const WeddingStoryDashboard = () => {
 
   return (
     <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      {/* Custom Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        toastClassName="custom-toast"
+        progressClassName="custom-progress"
+      />
+
       {/* Fixed Header & Tabs */}
       <div className="flex-shrink-0 px-4 mt-4">
         <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
@@ -455,9 +496,14 @@ const WeddingStoryDashboard = () => {
         </div>
       </div>
 
-      {/* FULLSCREEN PREVIEW ALBUM SLIDER */}
+      {/* =========================================================
+          FULLSCREEN PREVIEW ALBUM SLIDER – FIXED (with fallback)
+      ========================================================= */}
       {selectedStory && (
-        <div className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden">
+        <div
+          className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden flex items-center justify-center"
+          onClick={closeSlider}
+        >
           <button
             onClick={closeSlider}
             className="absolute top-6 right-6 z-50 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
@@ -470,43 +516,87 @@ const WeddingStoryDashboard = () => {
             <h1 className="text-lg md:text-xl font-bold uppercase tracking-[2px] truncate">
               {selectedStory.title}
             </h1>
-            <p className="text-xs text-white/60 tracking-wider font-light mt-0.5">Gallery Slider Review</p>
+            <p className="text-xs text-white/60 tracking-wider font-light mt-0.5">
+              {getSliderImages(selectedStory).length === 1 && !selectedStory.galleryImages?.length
+                ? "Cover Image (No gallery frames)"
+                : `Gallery Slider • ${getSliderImages(selectedStory).length} frames`
+              }
+            </p>
           </div>
 
-          <div className="h-screen flex items-center justify-center relative px-12">
-            <button
-              onClick={prevImage}
-              className="absolute left-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
-              aria-label="Previous View"
-            >
-              <FaChevronLeft size={16} />
-            </button>
+          {/* Main Image Area */}
+          <div
+            className="h-screen flex items-center justify-center relative px-12 w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {(() => {
+              const images = getSliderImages(selectedStory);
+              if (images.length === 0) {
+                return (
+                  <div className="text-white/80 text-center">
+                    <FaImages size={48} className="mx-auto mb-3 opacity-40" />
+                    <p className="text-sm font-semibold tracking-wide">No media available for this story.</p>
+                  </div>
+                );
+              }
 
-            {selectedStory.galleryImages?.length > 0 ? (
-              <img
-                src={selectedStory.galleryImages[currentImageIndex]}
-                alt={`${selectedStory.title} - Frame index ${currentImageIndex + 1}`}
-                className="max-w-full max-h-[82vh] object-contain rounded shadow-2xl border border-white/5"
-              />
-            ) : (
-              <div className="text-white/80 text-center">
-                <FaImages size={40} className="mx-auto mb-3 opacity-40" />
-                <p className="text-sm font-semibold tracking-wide">No frames inside this gallery collection context.</p>
-              </div>
-            )}
+              return (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                    className="absolute left-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+                    aria-label="Previous View"
+                  >
+                    <FaChevronLeft size={16} />
+                  </button>
 
-            <button
-              onClick={nextImage}
-              className="absolute right-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
-              aria-label="Next View"
-            >
-              <FaChevronRight size={16} />
-            </button>
+                  <img
+                    src={images[currentImageIndex]}
+                    alt={`${selectedStory.title} - Frame ${currentImageIndex + 1}`}
+                    className="max-w-full max-h-[82vh] object-contain rounded shadow-2xl border border-white/5"
+                    onError={(e) => {
+                      e.target.src = "https://via.placeholder.com/800x600?text=Image+Not+Found";
+                    }}
+                  />
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                    className="absolute right-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+                    aria-label="Next View"
+                  >
+                    <FaChevronRight size={16} />
+                  </button>
+                </>
+              );
+            })()}
           </div>
 
-          {selectedStory.galleryImages?.length > 0 && (
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white font-bold text-xs tracking-[2px] z-40 bg-white/10 border border-white/10 px-4 py-1.5 rounded-full">
-              {currentImageIndex + 1} / {selectedStory.galleryImages.length}
+          {/* Thumbnail Strip (only if more than 1 image) */}
+          {getSliderImages(selectedStory).length > 1 && (
+            <div
+              className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex gap-2 px-4 py-2 bg-black/40 backdrop-blur-sm rounded-full overflow-x-auto max-w-[90vw]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {getSliderImages(selectedStory).map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentImageIndex(idx)}
+                  className={`w-10 h-10 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${
+                    currentImageIndex === idx
+                      ? "border-white scale-110"
+                      : "border-white/30 hover:border-white/60"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumb ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+              <span className="text-white/80 text-xs font-bold px-2">
+                {currentImageIndex + 1} / {getSliderImages(selectedStory).length}
+              </span>
             </div>
           )}
         </div>
@@ -529,6 +619,20 @@ const WeddingStoryDashboard = () => {
         message={`Are you sure you want to permanently erase "${itemToDelete?.title || 'this story'}" from the portfolio log entries?`}
         itemName={itemToDelete?.title}
       />
+
+      {/* Global style for toast – consistent width and shadow */}
+      <style jsx global>{`
+        .custom-toast {
+          border-radius: 12px !important;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+          width: 420px !important;
+          max-width: 100vw !important;
+        }
+        .custom-progress {
+          background: rgba(255,255,255,0.3) !important;
+          height: 3px !important;
+        }
+      `}</style>
     </div>
   );
 };

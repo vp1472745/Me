@@ -1,10 +1,12 @@
 // ======================================================
-// FILE: AdminSettings.jsx
+// FILE: AdminFilms.jsx
 // ======================================================
-import  { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createVideo, getAllVideos, deleteVideo } from "../../../config/api";
 import { FaPlay, FaTrash, FaTimes, FaVideo, FaPlus, FaYoutube } from "react-icons/fa";
-import LoadingModal from "../../commonComponents/LoadingModal"; // Importing your modular loader
+import { toast, Toaster } from "react-hot-toast";
+import LoadingModal from "../../commonComponents/CommonLoadingModal";
+import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 
 function AdminFilms() {
   // ==========================
@@ -18,6 +20,11 @@ function AdminFilms() {
   const [loadingMessage, setLoadingMessage] = useState("Processing...");
   const [selectedVideo, setSelectedVideo] = useState(null);
 
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [videoToDelete, setVideoToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // ==========================
   // FETCH VIDEOS
   // ==========================
@@ -28,6 +35,7 @@ function AdminFilms() {
     } catch (error) {
       console.error("Error fetching video assets:", error);
       setVideos([]);
+      toast.error("Failed to load videos");
     }
   };
 
@@ -43,45 +51,70 @@ function AdminFilms() {
   // ==========================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!category.trim()) {
+      toast.error("Please enter a category");
+      return;
+    }
+    if (!youtubeUrl.trim()) {
+      toast.error("Please enter a YouTube URL");
+      return;
+    }
+
     try {
       setLoadingMessage("Adding stream reference into tracking database...");
       setLoading(true);
-      
+
       const formData = new FormData();
       formData.append("category", category);
       formData.append("youtubeUrl", youtubeUrl);
-      
+
       await createVideo(formData);
-      
-      // Reset operational states
+
+      toast.success("Video added successfully!");
       setCategory("");
       setYoutubeUrl("");
       await fetchVideos();
       setActiveTab("all");
     } catch (error) {
       console.error("Video submission sequence interrupted:", error);
-      alert(error.response?.data?.message || "Upload failed");
+      toast.error(error.response?.data?.message || "Upload failed");
     } finally {
       setLoading(false);
     }
   };
 
   // ==========================
-  // DELETE VIDEO RESOURCE
+  // DELETE VIDEO – open modal
   // ==========================
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to completely erase this video resource?")) return;
+  const handleDeleteClick = (video) => {
+    setVideoToDelete(video);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!videoToDelete) return;
+    setIsDeleting(true);
     try {
       setLoadingMessage("Purging stream asset mappings...");
       setLoading(true);
-      await deleteVideo(id);
+      await deleteVideo(videoToDelete._id);
+      toast.success("Video deleted successfully");
       await fetchVideos();
     } catch (error) {
       console.error("Deletion lifecycle failure:", error);
-      alert("Failed to delete video resource.");
+      toast.error("Failed to delete video resource.");
     } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setVideoToDelete(null);
       setLoading(false);
     }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setVideoToDelete(null);
   };
 
   // ==========================
@@ -102,7 +135,16 @@ function AdminFilms() {
 
   return (
     <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
-      
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: { background: "#2d3748", color: "#fff", borderRadius: "12px", padding: "16px" },
+          success: { style: { background: "#1a7d4a" } },
+          error: { style: { background: "#b91c1c" } },
+        }}
+      />
+
       {/* Structural Navigation Tabs Module */}
       <div className="flex-shrink-0 px-4 mt-4">
         <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
@@ -134,12 +176,10 @@ function AdminFilms() {
       {/* Dynamic Content Stream Area */}
       <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
         <div className="max-w-7xl mx-auto mt-6">
-          
           {/* CREATE TAB */}
           {activeTab === "create" && (
             <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
               <form onSubmit={handleSubmit} className="space-y-6">
-                
                 {/* Category Input Selection Box */}
                 <div>
                   <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
@@ -205,7 +245,7 @@ function AdminFilms() {
                   {videos.map((video) => {
                     const embedUrl = getEmbedUrl(video.youtubeUrl);
                     const videoId = embedUrl.includes("/embed/") ? embedUrl.split("/embed/")[1] : "";
-                    
+
                     return (
                       <div
                         key={video._id}
@@ -213,13 +253,16 @@ function AdminFilms() {
                       >
                         {/* Dynamic Stream Image Thumbnail Layout */}
                         {video.youtubeUrl && videoId && (
-                          <div className="relative overflow-hidden h-52 bg-black cursor-pointer" onClick={() => setSelectedVideo(video)}>
+                          <div
+                            className="relative overflow-hidden h-52 bg-black cursor-pointer"
+                            onClick={() => setSelectedVideo(video)}
+                          >
                             <img
                               src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
                               alt={video.title || "Cinema Feed"}
                               className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                               onError={(e) => {
-                                e.target.onerror = null; // Prevent infinite fallback loops
+                                e.target.onerror = null;
                                 e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                               }}
                             />
@@ -247,7 +290,7 @@ function AdminFilms() {
                             <FaPlay size={10} /> Stream
                           </button>
                           <button
-                            onClick={() => handleDelete(video._id)}
+                            onClick={() => handleDeleteClick(video)}
                             className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
                             title="Erase Stream Resource"
                           >
@@ -320,6 +363,16 @@ function AdminFilms() {
         message={loadingMessage}
         showProgress={false}
         variant="dots"
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Video"
+        message={`Are you sure you want to delete "${videoToDelete?.category || 'this video'}"? This action cannot be undone.`}
+        isLoading={isDeleting}
       />
     </div>
   );

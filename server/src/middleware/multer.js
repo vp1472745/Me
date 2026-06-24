@@ -31,7 +31,7 @@ const storage = new CloudinaryStorage({
     if (mimeType.startsWith("audio/")) {
       return {
         folder: "stories/audio",
-        resource_type: "video", // Cloudinary treats audio as a 'video' resource type
+        resource_type: "video", // Cloudinary treats audio as 'video' resource type
         allowed_formats: ["mp3", "wav", "aac", "m4a"],
       };
     }
@@ -42,9 +42,7 @@ const storage = new CloudinaryStorage({
 
 export const upload = multer({
   storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // Restricted to 10MB to match Cloudinary free tier limitations
-  },
+  // ✅ No `limits` – removes file size restriction
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
       // Images

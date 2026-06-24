@@ -1,6 +1,6 @@
 // StoryManager.jsx - Matches Wedding Dashboard UI (Pill Tabs + Inline Form)
 import React, { useState, useEffect, useCallback } from "react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   Plus,
@@ -17,11 +17,12 @@ import {
   Grid3x3,
 } from "lucide-react";
 
-import CommonModal from "../../commonComponents/modelCommonComponents";
-import LoadingModal from "../../commonComponents/LoadingModal";
+import CommonModal from "../../commonComponents/CommonModelComponents";
+import LoadingModal from "../../commonComponents/CommonLoadingModal";
+import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 import { createStory, getAllStories, deleteStory } from "../../../config/api";
 import StoriesList from "./getAllStories";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload"; // Imported your utility function
+import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
 
 const StoryManager = () => {
   const [activeTab, setActiveTab] = useState("upload");
@@ -53,6 +54,11 @@ const StoryManager = () => {
   const [selectedStory, setSelectedStory] = useState(null);
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
 
+  // Delete Confirmation Modal State
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Cleanup object URLs on unmount
   useEffect(() => {
     return () => {
@@ -80,7 +86,9 @@ const StoryManager = () => {
     } catch (err) {
       console.error(err);
       setViewError(err?.response?.data?.message || "Failed to load stories");
-      toast.error(err?.response?.data?.message || "Failed to load stories");
+      toast.error(err?.response?.data?.message || "Failed to load stories", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     } finally {
       setViewLoading(false);
     }
@@ -117,7 +125,9 @@ const StoryManager = () => {
   const handleGalleryImagesChange = (e) => {
     const files = Array.from(e.target.files);
     if (galleryImages.length + files.length > 10) {
-      toast.warning("Maximum 10 images allowed");
+      toast.warning("Maximum 10 images allowed", {
+        style: { background: "#d97706", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
       return;
     }
     setGalleryImages((prev) => [...prev, ...files]);
@@ -126,7 +136,9 @@ const StoryManager = () => {
   const handleGalleryVideosChange = (e) => {
     const files = Array.from(e.target.files);
     if (galleryVideos.length + files.length > 5) {
-      toast.warning("Maximum 5 videos allowed");
+      toast.warning("Maximum 5 videos allowed", {
+        style: { background: "#d97706", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
       return;
     }
     setGalleryVideos((prev) => [...prev, ...files]);
@@ -233,12 +245,17 @@ const StoryManager = () => {
       };
 
       const response = await createStory(payload);
-      toast.success(response.data?.message || "Story created successfully!");
+      toast.success(response.data?.message || " Story created successfully!", {
+        style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        
+      });
       resetForm();
       if (activeTab === "view") fetchStories();
     } catch (error) {
       console.error("Submission Error:", error);
-      toast.error(error?.response?.data?.message || error?.message || "Something went wrong");
+      toast.error(error?.response?.data?.message || error?.message || "Something went wrong", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     } finally {
       setLoading(false);
     }
@@ -259,53 +276,92 @@ const StoryManager = () => {
     setDetailsModalOpen(true);
   };
 
-  const handleDeleteStory = async (id) => {
-    const confirmDelete = window.confirm("Delete this story?");
-    if (!confirmDelete) return;
-    setViewLoading(true);
-    setModalMessage("Deleting story...");
+  // ✅ FIXED: handleDeleteClick now accepts a story ID, finds the full story from state
+  const handleDeleteClick = (storyId) => {
+    const story = stories.find((s) => s._id === storyId);
+    if (story) {
+      setStoryToDelete(story);
+      setDeleteModalOpen(true);
+    } else {
+      toast.error("Story not found", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!storyToDelete) return;
+    setIsDeleting(true);
     try {
-      await deleteStory(id);
-      setStories((prev) => prev.filter((s) => s._id !== id));
-      toast.success("Story deleted successfully");
+      await deleteStory(storyToDelete._id);
+      setStories((prev) => prev.filter((s) => s._id !== storyToDelete._id));
+      toast.success(" Story deleted successfully!", {
+        style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      
+      });
+      setDeleteModalOpen(false);
+      setStoryToDelete(null);
     } catch (err) {
       console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to delete story");
+      toast.error(err?.response?.data?.message || "Failed to delete story", {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
     } finally {
-      setViewLoading(false);
+      setIsDeleting(false);
     }
+  };
+
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setStoryToDelete(null);
   };
 
   return (
     <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      {/* Custom Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+        toastClassName="custom-toast"
+        progressClassName="custom-progress"
+      />
+
       {/* Fixed Header & Tabs */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 mt-5">
         <div className="border-b border-[#DDE7D8]">
-          <div className="flex items-center gap-4 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 mx-auto px-4 sm:px-6 lg:px-8">
             <button
               onClick={() => setActiveTab("upload")}
-              className={`px-8 py-4 text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[3px] transition-all duration-200 ${
+              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${
                 activeTab === "upload"
                   ? "bg-[#5A7863] text-white shadow-md"
                   : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
               }`}
             >
-              <span className="flex items-center gap-2">
-                <Upload size={16} />
+              <span className="flex items-center justify-center gap-2">
+                <Upload size={14} className="sm:w-4 sm:h-4" />
                 Upload Story
               </span>
             </button>
 
             <button
               onClick={() => setActiveTab("view")}
-              className={`px-8 py-4 text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[3px] transition-all duration-200 ${
+              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${
                 activeTab === "view"
                   ? "bg-[#5A7863] text-white shadow-md"
                   : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
               }`}
             >
-              <span className="flex items-center gap-2">
-                <Grid3x3 size={16} />
+              <span className="flex items-center justify-center gap-2">
+                <Grid3x3 size={14} className="sm:w-4 sm:h-4" />
                 View Stories
               </span>
             </button>
@@ -604,7 +660,7 @@ const StoryManager = () => {
                     <StoriesList
                       stories={stories}
                       onStoryClick={openStoryDetails}
-                      onDeleteStory={handleDeleteStory}
+                      onDeleteStory={handleDeleteClick}
                     />
                   )}
 
@@ -733,11 +789,33 @@ const StoryManager = () => {
 
       {/* Global Loading Modal */}
       <LoadingModal
-        isLoading={loading || (viewLoading && stories.length === 0)}
+        isLoading={loading || viewLoading}
         message={modalMessage}
         variant="spinner"
         showProgress={false}
       />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Story"
+        message={`Are you sure you want to delete "${storyToDelete?.title || 'this story'}"? This action cannot be undone.`}
+        isLoading={isDeleting}
+      />
+
+      {/* Optional global style for toast */}
+      <style jsx global>{`
+        .custom-toast {
+          border-radius: 12px !important;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.15) !important;
+        }
+        .custom-progress {
+          background: rgba(255,255,255,0.3) !important;
+          height: 3px !important;
+        }
+      `}</style>
     </div>
   );
 };

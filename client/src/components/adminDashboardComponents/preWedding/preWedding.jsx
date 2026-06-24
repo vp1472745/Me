@@ -10,6 +10,7 @@ import {
   Plus,
   Upload,
 } from "lucide-react";
+import { toast, Toaster } from "react-hot-toast";
 
 // ✅ Import the Cloudinary upload helper
 import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
@@ -20,6 +21,10 @@ import {
   getAllPreWeddingStories,
   deletePreWeddingStory,
 } from "../../../config/api";
+
+// ✅ Common Modals
+import LoadingModal from "../../commonComponents/CommonLoadingModal";
+import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 
 const PreWedding = () => {
   // ======================================================
@@ -32,14 +37,15 @@ const PreWedding = () => {
   // ======================================================
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [coverImage, setCoverImage] = useState(null);      // File object
-  const [galleryImages, setGalleryImages] = useState([]);  // Array of File objects
-  const [uploading, setUploading] = useState(false);
+  const [coverImage, setCoverImage] = useState(null);
+  const [galleryImages, setGalleryImages] = useState([]);
 
   // ======================================================
-  // UPLOAD PROGRESS STATE
+  // UPLOAD PROGRESS & LOADING STATE
   // ======================================================
-  const [uploadProgress, setUploadProgress] = useState({}); // { cover: 0, gallery-0: 0, ... }
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [modalMessage, setModalMessage] = useState("Uploading...");
 
   // ======================================================
   // GET ALL STATES
@@ -48,10 +54,17 @@ const PreWedding = () => {
   const [loading, setLoading] = useState(true);
 
   // ======================================================
-  // MODAL STATES
+  // MODAL STATES (Lightbox)
   // ======================================================
   const [selectedStory, setSelectedStory] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  // ======================================================
+  // DELETE MODAL STATE
+  // ======================================================
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [storyToDelete, setStoryToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // ======================================================
   // FETCH STORIES
@@ -63,6 +76,7 @@ const PreWedding = () => {
       setStories(response?.data?.data || []);
     } catch (error) {
       console.log(error);
+      toast.error("Failed to load stories");
     } finally {
       setLoading(false);
     }
@@ -73,29 +87,59 @@ const PreWedding = () => {
   }, []);
 
   // ======================================================
+  // REMOVE COVER IMAGE
+  // ======================================================
+  const removeCoverImage = () => {
+    setCoverImage(null);
+    setUploadProgress((prev) => {
+      const newProgress = { ...prev };
+      delete newProgress.cover;
+      return newProgress;
+    });
+  };
+
+  // ======================================================
+  // REMOVE GALLERY IMAGE
+  // ======================================================
+  const removeGalleryImage = (index) => {
+    const newGallery = [...galleryImages];
+    newGallery.splice(index, 1);
+    setGalleryImages(newGallery);
+
+    // Remove progress entry for this image
+    setUploadProgress((prev) => {
+      const newProgress = { ...prev };
+      delete newProgress[`gallery-${index}`];
+      // Optionally re-index remaining progress keys (not strictly necessary)
+      return newProgress;
+    });
+  };
+
+  // ======================================================
   // CREATE STORY – with client‑side Cloudinary upload + progress
   // ======================================================
   const handleCreateStory = async (e) => {
     e.preventDefault();
 
     if (!title.trim()) {
-      alert("Please enter a story title.");
+      toast.error("Please enter a story title.");
       return;
     }
     if (!coverImage) {
-      alert("Please select a cover image.");
+      toast.error("Please select a cover image.");
       return;
     }
 
     try {
       setUploading(true);
-      // Reset progress
       setUploadProgress({});
+      setModalMessage("Preparing upload...");
 
       // 1️⃣ Upload cover image with progress
       const coverResult = await new Promise((resolve, reject) => {
         uploadToCloudinary(coverImage, (percent) => {
           setUploadProgress((prev) => ({ ...prev, cover: percent }));
+          setModalMessage(`Uploading cover image... ${percent}%`);
         })
           .then(resolve)
           .catch(reject);
@@ -104,27 +148,31 @@ const PreWedding = () => {
       setUploadProgress((prev) => ({ ...prev, cover: 100 }));
 
       // 2️⃣ Upload all gallery images with progress
-      const galleryResults = await Promise.all(
-        galleryImages.map((file, idx) =>
-          new Promise((resolve, reject) => {
-            uploadToCloudinary(file, (percent) => {
-              setUploadProgress((prev) => ({
-                ...prev,
-                [`gallery-${idx}`]: percent,
-              }));
-            })
-              .then(resolve)
-              .catch(reject);
+      const galleryResults = [];
+      for (let i = 0; i < galleryImages.length; i++) {
+        const file = galleryImages[i];
+        setModalMessage(`Uploading gallery image ${i + 1} of ${galleryImages.length}...`);
+        const result = await new Promise((resolve, reject) => {
+          uploadToCloudinary(file, (percent) => {
+            setUploadProgress((prev) => ({
+              ...prev,
+              [`gallery-${i}`]: percent,
+            }));
+            setModalMessage(
+              `Uploading gallery image ${i + 1} of ${galleryImages.length}... ${percent}%`
+            );
           })
-        )
-      );
+            .then(resolve)
+            .catch(reject);
+        });
+        galleryResults.push(result);
+        setUploadProgress((prev) => ({ ...prev, [`gallery-${i}`]: 100 }));
+      }
+
       const galleryUrls = galleryResults.map((res) => res.secure_url);
-      // Mark all gallery as done
-      galleryImages.forEach((_, idx) => {
-        setUploadProgress((prev) => ({ ...prev, [`gallery-${idx}`]: 100 }));
-      });
 
       // 3️⃣ Send URLs to backend (as JSON)
+      setModalMessage("Saving story to database...");
       const payload = {
         title: title.trim(),
         description: description.trim(),
@@ -134,7 +182,7 @@ const PreWedding = () => {
 
       await createPreWeddingStory(payload);
 
-      alert("✅ Pre-Wedding Story Created Successfully");
+      toast.success(" Pre-Wedding Story Created Successfully");
 
       // Reset form
       setTitle("");
@@ -146,28 +194,45 @@ const PreWedding = () => {
       setActiveTab("all");
     } catch (error) {
       console.error("Upload error:", error);
-      alert(error?.response?.data?.message || "Upload failed. Please try again.");
+      toast.error(error?.response?.data?.message || "Upload failed. Please try again.");
     } finally {
       setUploading(false);
+      setModalMessage("Uploading...");
     }
   };
 
   // ======================================================
-  // DELETE STORY
+  // DELETE STORY – with confirmation modal
   // ======================================================
-  const handleDelete = async (id) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete?");
-    if (!confirmDelete) return;
+  const handleDeleteClick = (story) => {
+    setStoryToDelete(story);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!storyToDelete) return;
+    setIsDeleting(true);
     try {
-      await deletePreWeddingStory(id);
+      await deletePreWeddingStory(storyToDelete._id);
+      toast.success("Story deleted successfully");
       fetchStories();
     } catch (error) {
       console.log(error);
+      toast.error("Delete failed");
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setStoryToDelete(null);
     }
   };
 
+  const handleCloseDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setStoryToDelete(null);
+  };
+
   // ======================================================
-  // MODAL FUNCTIONS
+  // MODAL FUNCTIONS (Lightbox)
   // ======================================================
   const openModal = (story) => {
     setSelectedStory(story);
@@ -223,6 +288,16 @@ const PreWedding = () => {
   // ======================================================
   return (
     <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 4000,
+          style: { background: "#2d3748", color: "#fff", borderRadius: "12px", padding: "16px" },
+          success: { style: { background: "#1a7d4a" } },
+          error: { style: { background: "#b91c1c" } },
+        }}
+      />
+
       {/* ===== TABS ===== */}
       <div className="flex-shrink-0 px-4 mt-4">
         <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
@@ -314,12 +389,24 @@ const PreWedding = () => {
                       </div>
                     </div>
                     {coverImage && (
-                      <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md mt-2 inline-block truncate max-w-full shadow-xs">
-                        ✓ Banner: {coverImage.name}
-                        {uploadProgress.cover !== undefined && uploadProgress.cover < 100 && (
-                          <span className="ml-2 text-xs">({Math.round(uploadProgress.cover)}%)</span>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md inline-block truncate max-w-[70%] shadow-xs">
+                          ✓ Banner: {coverImage.name}
+                          {uploadProgress.cover !== undefined && uploadProgress.cover < 100 && (
+                            <span className="ml-2 text-xs">({Math.round(uploadProgress.cover)}%)</span>
+                          )}
+                        </p>
+                        {!uploading && (
+                          <button
+                            type="button"
+                            onClick={removeCoverImage}
+                            className="p-1 text-red-500  rounded-full transition-colors"
+                            title="Remove cover image"
+                          >
+                            <X size={16} />
+                          </button>
                         )}
-                      </p>
+                      </div>
                     )}
                   </div>
 
@@ -335,7 +422,6 @@ const PreWedding = () => {
                         multiple
                         onChange={(e) => {
                           setGalleryImages(Array.from(e.target.files));
-                          // Reset progress for new files
                           setUploadProgress({});
                         }}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
@@ -355,7 +441,7 @@ const PreWedding = () => {
                   </div>
                 </div>
 
-                {/* Local Previews with Progress Overlays */}
+                {/* Local Previews with Progress Overlays & Remove Icons */}
                 {galleryImages.length > 0 && (
                   <div className="p-4 bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl">
                     <p className="text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]/60 mb-2">Matrix Stream Preview</p>
@@ -364,13 +450,24 @@ const PreWedding = () => {
                         const progress = uploadProgress[`gallery-${idx}`] ?? 0;
                         const isUploading = uploading && progress > 0 && progress < 100;
                         return (
-                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white border border-[#DDE7D8]">
+                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white border border-[#DDE7D8] group">
                             <img
                               src={URL.createObjectURL(img)}
                               alt="preview"
                               className="w-full h-full object-cover"
                             />
-                            {/* Progress overlay */}
+                            {/* Remove button – hidden during upload */}
+                            {!uploading && (
+                              <button
+                                type="button"
+                                onClick={() => removeGalleryImage(idx)}
+                                className="absolute top-1 right-1 p-1 bg-red-500/60 rounded-full text-white "
+                                title="Remove image"
+                              >
+                                <X size={14} />
+                              </button>
+                            )}
+                            {/* Progress overlay during upload */}
                             {isUploading && (
                               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                                 <div className="w-full h-full relative">
@@ -384,7 +481,8 @@ const PreWedding = () => {
                                 </div>
                               </div>
                             )}
-                            {progress === 100 && (
+                            {/* Done badge – only if upload completed and not uploading anymore */}
+                            {progress === 100 && !uploading && (
                               <div className="absolute top-1 right-1 bg-green-500/80 text-white text-[8px] px-1.5 py-0.5 rounded-full">
                                 ✓
                               </div>
@@ -472,7 +570,7 @@ const PreWedding = () => {
                             <Eye size={12} /> Inspect
                           </button>
                           <button
-                            onClick={() => handleDelete(story._id)}
+                            onClick={() => handleDeleteClick(story)}
                             className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
                             title="Delete Story"
                           >
@@ -555,6 +653,25 @@ const PreWedding = () => {
           )}
         </div>
       )}
+
+      {/* ===== LOADING MODAL ===== */}
+      <LoadingModal
+        isLoading={uploading || loading}
+        message={uploading ? modalMessage : "Loading stories..."}
+        showProgress={uploading}
+        progress={getOverallProgress()}
+        variant="spinner"
+      />
+
+      {/* ===== DELETE CONFIRMATION MODAL ===== */}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title="Delete Story"
+        message={`Are you sure you want to delete "${storyToDelete?.title || 'this story'}"? This action cannot be undone.`}
+        isLoading={isDeleting}
+      />
     </div>
   );
 };
