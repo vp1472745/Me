@@ -2,7 +2,7 @@ import axios from "axios";
 
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://me-1-u6w8.onrender.com/api";
+  "https://me-vp02.onrender.com/api";
 
 console.log("BASE_URL =", BASE_URL);
 
