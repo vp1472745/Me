@@ -65,36 +65,21 @@ function Login() {
       // Role Based Redirect
       // ==========================
 
-      const userRole =
-        response.data.user.role;
+    const userRole = response.data.user.role;
 
-      // ADMIN
-      if (
-        userRole === "ADMIN"
-      ) {
+// Save user
+localStorage.setItem("user", JSON.stringify(response.data.user));
 
-        navigate(
-          "/dashboard/admin-stories",
-        );
+toast.success(response.data.message);
 
-      }
-
-      // EDITOR
-      else if (
-        userRole === "EDITOR"
-      ) {
-
-        navigate(
-          "/dashboard/editor-overview",
-        );
-
-      }
-
-      // DEFAULT
-      else {
-
-        navigate("/");
-      }
+// Force full page reload after login
+if (userRole === "ADMIN") {
+  window.location.replace("/dashboard/admin-stories");
+} else if (userRole === "EDITOR") {
+  window.location.replace("/dashboard/editor-overview");
+} else {
+  window.location.replace("/");
+}
 
     }  catch (error) {
   console.log("ERROR:", error);
