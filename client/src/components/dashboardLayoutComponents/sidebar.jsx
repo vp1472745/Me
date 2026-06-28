@@ -49,7 +49,7 @@ function Sidebar() {
               to="/admin-Hero"
               className={getLinkClass("/admin-Hero")}
             >
-              Create Hero Section
+        Upload Hero Backgrounds
             </Link>
             <Link
               to="/admin-stories"
