@@ -269,6 +269,45 @@ const WeddingStoryDashboard = () => {
   }, [activeTab]);
 
   /* =========================
+      FILE SIZE VALIDATION HANDLERS
+  ========================= */
+  const handleCoverImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    // Validate file size (500MB limit)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    if (file.size > maxSize) {
+      const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
+      return;
+    }
+    
+    setCoverImage(file);
+  };
+
+  const handleGalleryImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    // Validate file size (500MB limit per file)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
+      toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
+      return;
+    }
+    
+    setGalleryImages([...files]);
+  };
+
+  /* =========================
       INITIAL LOAD
   ========================= */
   useEffect(() => {
@@ -373,7 +412,7 @@ const WeddingStoryDashboard = () => {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => setCoverImage(e.target.files[0])}
+                          onChange={handleCoverImageChange}
                           className="hidden"
                           required
                         />
@@ -398,7 +437,7 @@ const WeddingStoryDashboard = () => {
                           type="file"
                           accept="image/*"
                           multiple
-                          onChange={(e) => setGalleryImages([...e.target.files])}
+                          onChange={handleGalleryImagesChange}
                           className="hidden"
                         />
                       </label>

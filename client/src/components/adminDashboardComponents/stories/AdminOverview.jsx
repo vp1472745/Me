@@ -107,6 +107,15 @@ const StoryManager = () => {
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (500MB limit)
+      const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+      if (file.size > maxSize) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+          style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        });
+        return;
+      }
       if (coverPreview) URL.revokeObjectURL(coverPreview);
       setCoverImage(file);
       setCoverPreview(URL.createObjectURL(file));
@@ -116,6 +125,15 @@ const StoryManager = () => {
   const handleAudioChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Validate file size (500MB limit)
+      const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+      if (file.size > maxSize) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+          style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        });
+        return;
+      }
       if (audioPreview) URL.revokeObjectURL(audioPreview);
       setAudio(file);
       setAudioPreview(URL.createObjectURL(file));
@@ -130,6 +148,19 @@ const StoryManager = () => {
       });
       return;
     }
+    
+    // Validate file size (500MB limit per file)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
+      toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
+      return;
+    }
+    
     setGalleryImages((prev) => [...prev, ...files]);
   };
 
@@ -141,6 +172,19 @@ const StoryManager = () => {
       });
       return;
     }
+    
+    // Validate file size (500MB limit per file)
+    const maxSize = 500 * 1024 * 1024; // 500MB in bytes
+    const oversizedFiles = files.filter(file => file.size > maxSize);
+    
+    if (oversizedFiles.length > 0) {
+      const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
+      toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
+        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+      });
+      return;
+    }
+    
     setGalleryVideos((prev) => [...prev, ...files]);
     files.forEach((file) => {
       setVideoPreviews((prev) => ({
@@ -187,6 +231,13 @@ const StoryManager = () => {
   // Process and Sequentially Upload Asset Files straight to Cloudinary
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submission started");
+    console.log("Form data:", formData);
+    console.log("Cover image:", coverImage);
+    console.log("Audio:", audio);
+    console.log("Gallery images:", galleryImages);
+    console.log("Gallery videos:", galleryVideos);
+    
     setLoading(true);
 
     try {
@@ -245,6 +296,7 @@ const StoryManager = () => {
       };
 
       const response = await createStory(payload);
+      console.log("Story creation response:", response);
       toast.success(response.data?.message || " Story created successfully!", {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
         
@@ -253,7 +305,10 @@ const StoryManager = () => {
       if (activeTab === "view") fetchStories();
     } catch (error) {
       console.error("Submission Error:", error);
-      toast.error(error?.response?.data?.message || error?.message || "Something went wrong", {
+      console.error("Error response:", error?.response);
+      console.error("Error status:", error?.response?.status);
+      console.error("Error data:", error?.response?.data);
+      toast.error(error?.response?.data?.message || error?.message || `Upload failed: ${error?.response?.status || 'Network error'}`, {
         style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
       });
     } finally {

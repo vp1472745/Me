@@ -112,6 +112,6 @@ const server = app.listen(PORT, () => {
   console.log(`📡 Production Pipeline actively dispatching objects on Interface Port: ${PORT}`);
 });
 
-// Set server socket thresholds to 5 minutes to fully support continuous stream chunks upload
-server.timeout = 300000;         // 5 Minutes network timeout
-server.keepAliveTimeout = 300000; // 5 Minutes stream persistence pipeline
+// Set server socket thresholds to 10 minutes to fully support continuous stream chunks upload (500MB files)
+server.timeout = 600000;         // 10 Minutes network timeout
+server.keepAliveTimeout = 600000; // 10 Minutes stream persistence pipeline

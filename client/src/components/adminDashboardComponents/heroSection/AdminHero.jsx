@@ -72,10 +72,8 @@ const HeroManager = () => {
           borderRadius: "12px",
           padding: "16px 24px",
           boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-        
         },
         progressClassName: "bg-white/30",
-       
       });
 
       setSelectedFile(null);
@@ -137,8 +135,8 @@ const HeroManager = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953] min-h-screen">
-      {/* Custom styled Toast Container */}
+    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={4000}
@@ -154,37 +152,48 @@ const HeroManager = () => {
         progressClassName="custom-progress"
       />
 
-      {/* Tabs */}
-      <div className="px-4 mt-4">
-        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm flex flex-wrap">
-          {["create", "all"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`flex-1 min-w-[120px] px-4 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[2px] transition-all flex items-center justify-center gap-2 ${
-                activeTab === tab
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4]"
-              }`}
-            >
-              {tab === "create" ? <Plus size={14} /> : <ImageIcon size={14} />}
-              {tab === "create" ? "Upload" : "All Media"}
-            </button>
-          ))}
+      {/* ===== FIXED HEADER (Tabs) ===== */}
+      <div className="sticky top-0 z-20  px-4 pt-4 pb-0">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap gap-1 bg-white rounded-t-xl overflow-hidden shadow-sm border border-[#DDE7D8]">
+            {["create", "all"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 min-w-[120px] px-4 py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[2px] transition-all flex items-center justify-center gap-2 ${
+                  activeTab === tab
+                    ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-[#5A7863]"
+                    : "text-[#3B4953]/70 hover:bg-[#F7F9F4]"
+                }`}
+              >
+                {tab === "create" ? <Plus size={14} /> : <ImageIcon size={14} />}
+                {tab === "create" ? "Upload" : "All Media"}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 p-4 sm:p-6 lg:p-10">
+      {/* ===== SCROLLABLE CONTENT ===== */}
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-10">
         <div className="max-w-7xl mx-auto">
           {activeTab === "create" ? (
             <div className="bg-white rounded-2xl border border-[#DDE7D8] p-6 shadow-sm">
               <form onSubmit={handleCreate} className="space-y-6">
                 <div className="relative border-2 border-dashed border-[#90AB8B]/40 rounded-xl p-4 sm:p-10 flex flex-col items-center text-center">
-                  <input type="file" accept="image/*,video/*" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                  />
                   {previewUrl ? (
                     <div className="w-full max-w-sm">
-                      {fileType === "video" ? <video src={previewUrl} className="rounded-lg w-full" controls /> : <img src={previewUrl} className="rounded-lg w-full max-h-60 object-contain" alt="Preview" />}
+                      {fileType === "video" ? (
+                        <video src={previewUrl} className="rounded-lg w-full" controls />
+                      ) : (
+                        <img src={previewUrl} className="rounded-lg w-full max-h-60 object-contain" alt="Preview" />
+                      )}
                     </div>
                   ) : (
                     <div className="py-10 text-[#3B4953]/60">
@@ -193,7 +202,11 @@ const HeroManager = () => {
                     </div>
                   )}
                 </div>
-                <button type="submit" disabled={uploading || !selectedFile} className="w-full bg-[#5A7863] text-white py-4 rounded-xl font-bold uppercase tracking-[2px] text-xs disabled:opacity-50">
+                <button
+                  type="submit"
+                  disabled={uploading || !selectedFile}
+                  className="w-full bg-[#5A7863] text-white py-4 rounded-xl font-bold uppercase tracking-[2px] text-xs disabled:opacity-50 transition hover:bg-[#4A6853]"
+                >
                   {uploading ? `Uploading ${uploadProgress}%` : "Publish"}
                 </button>
               </form>
@@ -201,33 +214,87 @@ const HeroManager = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {heroes.map((hero) => (
-                <div key={hero._id} className="bg-white rounded-xl border border-[#DDE7D8] p-3 flex flex-col gap-3">
+                <div
+                  key={hero._id}
+                  className="bg-white rounded-xl border border-[#DDE7D8] p-3 flex flex-col gap-3 shadow-sm hover:shadow-md transition"
+                >
                   <div className="h-48 bg-[#F7F9F4] rounded-lg overflow-hidden relative">
-                    {hero.mediaType === "video" ? <video src={hero.mediaUrl} className="w-full h-full object-cover" /> : <img src={hero.mediaUrl} className="w-full h-full object-cover" />}
+                    {hero.mediaType === "video" ? (
+                      <video src={hero.mediaUrl} className="w-full h-full object-cover" />
+                    ) : (
+                      <img src={hero.mediaUrl} className="w-full h-full object-cover" />
+                    )}
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => { setSelectedHero(hero); setLightboxOpen(true); }} className="flex-1 bg-[#F7F9F4] text-[#5A7863] py-2 rounded-lg text-xs font-bold uppercase">Inspect</button>
-                    <button onClick={() => { setHeroToDelete(hero); setDeleteModalOpen(true); }} className="px-4 bg-red-50 text-red-600 rounded-lg"><Trash2 size={16} /></button>
+                    <button
+                      onClick={() => {
+                        setSelectedHero(hero);
+                        setLightboxOpen(true);
+                      }}
+                      className="flex-1 bg-[#F7F9F4] text-[#5A7863] py-2 rounded-lg text-xs font-bold uppercase hover:bg-[#EBF4DD] transition flex items-center justify-center gap-1"
+                    >
+                      <Eye size={14} /> Inspect
+                    </button>
+                    <button
+                      onClick={() => {
+                        setHeroToDelete(hero);
+                        setDeleteModalOpen(true);
+                      }}
+                      className="px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 </div>
               ))}
+              {heroes.length === 0 && !loading && (
+                <div className="col-span-full text-center py-12 text-[#3B4953]/50">
+                  <ImageIcon size={48} className="mx-auto mb-4 opacity-30" />
+                  <p className="text-sm font-medium">No media uploaded yet.</p>
+                </div>
+              )}
+              {loading && (
+                <div className="col-span-full text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#5A7863] border-t-transparent" />
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Lightbox */}
-      {lightboxOpen && (
-        <div className="fixed inset-0 z-[1000] bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxOpen(false)}>
-          <button className="absolute top-5 right-5 text-white" onClick={() => setLightboxOpen(false)}><X size={30} /></button>
-          {selectedHero.mediaType === "video" ? <video src={selectedHero.mediaUrl} controls className="max-w-full max-h-[80vh]" /> : <img src={selectedHero.mediaUrl} className="max-w-full max-h-[80vh] object-contain" />}
+      {lightboxOpen && selectedHero && (
+        <div
+          className="fixed inset-0 z-[1000] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            className="absolute top-5 right-5 text-white hover:text-gray-300 transition"
+            onClick={() => setLightboxOpen(false)}
+          >
+            <X size={30} />
+          </button>
+          {selectedHero.mediaType === "video" ? (
+            <video src={selectedHero.mediaUrl} controls className="max-w-full max-h-[80vh]" />
+          ) : (
+            <img src={selectedHero.mediaUrl} className="max-w-full max-h-[80vh] object-contain" />
+          )}
         </div>
       )}
 
+      {/* Modals */}
       <LoadingModal isLoading={uploading} message="Uploading..." />
-      <DeleteConfirmationModal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={handleConfirmDelete} />
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Hero Media"
+        message={`Are you sure you want to delete this media? This action cannot be undone.`}
+        isLoading={isDeleting}
+      />
 
-      {/* Optional: global style for toast (if you want to override default classes) */}
+      {/* Global toast styles (optional) */}
       <style jsx global>{`
         .custom-toast {
           border-radius: 12px !important;
