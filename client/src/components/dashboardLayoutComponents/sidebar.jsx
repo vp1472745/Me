@@ -45,11 +45,8 @@ function Sidebar() {
         {/* ADMIN SIDEBAR */}
         {roleType === "ADMIN" && (
           <>
-            <Link
-              to="/admin-Hero"
-              className={getLinkClass("/admin-Hero")}
-            >
-        Upload Hero Backgrounds
+            <Link to="/admin-Hero" className={getLinkClass("/admin-Hero")}>
+              Upload Hero Backgrounds
             </Link>
             <Link
               to="/admin-stories"
@@ -74,6 +71,30 @@ function Sidebar() {
               className={getLinkClass("/admin-PreWedding")}
             >
               Create PreWedding
+            </Link>
+            <Link to="/admin-users" className={getLinkClass("/admin-users")}>
+              Create Users
+            </Link>
+
+            {/* 🆕 Family Access Links */}
+            <Link
+              to="/dashboard/family-access"
+              className={getLinkClass("/dashboard/family-access")}
+            >
+              Family Access
+            </Link>
+            <Link
+              to="/dashboard/admin-family-requests"
+              className={getLinkClass("/dashboard/admin-family-requests")}
+            >
+              Admin Family Requests
+            </Link>
+
+                <Link
+              to="/dashboard/assign-work"
+              className={getLinkClass("/dashboard/assign-work")}
+            >
+          Assign Work
             </Link>
           </>
         )}

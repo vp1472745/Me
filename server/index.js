@@ -19,6 +19,7 @@ import ImageRouter from "./src/router/imageRoute.js";
 import filmRoutes from "./src/router/filmsRoutes.js";
 import preWeddingRoutes from "./src/router/preWeddingRoutes.js";
 import heroRoutes from "./src/router/heroRoutes.js";
+import FamilyAcessRoutes from "./src/router/familyAccessRoutes.js";
 
 // Cloudinary Configuration Verification Trigger
 import "../server/src/config/cloudinary.js"; 
@@ -81,6 +82,7 @@ app.use("/api/image", ImageRouter);
 app.use("/api/film", filmRoutes);
 app.use("/api/pre-wedding", preWeddingRoutes);
 app.use("/api/hero", heroRoutes);
+app.use("/api/family-access", FamilyAcessRoutes);
 
 // Health Check API Matrix endpoint
 app.get("/api/health", (req, res) => {

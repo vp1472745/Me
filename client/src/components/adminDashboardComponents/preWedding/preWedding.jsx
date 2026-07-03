@@ -71,15 +71,13 @@ const PreWedding = () => {
   // ======================================================
   const fetchStories = async () => {
     try {
-      setLoading(true);
+    
       const response = await getAllPreWeddingStories();
       setStories(response?.data?.data || []);
     } catch (error) {
       console.log(error);
       toast.error("Failed to load stories");
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   useEffect(() => {
@@ -689,11 +687,7 @@ const PreWedding = () => {
 
       {/* ===== LOADING MODAL ===== */}
       <LoadingModal
-        isLoading={uploading || loading}
-        message={uploading ? modalMessage : "Loading stories..."}
-        showProgress={uploading}
-        progress={getOverallProgress()}
-        variant="spinner"
+       null
       />
 
       {/* ===== DELETE CONFIRMATION MODAL ===== */}

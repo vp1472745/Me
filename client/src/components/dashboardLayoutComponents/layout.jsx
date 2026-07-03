@@ -17,6 +17,10 @@ import {
   HeartHandshake,
   ChevronLeft,
   ChevronRight,
+  Users,
+  UserPlus,
+  UserCheck ,
+  Shield,
   Menu,
   X,
 } from "lucide-react";
@@ -38,7 +42,7 @@ function Layout({ roleType }) {
       const width = window.innerWidth;
       if (width <= 768) {
         setIsSidebarOpen(false);
-        setIsMobileOpen(false); // close mobile overlay when resizing to desktop
+        setIsMobileOpen(false);
       } else {
         setIsSidebarOpen(true);
         setIsMobileOpen(false);
@@ -85,6 +89,11 @@ function Layout({ roleType }) {
     { to: "/dashboard/images-admin", label: "Gallery", icon: ImagePlus },
     { to: "/dashboard/admin-Films", label: "Films", icon: Clapperboard },
     { to: "/dashboard/admin-PreWedding", label: "Pre-Wedding", icon: HeartHandshake },
+    { to: "/dashboard/admin-users", label: "Create Users", icon: Users },
+    { to: "/dashboard/assign-work", label: "Assign Work", icon: UserCheck },
+
+    // { to: "/dashboard/family-access", label: "Family Access", icon: UserPlus },
+    // { to: "/dashboard/admin-family-requests", label: "Family Requests (Admin)", icon: Shield },
   ];
 
   const editorNav = [
@@ -97,8 +106,8 @@ function Layout({ roleType }) {
 
   const isDesktop = window.innerWidth > 768;
   const isDesktopOpen = isSidebarOpen && isDesktop;
-  const sidebarWidth = isDesktopOpen ? "w-72" : (isDesktop ? "w-20" : "w-0");
-  const contentMargin = isDesktopOpen ? "ml-72" : (isDesktop ? "ml-20" : "ml-0");
+  const sidebarWidth = isDesktopOpen ? "w-72" : isDesktop ? "w-20" : "w-0";
+  const contentMargin = isDesktopOpen ? "ml-72" : isDesktop ? "ml-20" : "ml-0";
 
   const isActive = (path) => location.pathname === path;
 
@@ -185,19 +194,19 @@ function Layout({ roleType }) {
                   {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
                 </button>
               )}
-<h1 className="text-[18px] font-semibold tracking-tight">
-  {roleType === "ADMIN" ? (
-    <>
-      <span className="text-[#B8894B]">Admin</span>{" "}
-      <span className="text-[#3F4A56]">Dashboard</span>
-    </>
-  ) : (
-    <>
-      <span className="text-[#B8894B]">Content</span>{" "}
-      <span className="text-[#3F4A56]">Management</span>
-    </>
-  )}
-</h1>
+              <h1 className="text-[18px] font-semibold tracking-tight">
+                {roleType === "ADMIN" ? (
+                  <>
+                    <span className="text-[#B8894B]">Admin</span>{" "}
+                    <span className="text-[#3F4A56]">Dashboard</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[#B8894B]">Content</span>{" "}
+                    <span className="text-[#3F4A56]">Management</span>
+                  </>
+                )}
+              </h1>
             </div>
 
             {/* Right: role badge */}
@@ -236,11 +245,7 @@ function SidebarContent({
       {/* Brand & Toggle Button */}
       <div className="p-1 border-b border-[#DDE7D8] flex items-center justify-between min-h-[73px]">
         {isSidebarOpen ? (
-          <div
-            className="flex items-center gap-2.5 group cursor-pointer"
-            
-
-          >
+          <div className="flex items-center gap-2.5 group cursor-pointer">
             <Camera className="w-6 h-6 text-[#5A7863] transition-transform duration-500 group-hover:rotate-12" />
             <div>
               <h2 className="text-[14px] font-extrabold tracking-wide">
@@ -251,10 +256,7 @@ function SidebarContent({
             </div>
           </div>
         ) : (
-          <Camera
-            className="w-6 h-6 text-[#5A7863] mx-auto cursor-pointer hover:scale-110 transition-transform"
-           
-          />
+          <Camera className="w-6 h-6 text-[#5A7863] mx-auto cursor-pointer hover:scale-110 transition-transform" />
         )}
         <button
           onClick={toggleSidebar}
