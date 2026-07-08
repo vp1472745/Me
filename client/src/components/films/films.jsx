@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAllVideos } from "../../config/api";
 import Navbar from "../homeComponents/navbarHomeComponents";
+import FlimHeroSection from "./flimsHeroSection";
 
 function InstaCuts() {
   const [videos, setVideos] = useState([]);
@@ -45,7 +46,8 @@ function InstaCuts() {
   return (
     <>
    < Navbar textColor="text-black/50" />
-      <div className="min-h-screen px-5 md:px-16 py-28 md:py-35">
+    <FlimHeroSection />
+      <div className="min-h-screen px-5 md:px-16 ">
         {/* HEADER */}
         <div className="text-center mb-20">
           <div className="border-t border-gray-300 mb-10" />

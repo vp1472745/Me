@@ -17,6 +17,8 @@ import "react-toastify/dist/ReactToastify.css";
 import StoryManager from "./components/storiesComponents/mainFile";
 import StoryDetails from "./components/storiesComponents/StoryDetails";
 import StoriesList from "./components/storiesComponents/mainFile";
+import Registeration from "./components/auth/registeration"
+import Login from "./components/auth/login"
 
 /* ==========================
    PHOTOBOOKS
@@ -92,8 +94,8 @@ const AssignWork = lazy(() =>
 /* ==========================
    LOGIN PAGE
 ========================== */
-const Login = lazy(() => import("./components/Login"));
-
+const AdminLogin = lazy(() => import("./components/Login"));
+  
 function App() {
   const userStr = localStorage.getItem("user");
   let user = null;
@@ -111,14 +113,15 @@ function App() {
             PUBLIC ROUTES
         ========================== */}
         <Route element={<PublicRoute />}>
-          <Route path="/login" element={<Login />} />
+          <Route path="/adminlogin" element={<AdminLogin />} />
         </Route>
 
         {/* ==========================
             HOME PAGE
         ========================== */}
         <Route path="/" element={<Home />} />
-
+<Route path="/register" element={<Registeration />} />
+<Route path="/login" element={<Login />} />
         {/* ==========================
             STORIES
         ========================== */}

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import Navbar from "../homeComponents/navbarHomeComponents";
+import FAQHeroSection from "./FAQHeroSection"
 
 const faqData = [
 
@@ -197,6 +198,7 @@ const WeddingFAQ = () => {
 
   <>
 < Navbar textColor="text-black/50" />
+<FAQHeroSection />
 
     <div className="min-h-screen  py-16 px-4 md:px-10">
 
@@ -204,7 +206,7 @@ const WeddingFAQ = () => {
           HEADER
       ====================================================== */}
         {/* Header */}
-        <div className="text-center mb-12 py-8 md:py-20">
+        <div className="text-center mb-12 ">
           <div className="border-t border-[#cfc6bb] w-full max-w-4xl mx-auto"></div>
           <h1 className="text-4xl md:text-3xl font-light tracking-[8px] text-[#6f655d] mt-6 px-2">
             FREQUENTLY ASKED QUESTIONS

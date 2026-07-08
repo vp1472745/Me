@@ -77,7 +77,7 @@ function Layout({ roleType }) {
     } finally {
       localStorage.removeItem("user");
       toast.success("Logout Successfully");
-      navigate("/login");
+      navigate("/");
     }
   };
 
@@ -90,10 +90,9 @@ function Layout({ roleType }) {
     { to: "/dashboard/admin-Films", label: "Films", icon: Clapperboard },
     { to: "/dashboard/admin-PreWedding", label: "Pre-Wedding", icon: HeartHandshake },
     { to: "/dashboard/admin-users", label: "Create Users", icon: Users },
-    { to: "/dashboard/assign-work", label: "Assign Work", icon: UserCheck },
+    { to: "/dashboard/admin-all-users", label: "ALL Users", icon: UserCheck },
 
-    // { to: "/dashboard/family-access", label: "Family Access", icon: UserPlus },
-    // { to: "/dashboard/admin-family-requests", label: "Family Requests (Admin)", icon: Shield },
+    
   ];
 
   const editorNav = [
@@ -219,7 +218,8 @@ function Layout({ roleType }) {
         </header>
 
         {/* Scrollable content */}
-        <main className="flex-1 overflow-y-auto  sm:p-6">
+        <main className="flex-1 overflow-y-auto 
+         sm:p-6">
           <Outlet />
         </main>
       </div>

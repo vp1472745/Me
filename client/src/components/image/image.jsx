@@ -11,6 +11,7 @@ import {
   getAllGalleries,
 } from "../../config/api";
 import Navbar from "../homeComponents/navbarHomeComponents";
+import ImageHeroSection from "../image/ImageHeroSection"
 
 import {
   ChevronLeft,
@@ -108,6 +109,7 @@ const GallerySection = () => {
 
     <>
 <Navbar textColor="text-black/50" />
+<ImageHeroSection />
       {/* =====================================
           GALLERY SECTION
       ===================================== */}
@@ -115,7 +117,7 @@ const GallerySection = () => {
       <section
         className="
   
-          py-20 md:py-20
+          
           px-4
           md:px-10
         "

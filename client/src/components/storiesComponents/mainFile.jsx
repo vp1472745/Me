@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllStories } from "../../config/api";
 import { MapPin, Users, Music, Video } from "lucide-react";
 import Navbar from "../homeComponents/navbarHomeComponents";
+import StoriesHeroSection from "./StoriesHeroSection";
 
 const Stories = () => {
   const navigate = useNavigate();
@@ -72,7 +73,8 @@ const Stories = () => {
   return (
     <>
     <Navbar textColor="text-black/50" />
-      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 py-28 md:py-40">
+    <StoriesHeroSection />
+      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 ">
         <div className="max-w-7xl mx-auto">
           {/* Header - responsive text and spacing */}
           <div className="text-center mb-8 md:mb-12">
