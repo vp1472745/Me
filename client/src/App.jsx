@@ -39,6 +39,9 @@ import FAQ from "./components/FAQ/faq";
    ADMIN PAGES
 ========================== */
 const AdminOverview = lazy(() =>
+  import("./components/adminDashboardComponents/AdminOverview")
+);
+const AdminStories = lazy(() =>
   import("./components/adminDashboardComponents/stories/AdminOverview")
 );
 const AdminHero = lazy(() =>
@@ -59,6 +62,9 @@ const AdminPreWedding = lazy(() =>
 const AdminCreateUsers = lazy(() =>
   import("./components/adminDashboardComponents/CreateUsers/CreateUsers")
 );
+const AdminUsers = lazy(() =>
+  import("./components/adminDashboardComponents/AdminUsers")
+);
 
 /* ==========================
    EDITOR PAGES
@@ -71,6 +77,31 @@ const EditorPosts = lazy(() =>
 );
 const EditorSettings = lazy(() =>
   import("./components/editorDashboardComponents/EditorSettings")
+);
+
+/* ==========================
+   USER DASHBOARD PAGES
+========================== */
+const UserOverview = lazy(() =>
+  import("./components/userDashboardComponents/UserOverview")
+);
+const MyProjects = lazy(() =>
+  import("./components/userDashboardComponents/MyProjects")
+);
+const UserGallery = lazy(() =>
+  import("./components/userDashboardComponents/UserGallery")
+);
+const UserCorrections = lazy(() =>
+  import("./components/userDashboardComponents/UserCorrections")
+);
+const UserNotifications = lazy(() =>
+  import("./components/userDashboardComponents/UserNotifications")
+);
+const UserTimeline = lazy(() =>
+  import("./components/userDashboardComponents/UserTimeline")
+);
+const UserProfile = lazy(() =>
+  import("./components/userDashboardComponents/UserProfile")
 );
 
 /* ==========================
@@ -174,9 +205,11 @@ function App() {
               index
               element={
                 roleType === "ADMIN" ? (
-                  <Navigate to="admin-stories" replace />
-                ) : (
+                  <Navigate to="admin-overview" replace />
+                ) : roleType === "EDITOR" ? (
                   <Navigate to="editor-overview" replace />
+                ) : (
+                  <Navigate to="user-overview" replace />
                 )
               }
             />
@@ -184,9 +217,11 @@ function App() {
             {/* ==========================
                 ADMIN ROUTES
             ========================== */}
+            <Route path="admin-overview" element={<AdminOverview />} />
             <Route path="admin-hero" element={<AdminHero />} />
             <Route path="admin-users" element={<AdminCreateUsers />} />
-            <Route path="admin-stories" element={<AdminOverview />} />
+            <Route path="admin-all-users" element={<AdminUsers />} />
+            <Route path="admin-stories" element={<AdminStories />} />
             <Route path="photobooks-admin" element={<PhotoBooksAdmin />} />
             <Route path="images-admin" element={<ImageAdminDashboard />} />
             <Route path="admin-Films" element={<AdminFilms />} />
@@ -199,6 +234,17 @@ function App() {
             <Route path="editor-overview" element={<EditorOverview />} />
             <Route path="posts" element={<EditorPosts />} />
             <Route path="editor-settings" element={<EditorSettings />} />
+
+            {/* ==========================
+                USER ROUTES
+            ========================== */}
+            <Route path="user-overview" element={<UserOverview />} />
+            <Route path="my-projects" element={<MyProjects />} />
+            <Route path="gallery" element={<UserGallery />} />
+            <Route path="corrections" element={<UserCorrections />} />
+            <Route path="notifications" element={<UserNotifications />} />
+            <Route path="timeline" element={<UserTimeline />} />
+            <Route path="profile" element={<UserProfile />} />
 
             {/* ==========================
                 FAMILY ACCESS ROUTES

@@ -245,21 +245,66 @@ const API = axios.create({
 // Auth APIs
 // ==========================
 
-export const loginUser = async (data) => {
-  return API.post("/auth/login", data);
+// ==========================
+// Send OTP
+// ==========================
+
+export const sendOTP = async (email) => {
+  return API.post("/auth/send-otp", {
+    email,
+  });
 };
+
+// ==========================
+// Register
+// ==========================
 
 export const registerUser = async (data) => {
   return API.post("/auth/register", data);
 };
 
-// ✅ ADDED: createUser (alias for registerUser)
-export const createUser = registerUser; // same as register
+// Alias
+export const createUser = registerUser;
+
+// ==========================
+// Login
+// ==========================
+
+export const loginUser = async (data) => {
+  return API.post("/auth/login", data);
+};
+
+// ==========================
+// Logout
+// ==========================
 
 export const logoutUser = async () => {
   return API.get("/auth/logout");
 };
 
+// ==========================
+// Admin User Management APIs
+// ==========================
+
+export const getAdminUsers = async () => {
+  return API.get("/auth/admin/users");
+};
+
+export const getAdminEditors = async () => {
+  return API.get("/auth/admin/editors");
+};
+
+export const getAdminPendingUsers = async () => {
+  return API.get("/auth/admin/pending");
+};
+
+export const approveUserRequest = async (userId) => {
+  return API.post("/auth/admin/approve", { userId });
+};
+
+export const rejectUserRequest = async (userId) => {
+  return API.post("/auth/admin/reject", { userId });
+};
 // ==========================
 // Access APIs
 // ==========================
@@ -438,6 +483,151 @@ export const approveFamilyRequest = async (userId, requestId) => {
 
 export const rejectFamilyRequest = async (userId, requestId) => {
   return API.put(`/family-access/reject/${userId}/${requestId}`);
+};
+
+// ==========================
+// Photo Studio MERN Extensions APIs
+// ==========================
+
+// User Creation
+export const createAdminUser = async (data) => {
+  return API.post("/users/create-admin", data);
+};
+
+export const createEditorUser = async (data) => {
+  return API.post("/users/create-editor", data);
+};
+
+export const createClientUser = async (data) => {
+  return API.post("/users/create-user", data);
+};
+
+export const getAllDirectoryUsers = async (params) => {
+  return API.get("/users", { params });
+};
+
+export const getPendingDirectoryUsers = async () => {
+  return API.get("/users/pending");
+};
+
+export const approveDirectoryUser = async (data) => {
+  return API.post("/users/approve", data);
+};
+
+export const rejectDirectoryUser = async (data) => {
+  return API.post("/users/reject", data);
+};
+
+// Google Drive
+export const connectGoogleDrive = async (userId) => {
+  return API.get(`/google/connect/${userId}`);
+};
+
+export const getGoogleDriveStatus = async (userId) => {
+  return API.get(`/google/status/${userId}`);
+};
+
+export const disconnectGoogleDrive = async (userId) => {
+  return API.post(`/google/disconnect/${userId}`);
+};
+
+export const sendGoogleDriveLinkEmail = async (userId) => {
+  return API.post(`/google/send-link/${userId}`);
+};
+
+// Work / Assignments
+export const createWorkAssignment = async (data) => {
+  return API.post("/work/create", data);
+};
+
+export const submitWorkDuration = async (data) => {
+  return API.post("/work/duration", data);
+};
+
+export const approveWorkDuration = async (data) => {
+  return API.post("/work/approve-duration", data);
+};
+
+export const completeWorkAssignment = async (data) => {
+  return API.post("/work/complete", data);
+};
+
+export const getWorkAssignments = async () => {
+  return API.get("/work");
+};
+
+export const getWorkHistoryLogs = async (params) => {
+  return API.get("/work/history", { params });
+};
+
+// Uploads (Form Data required)
+export const uploadFileToDrive = async (formData) => {
+  return API.post("/upload/photo", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+export const uploadMultipleFilesToDrive = async (formData) => {
+  return API.post("/upload/multiple", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+// Corrections
+export const createCorrectionRequest = async (data) => {
+  return API.post("/correction/create", data);
+};
+
+export const updateCorrectionRequest = async (formData) => {
+  return API.post("/correction/update", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+};
+
+export const getCorrectionRequestHistory = async (fileId) => {
+  return API.get("/correction/history", { params: { fileId } });
+};
+
+export const approveCorrectedImage = async (data) => {
+  return API.post("/correction/approve", data);
+};
+
+export const getCorrectionsList = async () => {
+  return API.get("/correction");
+};
+
+// Gallery
+export const getGalleryDeliverables = async (params) => {
+  return API.get("/gallery", { params });
+};
+
+export const downloadGalleryFile = async (fileId, workId) => {
+  return API.get("/gallery/download", {
+    params: { fileId, workId },
+    responseType: "blob", // Important for file download streaming
+  });
+};
+
+export const toggleFavoriteGalleryFile = async (data) => {
+  return API.post("/gallery/favorite", data);
+};
+
+// Notifications
+export const getNotifications = async () => {
+  return API.get("/notification");
+};
+
+export const markNotificationRead = async (notificationId) => {
+  return API.put(`/notification/${notificationId}/read`);
+};
+
+export const markAllNotificationsRead = async () => {
+  return API.post("/notification/read-all");
+};
+
+// Analytics
+export const getDashboardAnalytics = async () => {
+  return API.get("/analytics/stats");
 };
 
 export default API;

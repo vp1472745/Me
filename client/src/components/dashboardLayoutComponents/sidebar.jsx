@@ -72,9 +72,9 @@ function Sidebar() {
             >
               Create PreWedding
             </Link>
-            <Link to="/admin-users" className={getLinkClass("/admin-users")}>
+            {/* <Link to="/admin-users" className={getLinkClass("/admin-users")}>
               Create Users
-            </Link>
+            </Link> */}
 
             {/* 🆕 Family Access Links */}
             <Link

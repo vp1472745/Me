@@ -1,5 +1,6 @@
 // src/components/Registration/Registration.jsx
 import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -15,9 +16,10 @@ import {
 } from "react-icons/fa";
 import { MdPhotoCamera } from "react-icons/md";
 import Image from "../../assets/LoginRegisterImage.jpg";
+import { sendOTP, registerUser } from "../../config/api"; // ✅ import actual API functions
 
 // ============================================================
-// COUNTRY CODES
+// COUNTRY CODES (UI only)
 // ============================================================
 const COUNTRY_CODES = [
   { code: "+91", country: "India" },
@@ -41,13 +43,6 @@ const COUNTRY_CODES = [
   { code: "+966", country: "Saudi Arabia" },
   { code: "+52", country: "Mexico" },
 ];
-
-// ============================================================
-// PERMISSIONS (USER role only)
-// ============================================================
-const PERMISSIONS = {
-  USER: ["view_dashboard"],
-};
 
 // ============================================================
 // TERMS & CONDITIONS CONTENT
@@ -80,29 +75,29 @@ Last updated: January 2026
 // MAIN COMPONENT
 // ============================================================
 const Registration = () => {
+  const navigate = useNavigate();
   // --- Form fields ---
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(""); // UI only (not sent to backend)
   const [email, setEmail] = useState("");
-  const [countryCode, setCountryCode] = useState("+91");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [password, setPassword] = useState("");
+  const [countryCode, setCountryCode] = useState("+91"); // UI only
+  const [phoneNumber, setPhoneNumber] = useState(""); // UI only
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
 
   // --- OTP states ---
   const [step, setStep] = useState("form");
   const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
   const [otpError, setOtpError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // --- Form submission (send OTP) ---
+  // --- Send OTP ---
   const handleSendOtp = async (e) => {
     e.preventDefault();
 
-    if (!name || !username || !password) {
-      toast.error("Name, username, and password are required");
+    // Validation
+    if (!name || !username) {
+      toast.error("Name and username are required");
       return;
     }
     if (!email) {
@@ -128,41 +123,39 @@ const Registration = () => {
     }
 
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otpCode);
-    toast.info(`OTP sent to ${email} (demo: ${otpCode})`);
-    setStep("otp");
-    setLoading(false);
+    try {
+      // Call actual sendOTP API
+      const response = await sendOTP(email);
+      toast.success(`OTP sent to ${email} successfully!`);
+      setStep("otp");
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || "Failed to send OTP. Please try again.";
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // --- Verify OTP and create user ---
+  // --- Verify OTP and register user ---
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
       setOtpError(true);
       toast.error("Please enter a 6-digit OTP");
       return;
     }
-    if (otp !== generatedOtp) {
-      setOtpError(true);
-      toast.error("Invalid OTP. Please try again.");
-      return;
-    }
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      const fullPhone = countryCode + phoneNumber;
+      // Prepare data for registration (only fields expected by backend)
       const userData = {
         name,
-        username,
         email,
-        phone: fullPhone,
-        password,
         role: "USER",
-        permissions: PERMISSIONS.USER,
+        otp, // the OTP entered by user
       };
-      console.log("User registered:", userData);
+
+      // Call actual register API
+      const response = await registerUser(userData);
 
       toast.success(
         <div className="flex items-center gap-2">
@@ -179,14 +172,19 @@ const Registration = () => {
       setEmail("");
       setCountryCode("+91");
       setPhoneNumber("");
-      setPassword("");
       setTermsAccepted(false);
       setOtp("");
-      setGeneratedOtp("");
       setOtpError(false);
       setStep("form");
+
+      // Redirect to login after a brief delay so toast can be read
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     } catch (error) {
-      toast.error("Registration failed. Please try again.");
+      const errorMsg = error.response?.data?.message || "Registration failed. Please try again.";
+      toast.error(errorMsg);
+      setOtpError(true);
     } finally {
       setLoading(false);
     }
@@ -196,7 +194,6 @@ const Registration = () => {
     setStep("form");
     setOtp("");
     setOtpError(false);
-    setGeneratedOtp("");
   };
 
   return (
@@ -210,7 +207,7 @@ const Registration = () => {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowTermsModal(false)}
           />
-          <div className="relative bg-white  shadow-2xl max-w-lg w-full  flex flex-col animate-fadeInUp">
+          <div className="relative bg-white shadow-2xl max-w-lg w-full flex flex-col animate-fadeInUp rounded-3xl">
             <div className="flex items-center justify-between p-6 border-b border-slate-200">
               <h3 className="text-xl font-semibold text-slate-800">Terms & Conditions</h3>
               <button
@@ -235,11 +232,11 @@ const Registration = () => {
         </div>
       )}
 
-      <div className="flex items-center justify-center bg-[#1a1a1a]  ">
-        <div className="w-full max-w-5xl  overflow-hidden shadow-2xl bg-white flex flex-col md:flex-row">
+      <div className="flex items-center justify-center bg-[#1a1a1a] min-h-screen p-4">
+        <div className="w-full max-w-5xl overflow-hidden shadow-2xl bg-white rounded-3xl flex flex-col md:flex-row">
           
           {/* ========== LEFT SIDE – IMAGE WITH OVERLAY ========== */}
-          <div className="hidden md:flex md:w-2/5 relative overflow-hidden ">
+          <div className="hidden md:flex md:w-2/5 relative overflow-hidden min-h-[600px]">
             <img
               src={Image}
               alt="Photography"
@@ -268,17 +265,12 @@ const Registration = () => {
                     Capture the moment
                   </span>
                 </div>
-
               </div>
-      
             </div>
           </div>
 
           {/* ========== RIGHT SIDE – FORM ========== */}
           <div className="w-full md:w-3/5 p-6 md:p-8 lg:p-10 bg-white">
-    
-
-
             {step === "form" ? (
               <form onSubmit={handleSendOtp}>
                 <div className="space-y-4">
@@ -368,21 +360,8 @@ const Registration = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                      Password <span className="text-rose-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <FaKey className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                      <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Enter password"
-                        className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#C9A96E] focus:ring-2 focus:ring-[#C9A96E]/20 transition"
-                        required
-                      />
-                    </div>
+                  <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed shadow-sm">
+                    <strong>Note:</strong> Your password will be automatically generated based on your name and sent to your registered email address once an administrator approves your account.
                   </div>
 
                   <div className="flex items-start gap-2 pt-2">
@@ -440,9 +419,17 @@ const Registration = () => {
                       )}
                     </button>
                   </div>
+
+                  <p className="text-center text-sm text-slate-500 mt-4">
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-[#C9A96E] font-semibold hover:underline">
+                      Sign in
+                    </Link>
+                  </p>
                 </div>
               </form>
             ) : (
+              // ---- OTP Verification Step ----
               <div className="space-y-4">
                 <div className="text-center mb-2">
                   <FaEnvelope className="text-4xl text-[#C9A96E] mx-auto mb-2" />
@@ -512,9 +499,16 @@ const Registration = () => {
                   <button
                     type="button"
                     onClick={() => {
-                      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-                      setGeneratedOtp(newOtp);
-                      toast.info(`New OTP sent (demo: ${newOtp})`);
+                      // Resend OTP
+                      setLoading(true);
+                      sendOTP(email)
+                        .then(() => {
+                          toast.success(`OTP resent to ${email}`);
+                        })
+                        .catch((err) => {
+                          toast.error(err.response?.data?.message || "Failed to resend OTP");
+                        })
+                        .finally(() => setLoading(false));
                     }}
                     className="text-[#C9A96E] hover:underline font-semibold"
                   >

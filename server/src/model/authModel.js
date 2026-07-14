@@ -53,10 +53,19 @@ const familyMemberSchema = new mongoose.Schema(
 
 const userSchema = new mongoose.Schema(
   {
+
+
     name: {
       type: String,
       required: true,
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
       unique: true,
+      lowercase: true,
       trim: true,
     },
 
@@ -68,7 +77,7 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: ["ADMIN", "EDITOR", "USER"],
-      required: true,
+      default: "USER",
     },
 
     permissions: [
@@ -77,7 +86,59 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    // User created by Admin
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    status: {
+    type: String,
+    enum: ["PENDING", "APPROVED", "REJECTED"],
+    default: "PENDING"
+},
+
+    // ===========================
+    // Google Drive Integration
+    // ===========================
+
+    googleDrive: {
+      connected: {
+        type: Boolean,
+        default: false,
+      },
+
+      googleEmail: {
+        type: String,
+        default: "",
+      },
+
+      accessToken: {
+        type: String,
+        default: "",
+      },
+
+      refreshToken: {
+        type: String,
+        default: "",
+      },
+
+      rootFolderId: {
+        type: String,
+        default: "",
+      },
+
+      connectedAt: {
+        type: Date,
+        default: null,
+      },
+    },
+
+    // ===========================
     // Family Access Requests
+    // ===========================
+
     familyRequests: [familyMemberSchema],
   },
   {
@@ -85,6 +146,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-const User = mongoose.model("User", userSchema);
-
-export default User;
+export default mongoose.model("User", userSchema);

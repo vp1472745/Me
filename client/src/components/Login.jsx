@@ -75,9 +75,11 @@ toast.success(response.data.message);
 
 // Force full page reload after login
 if (userRole === "ADMIN") {
-  window.location.replace("/dashboard/admin-stories");
+  window.location.replace("/dashboard/admin-overview");
 } else if (userRole === "EDITOR") {
   window.location.replace("/dashboard/editor-overview");
+} else if (userRole === "USER") {
+  window.location.replace("/dashboard/user-overview");
 } else {
   window.location.replace("/");
 }

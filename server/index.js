@@ -1,9 +1,7 @@
 // ======================================================
 // FILE: server.js (Main Core Entry Point)
 // ======================================================
-import dotenv from "dotenv";
-// 🔥 CRITICAL: Must be execution line #1 to load environmental primitives before any configurations read them
-dotenv.config();
+import "dotenv/config";
 
 import express from "express";
 import mongoose from "mongoose";
@@ -20,6 +18,16 @@ import filmRoutes from "./src/router/filmsRoutes.js";
 import preWeddingRoutes from "./src/router/preWeddingRoutes.js";
 import heroRoutes from "./src/router/heroRoutes.js";
 import FamilyAcessRoutes from "./src/router/familyAccessRoutes.js";
+
+// MERN Photo Studio Integrations
+import userRouter from "./src/router/userRouter.js";
+import googleRouter from "./src/router/googleRouter.js";
+import workRouter from "./src/router/workRouter.js";
+import uploadRouter from "./src/router/uploadRouter.js";
+import correctionRouter from "./src/router/correctionRouter.js";
+import galleryRouter from "./src/router/galleryRouter.js";
+import notificationRouter from "./src/router/notificationRouter.js";
+import analyticsRouter from "./src/router/analyticsRouter.js";
 
 // Cloudinary Configuration Verification Trigger
 import "../server/src/config/cloudinary.js"; 
@@ -83,6 +91,16 @@ app.use("/api/film", filmRoutes);
 app.use("/api/pre-wedding", preWeddingRoutes);
 app.use("/api/hero", heroRoutes);
 app.use("/api/family-access", FamilyAcessRoutes);
+
+// Mounted REST API endpoints
+app.use("/api/users", userRouter);
+app.use("/api/google", googleRouter);
+app.use("/api/work", workRouter);
+app.use("/api/upload", uploadRouter);
+app.use("/api/correction", correctionRouter);
+app.use("/api/gallery", galleryRouter);
+app.use("/api/notification", notificationRouter);
+app.use("/api/analytics", analyticsRouter);
 
 // Health Check API Matrix endpoint
 app.get("/api/health", (req, res) => {

@@ -19,10 +19,14 @@ import {
   ChevronRight,
   Users,
   UserPlus,
-  UserCheck ,
+  UserCheck,
   Shield,
   Menu,
   X,
+  Bell,
+  History,
+  User as UserIcon,
+  Briefcase,
 } from "lucide-react";
 
 function Layout({ roleType }) {
@@ -81,27 +85,41 @@ function Layout({ roleType }) {
     }
   };
 
-  // Navigation items
   const adminNav = [
+    { to: "/dashboard/admin-overview", label: "Dashboard", icon: Home },
     { to: "/dashboard/admin-hero", label: "Hero Content", icon: LayoutTemplate },
     { to: "/dashboard/admin-stories", label: "Stories", icon: ScrollText },
     { to: "/dashboard/photobooks-admin", label: "Photo Books", icon: BookImage },
     { to: "/dashboard/images-admin", label: "Gallery", icon: ImagePlus },
     { to: "/dashboard/admin-Films", label: "Films", icon: Clapperboard },
     { to: "/dashboard/admin-PreWedding", label: "Pre-Wedding", icon: HeartHandshake },
-    { to: "/dashboard/admin-users", label: "Create Users", icon: Users },
+    { to: "/dashboard/assign-work", label: "Assign Work", icon: Briefcase },
     { to: "/dashboard/admin-all-users", label: "ALL Users", icon: UserCheck },
-
-    
   ];
 
   const editorNav = [
-    { to: "/dashboard/editor-overview", label: "Overview", icon: Home, permission: "overview" },
-    { to: "/dashboard/posts", label: "Posts", icon: FileText, permission: "posts" },
-    { to: "/dashboard/editor-settings", label: "Settings", icon: Settings, permission: "settings" },
+    { to: "/dashboard/editor-overview", label: "Overview", icon: Home },
+    { to: "/dashboard/posts", label: "Posts", icon: FileText },
+    { to: "/dashboard/editor-settings", label: "Settings", icon: Settings },
   ];
 
-  const navItems = roleType === "ADMIN" ? adminNav : editorNav;
+  const userNav = [
+    { to: "/dashboard/user-overview", label: "Dashboard", icon: Home },
+    { to: "/dashboard/my-projects", label: "My Projects", icon: FileText },
+    { to: "/dashboard/gallery", label: "Gallery", icon: ImagePlus },
+    { to: "/dashboard/corrections", label: "Corrections", icon: ScrollText },
+    { to: "/dashboard/notifications", label: "Notifications", icon: Bell },
+    { to: "/dashboard/timeline", label: "Timeline", icon: History },
+    { to: "/dashboard/profile", label: "Profile", icon: UserIcon },
+    { to: "/dashboard/family-access", label: "Family Requests", icon: Users },
+  ];
+
+  const navItems =
+    roleType === "ADMIN"
+      ? adminNav
+      : roleType === "EDITOR"
+      ? editorNav
+      : userNav;
 
   const isDesktop = window.innerWidth > 768;
   const isDesktopOpen = isSidebarOpen && isDesktop;
@@ -240,6 +258,8 @@ function SidebarContent({
   onLinkClick,
   isMobile = false,
 }) {
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+
   return (
     <>
       {/* Brand & Toggle Button */}
@@ -270,7 +290,7 @@ function SidebarContent({
       {/* Navigation Links */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          if (item.permission && !window.user?.permissions?.includes(item.permission))
+          if (item.permission && !user?.permissions?.includes(item.permission))
             return null;
           const Icon = item.icon;
           const active = isActive(item.to);

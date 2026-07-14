@@ -14,43 +14,55 @@ mongoose
   });
 
 const seedData = async () => {
-
   try {
-
     // Delete Old Users
-
     await User.deleteMany();
 
     // Hash Password
+    const hashedPassword = await bcrypt.hash("123456", 10);
 
-    const hashedPassword =
-      await bcrypt.hash("123456", 10);
-
-    // Create Users
-
-await User.create([
-  {
-    name: "admin",
-    password: hashedPassword,
-    role: "ADMIN",
-    permissions: [],
-  },
-
-  {
-    name: "editor",
-    password: hashedPassword,
-    role: "EDITOR",
-    permissions: [],
-  },
-]);
+    // Create Users with APPROVED status so they can login immediately
+    await User.create([
+      {
+        name: "admin",
+        email: "admin@example.com",
+        password: hashedPassword,
+        role: "ADMIN",
+        status: "APPROVED",
+        permissions: [
+          "view_dashboard",
+          "manage_users",
+          "manage_roles",
+          "manage_stories",
+          "manage_hero",
+          "manage_gallery",
+          "manage_films",
+          "manage_prewedding",
+          "view_analytics",
+          "delete_content",
+        ],
+      },
+      {
+        name: "editor",
+        email: "editor@example.com",
+        password: hashedPassword,
+        role: "EDITOR",
+        status: "APPROVED",
+        permissions: [
+          "view_dashboard",
+          "manage_stories",
+          "manage_gallery",
+          "manage_films",
+          "manage_prewedding",
+          "view_analytics",
+        ],
+      },
+    ]);
     console.log("Seed Inserted");
 
     process.exit();
-
   } catch (error) {
-
     console.log(error);
-
     process.exit(1);
   }
 };

@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import { MdPhotoCamera } from "react-icons/md";
 import Image from "../../assets/LoginRegisterImage.jpg";
+import { loginUser } from "../../config/api";
 
 // ============================================================
 // LOGIN COMPONENT
@@ -33,11 +34,32 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const response = await loginUser({ email, password });
+      const user = response.data.user;
+
+      // Restrict to EDITOR and USER roles only
+      if (user.role === "ADMIN") {
+        toast.error("Admin login is not allowed on this page. Please use the Admin login page.");
+        setLoading(false);
+        return;
+      }
+
+      // Save user to localStorage
+      localStorage.setItem("user", JSON.stringify(user));
       toast.success("Login successful!");
-      navigate("/dashboard");
+
+      // Role Based Redirect
+      if (user.role === "EDITOR") {
+        window.location.replace("/dashboard/editor-overview");
+      } else if (user.role === "USER") {
+        window.location.replace("/dashboard/user-overview");
+      } else {
+        window.location.replace("/");
+      }
     } catch (error) {
-      toast.error("Login failed. Please try again.");
+      console.error("Login Error:", error);
+      const errorMsg = error.response?.data?.message || "Login failed. Please try again.";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
