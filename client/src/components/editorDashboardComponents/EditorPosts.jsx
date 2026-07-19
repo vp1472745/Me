@@ -339,21 +339,19 @@ const EditorPosts = () => {
       <div className="flex border-b border-[#DDE7D8] gap-4 mb-6">
         <button
           onClick={() => setActiveTab("assignments")}
-          className={`pb-2.5 text-sm font-bold border-b-2 transition-all ${
-            activeTab === "assignments"
+          className={`pb-2.5 text-sm font-bold border-b-2 transition-all ${activeTab === "assignments"
               ? "border-[#5A7863] text-[#5A7863]"
               : "border-transparent text-slate-400 hover:text-slate-600"
-          }`}
+            }`}
         >
           My Assignments ({projects.length})
         </button>
         <button
           onClick={() => setActiveTab("corrections")}
-          className={`pb-2.5 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${
-            activeTab === "corrections"
+          className={`pb-2.5 text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 ${activeTab === "corrections"
               ? "border-rose-500 text-rose-600"
               : "border-transparent text-slate-400 hover:text-slate-600"
-          }`}
+            }`}
         >
           Correction Requests ({corrections.filter((c) => c.status !== "Completed").length} Active)
         </button>
@@ -520,13 +518,12 @@ const EditorPosts = () => {
                     <p className="text-xs text-slate-400 mt-0.5">Project: <b>{corr.workId?.category}</b></p>
                   </div>
                   <div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
-                      corr.status === "Pending"
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${corr.status === "Pending"
                         ? "bg-rose-50 text-rose-700 border-rose-100"
                         : corr.status === "In Progress"
-                        ? "bg-amber-50 text-amber-700 border-amber-100"
-                        : "bg-green-50 text-green-700 border-green-100"
-                    }`}>
+                          ? "bg-amber-50 text-amber-700 border-amber-100"
+                          : "bg-green-50 text-green-700 border-green-100"
+                      }`}>
                       {corr.status}
                     </span>
                   </div>

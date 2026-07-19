@@ -296,11 +296,10 @@ const GalleryUpload = () => {
                         </div>
                         <button
                             onClick={() => setActiveTab("create")}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
-                                activeTab === "create"
+                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${activeTab === "create"
                                     ? "bg-[#5A7863] text-white hover:bg-[#4a6a53]"
                                     : "bg-white text-[#3B4953] border border-gray-200 hover:border-[#5A7863]"
-                            }`}
+                                }`}
                         >
                             <FaPlus className="text-sm" />
                             New Upload
@@ -311,22 +310,20 @@ const GalleryUpload = () => {
                     <div className="flex gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50 shadow-sm w-full sm:w-auto">
                         <button
                             onClick={() => setActiveTab("create")}
-                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                                activeTab === "create"
+                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "create"
                                     ? "bg-[#5A7863] text-white shadow-md"
                                     : "text-[#3B4953] hover:bg-gray-100"
-                            }`}
+                                }`}
                         >
                             <FaUpload className="text-xs" />
                             Upload
                         </button>
                         <button
                             onClick={() => setActiveTab("all")}
-                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${
-                                activeTab === "all"
+                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "all"
                                     ? "bg-[#5A7863] text-white shadow-md"
                                     : "text-[#3B4953] hover:bg-gray-100"
-                            }`}
+                                }`}
                         >
                             <FaTh className="text-xs" />
                             All Galleries
@@ -347,11 +344,10 @@ const GalleryUpload = () => {
                                 <form onSubmit={handleSubmit}>
                                     {/* Drop Zone */}
                                     <div
-                                        className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${
-                                            isDragging
+                                        className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${isDragging
                                                 ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
                                                 : "border-gray-300 hover:border-[#5A7863]/50"
-                                        } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"}`}
+                                            } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"}`}
                                         onDrop={handleDrop}
                                         onDragOver={handleDragOver}
                                         onDragLeave={handleDragLeave}
@@ -412,9 +408,8 @@ const GalleryUpload = () => {
                                                         </div>
                                                         <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
                                                             <div
-                                                                className={`h-full transition-all duration-300 rounded-full ${
-                                                                    isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
-                                                                }`}
+                                                                className={`h-full transition-all duration-300 rounded-full ${isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
+                                                                    }`}
                                                                 style={{ width: `${totalProgress}%` }}
                                                             />
                                                         </div>
@@ -502,11 +497,10 @@ const GalleryUpload = () => {
                                         <button
                                             type="submit"
                                             disabled={loading || files.length === 0}
-                                            className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${
-                                                loading || files.length === 0
+                                            className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${loading || files.length === 0
                                                     ? "bg-gray-300 cursor-not-allowed"
                                                     : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
-                                            }`}
+                                                }`}
                                         >
                                             {loading ? (
                                                 <>
@@ -680,11 +674,10 @@ const GalleryUpload = () => {
                                             e.stopPropagation();
                                             setCurrentImageIndex(idx);
                                         }}
-                                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                                            idx === currentImageIndex
+                                        className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${idx === currentImageIndex
                                                 ? "border-white scale-110 shadow-lg"
                                                 : "border-white/30 hover:border-white/60"
-                                        }`}
+                                            }`}
                                     >
                                         <img
                                             src={img}

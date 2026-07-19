@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { logoutUser } from "../../config/api";
+import ProjectTimer from "../commonComponents/ProjectTimer";
+
 import {
   Home,
   Settings,
@@ -241,6 +243,7 @@ function Layout({ roleType }) {
           <Outlet />
         </main>
       </div>
+      <ProjectTimer />
     </div>
   );
 }

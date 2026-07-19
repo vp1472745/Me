@@ -6,7 +6,8 @@ import {
   completeWork,
   getWorkList,
   getHistoryLogs,
-} from "../controller/workController.js";
+  muteProjectAlarm,
+} from "../controller/adminController/workController.js";
 import { authMiddleware, adminOnly, roleMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.use(authMiddleware);
 router.post("/create", adminOnly, createWork);
 router.post("/assign", adminOnly, createWork); // Alias
 router.post("/approve-duration", adminOnly, approveDuration);
+router.post("/mute-alarm", adminOnly, muteProjectAlarm);
 
 // Editor Only routes
 router.post("/duration", roleMiddleware("EDITOR"), submitDuration);

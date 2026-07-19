@@ -71,13 +71,13 @@ const PreWedding = () => {
   // ======================================================
   const fetchStories = async () => {
     try {
-    
+
       const response = await getAllPreWeddingStories();
       setStories(response?.data?.data || []);
     } catch (error) {
       console.log(error);
       toast.error("Failed to load stories");
-    } 
+    }
   };
 
   useEffect(() => {
@@ -102,7 +102,7 @@ const PreWedding = () => {
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     // Validate file size (500MB limit)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     if (file.size > maxSize) {
@@ -110,24 +110,24 @@ const PreWedding = () => {
       toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`);
       return;
     }
-    
+
     setCoverImage(file);
   };
 
   const handleGalleryImagesChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     // Validate file size (500MB limit per file)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     const oversizedFiles = files.filter(file => file.size > maxSize);
-    
+
     if (oversizedFiles.length > 0) {
       const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
       toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`);
       return;
     }
-    
+
     setGalleryImages(files);
     setUploadProgress({});
   };
@@ -338,22 +338,20 @@ const PreWedding = () => {
           <div className="flex">
             <button
               onClick={() => setActiveTab("create")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] flex items-center gap-2 ${
-                activeTab === "create"
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] flex items-center gap-2 ${activeTab === "create"
                   ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
+                }`}
             >
               <Plus size={14} />
               Create Story
             </button>
             <button
               onClick={() => setActiveTab("all")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 flex items-center gap-2 ${
-                activeTab === "all"
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 flex items-center gap-2 ${activeTab === "all"
                   ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
+                }`}
             >
               <ImageIcon size={14} />
               All Stories
@@ -669,11 +667,10 @@ const PreWedding = () => {
                     src={img}
                     alt="thumbnail"
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-16 h-12 md:w-20 md:h-14 object-cover rounded-md cursor-pointer transition-all duration-200 flex-shrink-0 ${
-                      currentImageIndex === idx
+                    className={`w-16 h-12 md:w-20 md:h-14 object-cover rounded-md cursor-pointer transition-all duration-200 flex-shrink-0 ${currentImageIndex === idx
                         ? "ring-2 ring-[#90AB8B] scale-102 opacity-100"
                         : "opacity-40 hover:opacity-80"
-                    }`}
+                      }`}
                   />
                 ))}
               </div>
@@ -687,7 +684,7 @@ const PreWedding = () => {
 
       {/* ===== LOADING MODAL ===== */}
       <LoadingModal
-       null
+        null
       />
 
       {/* ===== DELETE CONFIRMATION MODAL ===== */}

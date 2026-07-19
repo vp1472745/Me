@@ -9,28 +9,28 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 // Routing Handlers Integration Area
-import authRouter from "./src/router/authRouter.js";
-import accessRouter from "./src/router/accessRoutes.js";
-import storyRoutes from "./src/router/storyRoutes.js";
-import photoBookRouter from "./src/router/photoBookRouter.js";
-import ImageRouter from "./src/router/imageRoute.js";
-import filmRoutes from "./src/router/filmsRoutes.js";
-import preWeddingRoutes from "./src/router/preWeddingRoutes.js";
-import heroRoutes from "./src/router/heroRoutes.js";
-import FamilyAcessRoutes from "./src/router/familyAccessRoutes.js";
+import authRouter from "./src/router/adminRoutes/authRouter.js";
+import accessRouter from "./src/router/adminRoutes/accessRoutes.js";
+import storyRoutes from "./src/router/adminRoutes/storyRoutes.js";
+import photoBookRouter from "./src/router/adminRoutes/photoBookRouter.js";
+import ImageRouter from "./src/router/adminRoutes/imageRoute.js";
+import filmRoutes from "./src/router/adminRoutes/filmsRoutes.js";
+import preWeddingRoutes from "./src/router/adminRoutes/preWeddingRoutes.js";
+import heroRoutes from "./src/router/adminRoutes/heroRoutes.js";
+import FamilyAcessRoutes from "./src/router/adminRoutes/familyAccessRoutes.js";
 
 // MERN Photo Studio Integrations
 import userRouter from "./src/router/userRouter.js";
-import googleRouter from "./src/router/googleRouter.js";
+import googleRouter from "./src/router/adminRoutes/googleRouter.js";
 import workRouter from "./src/router/workRouter.js";
-import uploadRouter from "./src/router/uploadRouter.js";
-import correctionRouter from "./src/router/correctionRouter.js";
-import galleryRouter from "./src/router/galleryRouter.js";
-import notificationRouter from "./src/router/notificationRouter.js";
-import analyticsRouter from "./src/router/analyticsRouter.js";
+import uploadRouter from "./src/router/adminRoutes/uploadRouter.js";
+import correctionRouter from "./src/router/adminRoutes/correctionRouter.js";
+import galleryRouter from "./src/router/adminRoutes/galleryRouter.js";
+import notificationRouter from "./src/router/adminRoutes/notificationRouter.js";
+import analyticsRouter from "./src/router/adminRoutes/analyticsRouter.js";
 
 // Cloudinary Configuration Verification Trigger
-import "../server/src/config/cloudinary.js"; 
+import "../server/src/config/cloudinary.js";
 
 const app = express();
 

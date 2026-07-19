@@ -560,6 +560,10 @@ export const getWorkHistoryLogs = async (params) => {
   return API.get("/work/history", { params });
 };
 
+export const muteProjectAlarm = async (data) => {
+  return API.post("/work/mute-alarm", data);
+};
+
 // Uploads (Form Data required)
 export const uploadFileToDrive = async (formData) => {
   return API.post("/upload/photo", formData, {

@@ -105,6 +105,18 @@ const workSchema = new mongoose.Schema(
       },
     },
     deliverables: [deliverableSchema],
+    alarmMuted: {
+      type: Boolean,
+      default: false,
+    },
+    adminAlarmMuted: {
+      type: Boolean,
+      default: false,
+    },
+    editorAlarmMuted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

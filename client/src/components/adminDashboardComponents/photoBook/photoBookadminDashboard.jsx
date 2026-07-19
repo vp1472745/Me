@@ -91,7 +91,7 @@ const WeddingStoryDashboard = () => {
       const uploadedGalleryUrls = [];
       for (let i = 0; i < galleryImages.length; i++) {
         setModalMessage(`Compressing gallery frame ${i + 1} of ${galleryImages.length}...`);
-        
+
         let finalGalleryImg = galleryImages[i];
         if (galleryImages[i].size > 2 * 1024 * 1024) {
           finalGalleryImg = await imageCompression(galleryImages[i], compressionOptions);
@@ -103,7 +103,7 @@ const WeddingStoryDashboard = () => {
             `Uploading gallery frame ${i + 1} of ${galleryImages.length}... ${percent}%`
           );
         });
-        
+
         uploadedGalleryUrls.push(galleryUploadResponse.secure_url);
       }
 
@@ -121,7 +121,7 @@ const WeddingStoryDashboard = () => {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
         icon: false,
       });
-      
+
       // Reset Form States
       setTitle("");
       setDescription("");
@@ -274,7 +274,7 @@ const WeddingStoryDashboard = () => {
   const handleCoverImageChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
+
     // Validate file size (500MB limit)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     if (file.size > maxSize) {
@@ -284,18 +284,18 @@ const WeddingStoryDashboard = () => {
       });
       return;
     }
-    
+
     setCoverImage(file);
   };
 
   const handleGalleryImagesChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
-    
+
     // Validate file size (500MB limit per file)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     const oversizedFiles = files.filter(file => file.size > maxSize);
-    
+
     if (oversizedFiles.length > 0) {
       const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
       toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
@@ -303,7 +303,7 @@ const WeddingStoryDashboard = () => {
       });
       return;
     }
-    
+
     setGalleryImages([...files]);
   };
 
@@ -338,21 +338,19 @@ const WeddingStoryDashboard = () => {
           <div className="flex">
             <button
               onClick={() => setActiveTab("create")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${
-                activeTab === "create"
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${activeTab === "create"
                   ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
+                }`}
             >
               Create Story
             </button>
             <button
               onClick={() => setActiveTab("stories")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${
-                activeTab === "stories"
+              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${activeTab === "stories"
                   ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
                   : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
+                }`}
             >
               All Wedding Stories
             </button>
@@ -620,11 +618,10 @@ const WeddingStoryDashboard = () => {
                 <button
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
-                  className={`w-10 h-10 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${
-                    currentImageIndex === idx
+                  className={`w-10 h-10 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${currentImageIndex === idx
                       ? "border-white scale-110"
                       : "border-white/30 hover:border-white/60"
-                  }`}
+                    }`}
                 >
                   <img
                     src={img}

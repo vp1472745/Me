@@ -148,11 +148,11 @@ const StoryManager = () => {
       });
       return;
     }
-    
+
     // Validate file size (500MB limit per file)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     const oversizedFiles = files.filter(file => file.size > maxSize);
-    
+
     if (oversizedFiles.length > 0) {
       const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
       toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
@@ -160,7 +160,7 @@ const StoryManager = () => {
       });
       return;
     }
-    
+
     setGalleryImages((prev) => [...prev, ...files]);
   };
 
@@ -172,11 +172,11 @@ const StoryManager = () => {
       });
       return;
     }
-    
+
     // Validate file size (500MB limit per file)
     const maxSize = 500 * 1024 * 1024; // 500MB in bytes
     const oversizedFiles = files.filter(file => file.size > maxSize);
-    
+
     if (oversizedFiles.length > 0) {
       const fileSizeMB = (oversizedFiles[0].size / (1024 * 1024)).toFixed(2);
       toast.error(`File size is ${fileSizeMB}MB. You can only upload files up to 500MB.`, {
@@ -184,7 +184,7 @@ const StoryManager = () => {
       });
       return;
     }
-    
+
     setGalleryVideos((prev) => [...prev, ...files]);
     files.forEach((file) => {
       setVideoPreviews((prev) => ({
@@ -237,7 +237,7 @@ const StoryManager = () => {
     console.log("Audio:", audio);
     console.log("Gallery images:", galleryImages);
     console.log("Gallery videos:", galleryVideos);
-    
+
     setLoading(true);
 
     try {
@@ -299,7 +299,7 @@ const StoryManager = () => {
       console.log("Story creation response:", response);
       toast.success(response.data?.message || " Story created successfully!", {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
-        
+
       });
       resetForm();
       if (activeTab === "view") fetchStories();
@@ -352,7 +352,7 @@ const StoryManager = () => {
       setStories((prev) => prev.filter((s) => s._id !== storyToDelete._id));
       toast.success(" Story deleted successfully!", {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
-      
+
       });
       setDeleteModalOpen(false);
       setStoryToDelete(null);
@@ -395,11 +395,10 @@ const StoryManager = () => {
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-4 mx-auto px-4 sm:px-6 lg:px-8">
             <button
               onClick={() => setActiveTab("upload")}
-              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${
-                activeTab === "upload"
+              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${activeTab === "upload"
                   ? "bg-[#5A7863] text-white shadow-md"
                   : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
-              }`}
+                }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <Upload size={14} className="sm:w-4 sm:h-4" />
@@ -409,11 +408,10 @@ const StoryManager = () => {
 
             <button
               onClick={() => setActiveTab("view")}
-              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${
-                activeTab === "view"
+              className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${activeTab === "view"
                   ? "bg-[#5A7863] text-white shadow-md"
                   : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
-              }`}
+                }`}
             >
               <span className="flex items-center justify-center gap-2">
                 <Grid3x3 size={14} className="sm:w-4 sm:h-4" />
