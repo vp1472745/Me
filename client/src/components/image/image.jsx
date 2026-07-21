@@ -72,7 +72,7 @@ const GallerySection = () => {
   const handleOpenSlider =
     (images, index) => {
 
-      setSelectedImages(images);
+      setSelectedImages(images || []);
 
       setCurrentIndex(index);
 
@@ -199,7 +199,7 @@ const GallerySection = () => {
                   "
                 >
 
-                  {gallery.images.map(
+                  {(gallery.images || []).map(
                     (image, index) => (
 
                       <div
@@ -214,7 +214,7 @@ const GallerySection = () => {
                         "
                         onClick={() =>
                           handleOpenSlider(
-                            gallery.images,
+                            gallery.images || [],
                             index
                           )
                         }
@@ -305,7 +305,7 @@ const GallerySection = () => {
 
           <img
             src={
-              selectedImages[currentIndex]
+              selectedImages?.[currentIndex] || ""
             }
             alt=""
             className="
