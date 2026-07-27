@@ -5,13 +5,15 @@ import {
   driveStatus,
   disconnectDrive,
   sendDriveLinkEmail,
+  proxyPublicFile,
 } from "../../controller/adminController/googleDriveController.js";
 import { authMiddleware, adminOnly } from "../../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// OAuth callback is public since Google redirects here
+// OAuth callback and file streaming are public
 router.get("/callback", driveCallback);
+router.get("/file/:fileId", proxyPublicFile);
 
 // Other endpoints require authentication
 router.use(authMiddleware);

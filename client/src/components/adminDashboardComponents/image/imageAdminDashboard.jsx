@@ -286,7 +286,7 @@ const GalleryUpload = () => {
             <div className="sticky top-0 z-20 bg-gradient-to-br from-[#F7F9F4] via-[#f0f5eb] to-[#e8efe0] border-b border-[#DDE7D8]/50 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
                     {/* Title & New Upload Button */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <div>
                             <h1 className="text-3xl font-bold bg-gradient-to-r from-[#3B4953] to-[#5A7863] bg-clip-text text-transparent">
                                 Media Gallery
@@ -305,15 +305,15 @@ const GalleryUpload = () => {
                             <FaPlus className="text-sm" />
                             New Upload
                         </button>
-                    </div>
+                    </div> */}
 
                     {/* Tabs */}
                     <div className="flex gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50 shadow-sm w-full sm:w-auto">
                         <button
                             onClick={() => setActiveTab("create")}
                             className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "create"
-                                    ? "bg-[#5A7863] text-white shadow-md"
-                                    : "text-[#3B4953] hover:bg-gray-100"
+                                ? "bg-[#5A7863] text-white shadow-md"
+                                : "text-[#3B4953] hover:bg-gray-100"
                                 }`}
                         >
                             <FaUpload className="text-xs" />
@@ -322,8 +322,8 @@ const GalleryUpload = () => {
                         <button
                             onClick={() => setActiveTab("all")}
                             className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "all"
-                                    ? "bg-[#5A7863] text-white shadow-md"
-                                    : "text-[#3B4953] hover:bg-gray-100"
+                                ? "bg-[#5A7863] text-white shadow-md"
+                                : "text-[#3B4953] hover:bg-gray-100"
                                 }`}
                         >
                             <FaTh className="text-xs" />
@@ -346,8 +346,8 @@ const GalleryUpload = () => {
                                     {/* Drop Zone */}
                                     <div
                                         className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${isDragging
-                                                ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
-                                                : "border-gray-300 hover:border-[#5A7863]/50"
+                                            ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
+                                            : "border-gray-300 hover:border-[#5A7863]/50"
                                             } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"}`}
                                         onDrop={handleDrop}
                                         onDragOver={handleDragOver}
@@ -499,8 +499,8 @@ const GalleryUpload = () => {
                                             type="submit"
                                             disabled={loading || files.length === 0}
                                             className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${loading || files.length === 0
-                                                    ? "bg-gray-300 cursor-not-allowed"
-                                                    : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
                                                 }`}
                                         >
                                             {loading ? (
@@ -676,8 +676,8 @@ const GalleryUpload = () => {
                                             setCurrentImageIndex(idx);
                                         }}
                                         className={`flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition-all duration-200 ${idx === currentImageIndex
-                                                ? "border-white scale-110 shadow-lg"
-                                                : "border-white/30 hover:border-white/60"
+                                            ? "border-white scale-110 shadow-lg"
+                                            : "border-white/30 hover:border-white/60"
                                             }`}
                                     >
                                         <img

@@ -147,7 +147,8 @@ const UserGallery = () => {
   };
 
   const getMediaUrl = (item) => {
-    return `http://localhost:5000/api/gallery/download?fileId=${item.fileId}&workId=${item.projectId}`;
+    const baseUrl = import.meta.env.VITE_API_URL || "https://me-vp02.onrender.com/api";
+    return `${baseUrl}/gallery/download?fileId=${item.fileId}&workId=${item.projectId}`;
   };
 
   const getCategoryColor = (cat) => {

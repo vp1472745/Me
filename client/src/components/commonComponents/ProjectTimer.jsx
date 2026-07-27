@@ -1,25 +1,38 @@
+// ProjectTimer.jsx - Premium SaaS-Grade Overdue Alert & Project Countdown Popover
 import React, { useState, useEffect, useRef } from "react";
 import { getWorkAssignments, muteProjectAlarm } from "../../config/api";
-import { Clock, AlertTriangle, Volume2, VolumeX, BellRing, Timer, CheckCircle } from "lucide-react";
+import { Clock, AlertTriangle, Volume2, VolumeX, BellRing, Timer, HelpCircle, Loader2 } from "lucide-react";
 
 const ProjectTimer = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const isAdmin = user.role === "ADMIN";
+  
+  // Grant mute access to both ADMIN and EDITOR
+  const hasMuteAccess = user.role === "ADMIN" || user.role === "EDITOR";
 
-  const [projects, setProjects] = useState([]);
   const [activeProjects, setActiveProjects] = useState([]);
+  
+  // Dynamic initialization checking if 24 hours mute timer has expired
   const [isMuted, setIsMuted] = useState(() => {
-    return localStorage.getItem("timerMuted") === "true";
+    const muted = localStorage.getItem("timerMuted") === "true";
+    const muteTimestamp = localStorage.getItem("muteTimestamp");
+    if (muted && muteTimestamp) {
+      const timePassed = Date.now() - parseInt(muteTimestamp);
+      if (timePassed >= 24 * 60 * 60 * 1000) {
+        localStorage.setItem("timerMuted", "false");
+        localStorage.removeItem("muteTimestamp");
+        return false;
+      }
+      return true;
+    }
+    return muted;
   });
+  
   const [audioEnabled, setAudioEnabled] = useState(false);
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false); // Closed by default in the topbar
+  const [loading, setLoading] = useState(false);
 
   const audioCtxRef = useRef(null);
   const alarmIntervalRef = useRef(null);
-
-  useEffect(() => {
-    localStorage.setItem("timerMuted", isMuted);
-  }, [isMuted]);
 
   // Poll server for projects list
   const fetchProjects = async () => {
@@ -30,7 +43,6 @@ const ProjectTimer = () => {
         const inProgress = res.data.projects.filter(
           (p) => p.status === "IN_PROGRESS" && p.duration?.expectedCompletionDate
         );
-        console.log("PROJECTS POLLED FROM CLIENT:", inProgress);
         setActiveProjects(inProgress);
       }
     } catch (error) {
@@ -39,10 +51,8 @@ const ProjectTimer = () => {
   };
 
   const handleMuteProject = async (workId, type) => {
-    console.log("MUTING ALARM ON CLIENT FOR:", { workId, type });
     try {
       const response = await muteProjectAlarm({ workId, type });
-      console.log("MUTED ALARM CLIENT RESPONSE:", response.data);
       fetchProjects();
     } catch (error) {
       console.error("Failed to mute project alarm:", error);
@@ -60,6 +70,18 @@ const ProjectTimer = () => {
   useEffect(() => {
     const tick = setInterval(() => {
       setNow(new Date());
+
+      // Auto-unmute after 24 hours
+      const muted = localStorage.getItem("timerMuted") === "true";
+      const muteTimestamp = localStorage.getItem("muteTimestamp");
+      if (muted && muteTimestamp) {
+        const timePassed = Date.now() - parseInt(muteTimestamp);
+        if (timePassed >= 24 * 60 * 60 * 1000) {
+          localStorage.setItem("timerMuted", "false");
+          localStorage.removeItem("muteTimestamp");
+          setIsMuted(false);
+        }
+      }
     }, 1000);
     return () => clearInterval(tick);
   }, []);
@@ -69,7 +91,7 @@ const ProjectTimer = () => {
   // Determine if any task is overdue and not muted for this user's role
   const overdueTasks = activeProjects.filter((p) => {
     const deadline = new Date(p.duration.expectedCompletionDate);
-    const isMutedForRole = isAdmin ? p.adminAlarmMuted : p.editorAlarmMuted;
+    const isMutedForRole = user.role === "ADMIN" ? p.adminAlarmMuted : p.editorAlarmMuted;
     return deadline < now && !isMutedForRole;
   });
 
@@ -77,7 +99,7 @@ const ProjectTimer = () => {
   const nearDeadlineTasks = activeProjects.filter((p) => {
     const deadline = new Date(p.duration.expectedCompletionDate);
     const timeLeft = deadline - now;
-    const isMutedForRole = isAdmin ? p.adminAlarmMuted : p.editorAlarmMuted;
+    const isMutedForRole = user.role === "ADMIN" ? p.adminAlarmMuted : p.editorAlarmMuted;
     return timeLeft >= 0 && timeLeft <= TWO_DAYS_MS && !isMutedForRole;
   });
 
@@ -96,8 +118,7 @@ const ProjectTimer = () => {
     const ctx = audioCtxRef.current;
     
     alarmIntervalRef.current = setInterval(() => {
-      const muted = isAdmin ? isMuted : false;
-      if (muted) return;
+      if (isMuted) return;
       if (ctx.state === "suspended") {
         ctx.resume().catch((err) => console.log("AudioContext resume failed:", err));
         return;
@@ -124,9 +145,7 @@ const ProjectTimer = () => {
         };
 
         const t = ctx.currentTime;
-        // Beep 1
         playBeep(880, t, 0.25);
-        // Beep 2
         playBeep(880, t + 0.3, 0.25);
       } catch (err) {
         console.error("Audio beep generation failed:", err);
@@ -141,18 +160,32 @@ const ProjectTimer = () => {
     }
   };
 
-  // Alarm sound triggers based on status (starts sounding 2 days in advance, only Admin can mute it)
+  // Alarm sound triggers (ADMIN and EDITOR both silence via isMuted)
   useEffect(() => {
-    const playAlarm = hasAlarm && (!isAdmin || !isMuted);
+    const playAlarm = hasAlarm && hasMuteAccess && !isMuted;
     if (playAlarm) {
       startAlarmSound();
     } else {
       stopAlarmSound();
     }
     return () => stopAlarmSound();
-  }, [hasAlarm, isMuted, isAdmin]);
+  }, [hasAlarm, isMuted, hasMuteAccess]);
 
-  // Attempt to enable Web Audio Context via user interaction
+  // Expose toggle mute button with 24 hours expiry time marking
+  const toggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    localStorage.setItem("timerMuted", nextMuted ? "true" : "false");
+    if (nextMuted) {
+      localStorage.setItem("muteTimestamp", Date.now().toString());
+      toast.info("Overdue alarm sound muted for 24 hours.");
+    } else {
+      localStorage.removeItem("muteTimestamp");
+      toast.info("Overdue alarm sound unmuted.");
+    }
+  };
+
+  // Enable audio context via user interaction
   const enableAudio = () => {
     if (!audioCtxRef.current) {
       audioCtxRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -188,7 +221,6 @@ const ProjectTimer = () => {
   }, []);
 
   useEffect(() => {
-    // Automatically flag if context is running
     const checkState = setInterval(() => {
       if (audioCtxRef.current && audioCtxRef.current.state === "running") {
         setAudioEnabled(true);
@@ -198,7 +230,7 @@ const ProjectTimer = () => {
     return () => clearInterval(checkState);
   }, []);
 
-  // Format time remaining/overdue/warning
+  // Format remaining time
   const formatTimeDiff = (targetDate) => {
     const diff = new Date(targetDate) - now;
     const isLate = diff < 0;
@@ -218,213 +250,165 @@ const ProjectTimer = () => {
       text = `${timeStr} left (Urgent)`;
     }
 
-    return {
-      isLate,
-      isWarning,
-      text,
-      raw: timeStr,
-    };
+    return { isLate, isWarning, text, raw: timeStr };
   };
 
-  if (activeProjects.length === 0) return null;
+  // Hide component for standard users (clients)
+  if (!hasMuteAccess) return null;
 
   return (
-    <div 
-      className={`fixed bottom-6 right-6 z-[9999] transition-all duration-300 max-w-sm w-80 sm:w-96 text-slate-800 ${
-        expanded ? "scale-100" : "scale-90 opacity-90"
-      }`}
-    >
-      {/* Container */}
-      <div 
-        className={`backdrop-blur-md bg-white/80 border shadow-2xl rounded-3xl p-5 overflow-hidden transition-all duration-355 ${
-          hasOverdue 
-            ? "border-rose-300 bg-rose-50/90 shadow-rose-100" 
-            : hasNearDeadline
-            ? "border-amber-300 bg-amber-50/90 shadow-amber-100"
-            : "border-slate-200/60"
+    <div className="relative">
+      
+      {/* Topbar Alarm/Timer Trigger Button */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        title="Project Overdue Alarms"
+        className={`p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#18181B]/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 transition flex items-center justify-center relative ${
+          hasAlarm ? "ring-2 ring-rose-500/20" : ""
         }`}
       >
-        {/* Header bar */}
-        <div className="flex items-center justify-between border-b border-slate-200/50 pb-3 mb-3">
-          <div className="flex items-center gap-2">
-            {hasOverdue ? (
-              <div className="relative">
-                <BellRing className="w-5 h-5 text-rose-600 animate-bounce" />
-                <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-rose-600 rounded-full animate-ping" />
-              </div>
-            ) : hasNearDeadline ? (
-              <div className="relative">
-                <BellRing className="w-5 h-5 text-amber-650 animate-bounce" />
-                <span className="absolute -top-1.5 -right-1.5 w-2.5 h-2.5 bg-amber-650 rounded-full animate-ping" />
-              </div>
-            ) : (
-              <Timer className="w-5 h-5 text-[#5A7863]" />
-            )}
-            <span className="font-extrabold text-sm text-slate-800">
-              {hasOverdue 
-                ? "🚨 Overdue Projects Alert!" 
-                : hasNearDeadline 
-                ? "⚠️ Near Deadline Alert!" 
-                : "⏱️ Project Countdowns"}
-            </span>
-          </div>
+        <Clock size={16} className={hasOverdue ? "text-rose-500 animate-pulse" : hasNearDeadline ? "text-amber-500 animate-pulse" : ""} />
+        
+        {/* Count notification bubble badge */}
+        {activeProjects.length > 0 && (
+          <span className={`absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full text-[8px] font-black flex items-center justify-center text-white border-2 border-white dark:border-[#121214] ${
+            hasOverdue ? "bg-rose-500 animate-bounce" : hasNearDeadline ? "bg-amber-500" : "bg-emerald-500"
+          }`}>
+            {activeProjects.length}
+          </span>
+        )}
+      </button>
 
-          <div className="flex items-center gap-2">
-            {/* Audio Autoplay Enabler if browser blocks it (Admin Only) */}
-            {!audioEnabled && hasAlarm && isAdmin && (
-              <button 
-                onClick={enableAudio}
-                className="px-2 py-1 bg-amber-500 text-white rounded-lg text-[10px] font-bold animate-pulse hover:bg-amber-600 transition cursor-pointer"
-              >
-                Enable Sound
-              </button>
-            )}
+      {/* Popover Dropdown Card */}
+      {expanded && (
+        <div className="absolute right-0 mt-3.5 w-80 sm:w-96 bg-white dark:bg-[#121214] border border-zinc-200 dark:border-zinc-800/80 shadow-2xl rounded-2xl p-5 z-[9999] text-zinc-800 dark:text-zinc-100 transition-all duration-200">
+          
+          {/* Header Bar inside dropdown */}
+          <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/80 pb-3.5 mb-3.5">
+            <div className="flex items-center gap-2">
+              {hasOverdue ? (
+                <BellRing className="w-4 h-4 text-rose-500 animate-bounce" />
+              ) : (
+                <Timer className="w-4 h-4 text-[#5A7863] dark:text-[#A7D18C]" />
+              )}
+              <span className="font-extrabold text-xs tracking-tight">
+                {hasOverdue 
+                  ? "Overdue Projects Alert" 
+                  : hasNearDeadline 
+                  ? "Near Deadline Warning" 
+                  : "Active Countdowns"}
+              </span>
+            </div>
 
-            {/* Mute button (Admin Only) */}
-            {isAdmin && (
+            <div className="flex items-center gap-2">
+              {/* Web Audio Context enabler */}
+              {!audioEnabled && hasAlarm && (
+                <button 
+                  onClick={enableAudio}
+                  className="px-2 py-1 bg-amber-500 text-white rounded-lg text-[9px] font-bold animate-pulse hover:bg-amber-600 transition"
+                >
+                  Enable Sound
+                </button>
+              )}
+
+              {/* Volume mute button for admin/editor with 24 hours status tooltip */}
               <button
-                onClick={() => setIsMuted(!isMuted)}
-                title={isMuted ? "Unmute Alarm" : "Mute Alarm"}
+                onClick={toggleMute}
+                title={isMuted ? "Alarm muted (Auto-unmutes after 24 hrs)" : "Mute alarm sound for 24 hrs"}
                 className={`p-1.5 rounded-lg border transition ${
                   isMuted 
-                    ? "bg-rose-100 text-rose-700 border-rose-200" 
-                    : "bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200"
+                    ? "bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 border-rose-100 dark:border-rose-900/40" 
+                    : "bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100"
                 }`}
               >
-                {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                {isMuted ? <VolumeX size={13} /> : <Volume2 size={13} />}
               </button>
-            )}
-
-            {/* Minimize toggle */}
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="text-xs text-slate-400 hover:text-slate-600 font-bold px-1.5"
-            >
-              {expanded ? "Hide" : "Show"}
-            </button>
+            </div>
           </div>
-        </div>
 
-        {/* Content list */}
-        {expanded && (
-          <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
-            {activeProjects.map((proj) => {
-              const timing = formatTimeDiff(proj.duration.expectedCompletionDate);
+          {/* Body List of all projects */}
+          {activeProjects.length === 0 ? (
+            <div className="py-6 text-center text-xs text-zinc-400 dark:text-zinc-500 font-medium">
+              No active folder assignments running.
+            </div>
+          ) : (
+            <div className="space-y-3.5 max-h-64 overflow-y-auto pr-1">
+              {activeProjects.map((proj) => {
+                const timing = formatTimeDiff(proj.duration.expectedCompletionDate);
 
-              return (
-                <div 
-                  key={proj._id}
-                  className={`p-3 rounded-2xl border text-xs transition-colors ${
-                    timing.isLate 
-                      ? "bg-rose-100/50 border-rose-200/60 shadow-sm" 
-                      : timing.isWarning
-                      ? "bg-amber-100/50 border-amber-200/60 shadow-sm"
-                      : "bg-white/60 border-slate-100"
-                  }`}
-                >
-                  <div className="flex justify-between items-start mb-1">
-                    <div>
-                      <span className="font-extrabold text-slate-900 block text-[13px]">
-                        {proj.category} Subfolder
-                      </span>
-                      <span className="text-[10px] text-slate-400 block mt-0.5">
-                        Client: <b className="text-slate-600">{proj.client?.name}</b> | Editor: <b className="text-slate-600">{proj.editor?.name}</b>
-                      </span>
-                    </div>
-                    <div className="flex flex-col items-end gap-1.5">
-                      {timing.isLate ? (
-                        <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-rose-700 tracking-wider bg-rose-200 px-2 py-0.5 rounded-lg animate-pulse">
-                          <AlertTriangle size={10} /> Overdue
-                        </span>
-                      ) : timing.isWarning ? (
-                        <span className="flex items-center gap-0.5 text-[9px] font-black uppercase text-amber-700 tracking-wider bg-amber-200 px-2 py-0.5 rounded-lg animate-pulse">
-                          <AlertTriangle size={10} /> Urgent
-                        </span>
-                      ) : (
-                        <span className="text-[10px] font-bold text-[#5A7863] bg-emerald-50 px-2 py-0.5 rounded-lg">
-                          In Progress
-                        </span>
-                      )}
-                      {isAdmin ? (
-                        <div className="flex flex-col gap-1 mt-1 text-right items-end">
-                          {/* Admin Alarm Control */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[8px] text-slate-400 font-semibold">Admin:</span>
-                            <button
-                              onClick={() => handleMuteProject(proj._id, "ADMIN")}
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border transition cursor-pointer ${
-                                proj.adminAlarmMuted 
-                                  ? "text-emerald-750 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" 
-                                  : "text-rose-750 bg-rose-50 hover:bg-rose-100 border-rose-200"
-                              }`}
-                            >
-                              {proj.adminAlarmMuted ? "Unmute" : "Mute"}
-                            </button>
-                          </div>
-                          {/* Editor Alarm Control */}
-                          <div className="flex items-center gap-1">
-                            <span className="text-[8px] text-slate-400 font-semibold">Editor:</span>
-                            <button
-                              onClick={() => handleMuteProject(proj._id, "EDITOR")}
-                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border transition cursor-pointer ${
-                                proj.editorAlarmMuted 
-                                  ? "text-emerald-750 bg-emerald-50 hover:bg-emerald-100 border-emerald-200" 
-                                  : "text-rose-750 bg-rose-50 hover:bg-rose-100 border-rose-200"
-                              }`}
-                            >
-                              {proj.editorAlarmMuted ? "Unmute" : "Mute"}
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        proj.editorAlarmMuted && (
-                          <span className="text-[9px] font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-lg flex items-center gap-0.5 mt-1">
-                            <VolumeX size={10} /> Silenced by Admin
-                          </span>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-slate-200/30">
-                    <span className="text-slate-400 text-[10px] flex items-center gap-1">
-                      <Clock size={11} /> Deadline: {new Date(proj.duration.expectedCompletionDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                    <span className={`font-black ${
+                return (
+                  <div 
+                    key={proj._id}
+                    className={`p-3.5 rounded-xl border transition-colors ${
                       timing.isLate 
-                        ? "text-rose-700 animate-pulse text-[11px]" 
+                        ? "bg-rose-50/40 dark:bg-rose-950/5 border-rose-100 dark:border-rose-950/20" 
                         : timing.isWarning
-                        ? "text-amber-700 animate-pulse text-[11px]"
-                        : "text-slate-700 font-mono text-[11px]"
-                    }`}>
-                      {timing.text}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                        ? "bg-amber-50/40 dark:bg-amber-950/5 border-amber-100 dark:border-amber-950/20"
+                        : "bg-zinc-50/30 dark:bg-zinc-900/20 border-zinc-100 dark:border-zinc-850"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start gap-3">
+                      <div>
+                        <span className="font-extrabold text-[12px] text-zinc-800 dark:text-zinc-100 block">
+                          {proj.category} Delivery
+                        </span>
+                        <span className="text-[10px] text-zinc-400 dark:text-zinc-500 block mt-1 font-medium">
+                          Client: <span className="text-zinc-600 dark:text-zinc-300">{proj.client?.name}</span> | Editor: <span className="text-zinc-600 dark:text-zinc-300">{proj.editor?.name}</span>
+                        </span>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5">
+                        {timing.isLate ? (
+                          <span className="text-[9px] font-black uppercase text-rose-600 bg-rose-50 dark:bg-rose-950/30 px-2 py-0.5 rounded-lg border border-rose-100 dark:border-rose-900/20">
+                            Overdue
+                          </span>
+                        ) : timing.isWarning ? (
+                          <span className="text-[9px] font-black uppercase text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2 py-0.5 rounded-lg border border-amber-100 dark:border-amber-900/20">
+                            Urgent
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-bold text-[#5A7863] dark:text-[#A7D18C] bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-lg">
+                            In Progress
+                          </span>
+                        )}
 
-        {/* Minimal display when collapsed */}
-        {!expanded && (
-          <div className="text-center pt-1">
-            <span className={`text-[11px] font-black ${
-              hasOverdue 
-                ? "text-rose-700 animate-pulse" 
-                : hasNearDeadline
-                ? "text-amber-700 animate-pulse"
-                : "text-[#5A7863]"
-            }`}>
-              {hasOverdue 
-                ? `🚨 ${overdueTasks.length} task(s) are overdue!` 
-                : hasNearDeadline
-                ? `⚠️ ${nearDeadlineTasks.length} task(s) near deadline!`
-                : `⏱️ ${activeProjects.length} task(s) running`}
-            </span>
-          </div>
-        )}
-      </div>
+                        {/* Project sub-mute buttons */}
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <span className="text-[8px] text-zinc-400 dark:text-zinc-500 font-semibold">Mute:</span>
+                          <button
+                            onClick={() => handleMuteProject(proj._id, user.role)}
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border transition ${
+                              (user.role === "ADMIN" ? proj.adminAlarmMuted : proj.editorAlarmMuted)
+                                ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30" 
+                                : "text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/20 border-rose-100 dark:border-rose-900/30"
+                            }`}
+                          >
+                            {(user.role === "ADMIN" ? proj.adminAlarmMuted : proj.editorAlarmMuted) ? "Unmute" : "Mute"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-800/80">
+                      <span className="text-zinc-400 dark:text-zinc-500 text-[10px] font-medium">
+                        Deadline: {new Date(proj.duration.expectedCompletionDate).toLocaleDateString()}
+                      </span>
+                      <span className={`text-[10px] font-bold ${
+                        timing.isLate 
+                          ? "text-rose-500 animate-pulse" 
+                          : timing.isWarning
+                          ? "text-amber-500 animate-pulse"
+                          : "text-zinc-600 dark:text-zinc-300"
+                      }`}>
+                        {timing.text}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

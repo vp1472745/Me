@@ -340,8 +340,8 @@ const WeddingStoryDashboard = () => {
             <button
               onClick={() => setActiveTab("create")}
               className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${activeTab === "create"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
                 }`}
             >
               Create Story
@@ -349,8 +349,8 @@ const WeddingStoryDashboard = () => {
             <button
               onClick={() => setActiveTab("stories")}
               className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${activeTab === "stories"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
                 }`}
             >
               All Wedding Stories
@@ -620,8 +620,8 @@ const WeddingStoryDashboard = () => {
                   key={idx}
                   onClick={() => setCurrentImageIndex(idx)}
                   className={`w-10 h-10 rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${currentImageIndex === idx
-                      ? "border-white scale-110"
-                      : "border-white/30 hover:border-white/60"
+                    ? "border-white scale-110"
+                    : "border-white/30 hover:border-white/60"
                     }`}
                 >
                   <img

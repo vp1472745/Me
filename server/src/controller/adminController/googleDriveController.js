@@ -7,6 +7,9 @@ import {
   getUserEmail,
   findOrCreateFolder,
   setupClientFolders,
+  getFileStream,
+  getAccessToken,
+  getAccessTokenFromRefreshToken,
 } from "../../services/googleDriveService.js";
 
 // 1. Connect drive - return authUrl
@@ -200,5 +203,54 @@ export const sendDriveLinkEmail = async (req, res) => {
   } catch (error) {
     console.error("sendDriveLinkEmail Error:", error);
     return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// 6. Proxy/Stream public file content from Google Drive
+export const proxyPublicFile = async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    if (!fileId) {
+      return res.status(400).json({ success: false, message: "File ID is required" });
+    }
+
+    // Find connected Google Drive user (preferably an admin)
+    let driveUser = await User.findOne({ "googleDrive.connected": true, role: "ADMIN" });
+    if (!driveUser) {
+      driveUser = await User.findOne({ "googleDrive.connected": true });
+    }
+
+    let accessToken = null;
+    const envRefreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+    if (driveUser) {
+      accessToken = await getAccessToken(driveUser);
+    } else if (envRefreshToken) {
+      accessToken = await getAccessTokenFromRefreshToken(envRefreshToken);
+    }
+
+    if (!accessToken) {
+      return res.status(400).json({ success: false, message: "No connected Google Drive found to stream asset" });
+    }
+
+    // Get stream from Google Drive
+    const driveRes = await getFileStream(accessToken, fileId);
+
+    // Set headers
+    const contentType = driveRes.headers["content-type"] || "application/octet-stream";
+    const contentLength = driveRes.headers["content-length"];
+
+    res.setHeader("Content-Type", contentType);
+    if (contentLength) {
+      res.setHeader("Content-Length", contentLength);
+    }
+
+    // Pipe stream response
+    driveRes.data.pipe(res);
+  } catch (error) {
+    console.error("Public file proxy error:", error);
+    if (!res.headersSent) {
+      return res.status(500).json({ success: false, message: error.message });
+    }
   }
 };

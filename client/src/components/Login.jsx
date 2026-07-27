@@ -1,471 +1,181 @@
+// Login.jsx - Premium SaaS-Grade Authentication Portal
 import { useState } from "react";
-
 import { useNavigate } from "react-router-dom";
-
 import { toast } from "react-toastify";
-
 import { loginUser } from "../config/api";
-
+import { Camera, Lock, User, Loader2, ArrowRight } from "lucide-react";
 
 function Login() {
-
   const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     name: "",
     password: "",
   });
-
-  const [loading, setLoading] =
-    useState(false);
-
-  // ==========================
-  // Handle Input Change
-  // ==========================
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
   };
 
-  // ==========================
-  // Handle Login
-  // ==========================
-
   const handleLogin = async (e) => {
-
     e.preventDefault();
-
     try {
-
       setLoading(true);
+      const response = await loginUser(formData);
+      const userRole = response.data.user.role;
 
-      const response =
-        await loginUser(formData);
+      // Save user session
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      toast.success(response.data.message || "Login successful!");
 
-      // ==========================
-      // Save User
-      // ==========================
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify(
-          response.data.user,
-        ),
-      );
-
-      toast.success(
-        response.data.message,
-      );
-
-      // ==========================
       // Role Based Redirect
-      // ==========================
-
-    const userRole = response.data.user.role;
-
-// Save user
-localStorage.setItem("user", JSON.stringify(response.data.user));
-
-toast.success(response.data.message);
-
-// Force full page reload after login
-if (userRole === "ADMIN") {
-  window.location.replace("/dashboard/admin-overview");
-} else if (userRole === "EDITOR") {
-  window.location.replace("/dashboard/editor-overview");
-} else if (userRole === "USER") {
-  window.location.replace("/dashboard/user-overview");
-} else {
-  window.location.replace("/");
-}
-
-    }  catch (error) {
-  console.log("ERROR:", error);
-  console.log("STATUS:", error.response?.status);
-  console.log("DATA:", error.response?.data);
-  console.log("MESSAGE:", error.message);
-
-  toast.error(
-    error.response?.data?.message ||
-    error.message ||
-    "Login Failed"
-  );
-} finally {
-
+      if (userRole === "ADMIN") {
+        window.location.replace("/dashboard/admin-overview");
+      } else if (userRole === "EDITOR") {
+        window.location.replace("/dashboard/editor-overview");
+      } else if (userRole === "USER") {
+        window.location.replace("/dashboard/user-overview");
+      } else {
+        window.location.replace("/");
+      }
+    } catch (error) {
+      console.error("ERROR:", error);
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        "Login Failed. Please check your credentials."
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-
-    <div
-      className="
-        flex
-        min-h-screen
-        overflow-hidden
-      "
-    >
-
-      {/* ==========================
-          LEFT SIDE
-      ========================== */}
-
+    <div className="flex min-h-screen overflow-hidden bg-[#0A0A0C] text-zinc-100 font-sans">
+      
+      {/* LEFT PANEL: Premium Branding & Visual Showcase */}
       <div
-        className="
-          hidden
-          md:flex
-          md:w-1/2
-          relative
-          bg-cover
-          bg-center
-          bg-no-repeat
-        "
+        className="hidden lg:flex lg:w-1/2 relative bg-cover bg-center bg-no-repeat overflow-hidden"
         style={{
-          backgroundImage:
-            `url('https://images.unsplash.com/photo-1613336026275-d6d473084e85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1613336026275-d6d473084e85?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
         }}
       >
+        {/* Soft dark radial vignette and blur */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#09090B] via-black/45 to-[#0A0A0C]/10 backdrop-blur-[2px]" />
+        
+        {/* Glowing visual effect in corner */}
+        <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-[#5A7863]/20 dark:bg-[#A7D18C]/10 rounded-full blur-3xl" />
 
-        {/* Overlay */}
-
-        <div
-          className="
-            absolute
-            inset-0
-            bg-black/50
-            backdrop-blur-[2px]
-          "
-        ></div>
-
-        {/* Content */}
-
-        <div
-          className="
-            relative
-            z-10
-            flex
-            flex-col
-            justify-center
-            px-12
-            text-white
-          "
-        >
-
-          <div className="mb-6">
-
-            <span
-              className="
-                text-4xl
-                font-black
-                tracking-tighter
-              "
-            >
-              SHUTTER
+        <div className="relative z-10 flex flex-col justify-between h-full p-16">
+          <div className="flex items-center gap-2.5">
+            <Camera className="w-6 h-6 text-[#A7D18C]" />
+            <span className="text-sm font-black tracking-widest uppercase">
+              SHUTTER<span className="text-[#A7D18C]">STUDIO</span>
             </span>
-
-            <span
-              className="
-                text-4xl
-                font-light
-                tracking-tighter
-              "
-            >
-              STUDIO
-            </span>
-
           </div>
 
-          <h1
-            className="
-              text-5xl
-              lg:text-6xl
-              font-bold
-              leading-tight
-              mb-6
-            "
-          >
-            Capture the
-            <br />
-            Art of Moments
-          </h1>
+          <div className="space-y-6 max-w-lg">
+            <h1 className="text-5xl font-black leading-[1.1] tracking-tight">
+              Capture the<br />Art of Moments
+            </h1>
+            <p className="text-sm text-zinc-300 font-medium leading-relaxed">
+              Every photograph tells a unique story. Access our professional studio workspace to manage assignments, curate premium deliverables, and share high-resolution galleries.
+            </p>
+          </div>
 
-          <p
-            className="
-              text-lg
-              lg:text-xl
-              text-gray-200
-              mb-8
-              leading-relaxed
-            "
-          >
-            Every photograph tells a unique story.
-            Join our community of visual storytellers
-            and showcase your perspective.
-          </p>
-
+          <div className="text-xs text-zinc-500 font-semibold">
+            © {new Date().getFullYear()} Shutter Studio. All rights reserved.
+          </div>
         </div>
-
       </div>
 
-      {/* ==========================
-          RIGHT SIDE
-      ========================== */}
-
-      <div
-        className="
-          w-full
-          md:w-1/2
-          flex
-          items-center
-          justify-center
-          p-6
-          lg:p-10
-          bg-gradient-to-br
-          from-gray-50
-          to-gray-100
-        "
-      >
-
-        <div
-          className="
-            w-full
-            max-w-md
-          "
-        >
-
-          {/* Mobile Logo */}
-
-          <div
-            className="
-              md:hidden
-              text-center
-              mb-8
-            "
-          >
-
-            <span
-              className="
-                text-3xl
-                font-black
-                tracking-tighter
-                text-gray-900
-              "
-            >
-              SHUTTER
-            </span>
-
-            <span
-              className="
-                text-3xl
-                font-light
-                tracking-tighter
-                text-gray-700
-              "
-            >
-              STUDIO
-            </span>
-
-            <p
-              className="
-                text-sm
-                text-gray-500
-                mt-2
-              "
-            >
-              Sign in to continue
+      {/* RIGHT PANEL: SaaS-Grade Login Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-20 bg-[#0A0A0C]">
+        <div className="w-full max-w-md space-y-8">
+          
+          {/* Logo/Brand for Mobile view */}
+          <div className="text-center lg:text-left space-y-2">
+            <div className="flex lg:hidden items-center justify-center gap-2 mb-6">
+              <Camera className="w-6 h-6 text-[#A7D18C]" />
+              <span className="text-base font-black tracking-widest uppercase">
+                SHUTTER<span className="text-[#A7D18C]">STUDIO</span>
+              </span>
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight">Welcome Back</h2>
+            <p className="text-sm text-zinc-500 font-medium">
+              Enter your credentials to access your console
             </p>
-
           </div>
 
-          {/* FORM */}
-
-          <form
-            onSubmit={handleLogin}
-            className="
-              bg-white
-              rounded-2xl
-              shadow-2xl
-              shadow-gray-200/50
-              p-8
-              lg:p-10
-            "
-          >
-
-            <div
-              className="
-                text-center
-                mb-8
-              "
-            >
-
-              <div
-                className="
-                  hidden
-                  md:block
-                  mb-4
-                "
-              >
-
-                <div
-                  className="
-                    w-16
-                    h-16
-                    bg-amber-100
-                    rounded-2xl
-                    flex
-                    items-center
-                    justify-center
-                    mx-auto
-                  "
-                >
-
-                  <span className="text-3xl">
-                    📷
-                  </span>
-
-                </div>
-
-              </div>
-
-              <h2
-                className="
-                  text-2xl
-                  lg:text-3xl
-                  font-bold
-                  text-gray-800
-                "
-              >
-                Welcome Back
-              </h2>
-
-              <p
-                className="
-                  text-gray-500
-                  mt-2
-                  text-sm
-                "
-              >
-                Sign in to your account
-              </p>
-
-            </div>
-
-            {/* USERNAME */}
-
-            <div className="mb-5">
-
-              <label
-                className="
-                  block
-                  text-sm
-                  font-semibold
-                  text-gray-700
-                  mb-2
-                "
-              >
+          {/* Form */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {/* Username Field */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest">
                 Full Name / Username
               </label>
-
-              <input
-                type="text"
-                name="name"
-                placeholder="Enter username"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="
-                  w-full
-                  px-4
-                  py-3
-                  border
-                  border-gray-200
-                  rounded-xl
-                  focus:ring-2
-                  focus:ring-amber-400/30
-                  focus:border-amber-400
-                  outline-none
-                "
-              />
-
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <User size={16} />
+                </div>
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="e.g. admin"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 bg-[#121214] border border-zinc-800/80 rounded-xl text-zinc-100 placeholder-zinc-600 focus:ring-2 focus:ring-[#A7D18C]/20 focus:border-[#A7D18C] outline-none transition duration-150 text-sm font-semibold"
+                />
+              </div>
             </div>
 
-            {/* PASSWORD */}
-
-            <div className="mb-6">
-
-              <label
-                className="
-                  block
-                  text-sm
-                  font-semibold
-                  text-gray-700
-                  mb-2
-                "
-              >
-                Password
-              </label>
-
-              <input
-                type="password"
-                name="password"
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="
-                  w-full
-                  px-4
-                  py-3
-                  border
-                  border-gray-200
-                  rounded-xl
-                  focus:ring-2
-                  focus:ring-amber-400/30
-                  focus:border-amber-400
-                  outline-none
-                "
-              />
-
+            {/* Password Field */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest">
+                  Password
+                </label>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+                  <Lock size={16} />
+                </div>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="w-full pl-10 pr-4 py-3 bg-[#121214] border border-zinc-800/80 rounded-xl text-zinc-100 placeholder-zinc-600 focus:ring-2 focus:ring-[#A7D18C]/20 focus:border-[#A7D18C] outline-none transition duration-150 text-sm font-semibold"
+                />
+              </div>
             </div>
 
-            {/* BUTTON */}
-
+            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
-              className="
-                w-full
-                bg-gradient-to-r
-                from-gray-900
-                to-gray-800
-                hover:from-amber-700
-                hover:to-amber-600
-                text-white
-                font-semibold
-                py-3.5
-                rounded-xl
-                transition-all
-                duration-300
-              "
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-[#A7D18C] to-[#86B66B] hover:shadow-lg hover:shadow-[#A7D18C]/15 text-zinc-950 font-bold rounded-xl text-xs uppercase tracking-wider transition duration-200 flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-
-              {loading
-                ? "Signing in..."
-                : "Sign In"}
-
+              {loading ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" /> Verifying Access...
+                </>
+              ) : (
+                <>
+                  Sign In <ArrowRight size={14} />
+                </>
+              )}
             </button>
-
           </form>
-
         </div>
-
       </div>
-
     </div>
   );
 }

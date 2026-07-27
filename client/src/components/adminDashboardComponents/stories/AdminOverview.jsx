@@ -397,8 +397,8 @@ const StoryManager = () => {
             <button
               onClick={() => setActiveTab("upload")}
               className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${activeTab === "upload"
-                  ? "bg-[#5A7863] text-white shadow-md"
-                  : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
+                ? "bg-[#5A7863] text-white shadow-md"
+                : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
                 }`}
             >
               <span className="flex items-center justify-center gap-2">
@@ -410,8 +410,8 @@ const StoryManager = () => {
             <button
               onClick={() => setActiveTab("view")}
               className={`flex-1 sm:flex-none px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-semibold rounded-t-lg rounded-b-none uppercase tracking-[1px] sm:tracking-[3px] transition-all duration-200 ${activeTab === "view"
-                  ? "bg-[#5A7863] text-white shadow-md"
-                  : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
+                ? "bg-[#5A7863] text-white shadow-md"
+                : "text-[#3B4953] border-b-2 border-transparent hover:text-[#5A7863] hover:bg-[#EBF4DD]"
                 }`}
             >
               <span className="flex items-center justify-center gap-2">

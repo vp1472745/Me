@@ -14,6 +14,7 @@ import WhatWeDo from "../../assets/whatWeDo/firstImage.jpg";
 
 // API Endpoint Connection
 import { getAllHeroSections } from "../../config/api";
+import { getCleanMediaUrl } from "../../utils/cleanUrl";
 
 const HeroSection = () => {
   const [heroMedia, setHeroMedia] = useState(null);
@@ -26,7 +27,11 @@ const HeroSection = () => {
 
       if (heroes.length > 0) {
         // Fetching the first configuration item entry setup
-        setHeroMedia(heroes[0]);
+        const firstHero = heroes[0];
+        setHeroMedia({
+          ...firstHero,
+          mediaUrl: getCleanMediaUrl(firstHero.mediaUrl),
+        });
       }
     } catch (error) {
       console.log("Error fetching hero section content pipeline:", error);

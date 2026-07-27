@@ -340,8 +340,8 @@ const PreWedding = () => {
             <button
               onClick={() => setActiveTab("create")}
               className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] flex items-center gap-2 ${activeTab === "create"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
                 }`}
             >
               <Plus size={14} />
@@ -350,8 +350,8 @@ const PreWedding = () => {
             <button
               onClick={() => setActiveTab("all")}
               className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 flex items-center gap-2 ${activeTab === "all"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
+                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
+                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
                 }`}
             >
               <ImageIcon size={14} />
@@ -669,8 +669,8 @@ const PreWedding = () => {
                     alt="thumbnail"
                     onClick={() => setCurrentImageIndex(idx)}
                     className={`w-16 h-12 md:w-20 md:h-14 object-cover rounded-md cursor-pointer transition-all duration-200 flex-shrink-0 ${currentImageIndex === idx
-                        ? "ring-2 ring-[#90AB8B] scale-102 opacity-100"
-                        : "opacity-40 hover:opacity-80"
+                      ? "ring-2 ring-[#90AB8B] scale-102 opacity-100"
+                      : "opacity-40 hover:opacity-80"
                       }`}
                   />
                 ))}

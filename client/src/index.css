@@ -1,16 +1,152 @@
 @import "tailwindcss";
 @import "flyonui/variants.css";
 
+@variant dark (&:where(.dark, .dark *));
+
 body {
   background-color: #f3eee6;
 }
 
-/* Hide scrollbar globally */
+/* Hide scrollbar globally for public pages */
 * {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE & Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
 }
 
-*::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+/* Custom premium scrollbar for dashboard container only */
+.dark-dashboard-container * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.dark-dashboard-container *::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+  height: 4px;
+}
+.dark-dashboard-container *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+}
+.dark-dashboard-container *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* =============================================================
+   DASHBOARD DARK MODE ENHANCEMENTS (BULLETPROOF ATTRIBUTE MATCH)
+   ============================================================= */
+.dark-dashboard-container.dark {
+  background-color: #0A0A0C !important;
+}
+
+/* Force dark main container canvas background */
+.dark-dashboard-container.dark main {
+  background-color: #0A0A0C !important;
+}
+
+/* Match any background containing #F7F9F4 */
+.dark-dashboard-container.dark [class*="bg-[#F7F9F4]"] {
+  background-color: #0A0A0C !important;
+}
+
+/* Match any background gradients originating from light beige #F7F9F4 */
+.dark-dashboard-container.dark [class*="from-[#F7F9F4]"],
+.dark-dashboard-container.dark [class*="from-bg-[#F7F9F4]"] {
+  background-image: none !important;
+  background-color: #0A0A0C !important;
+}
+
+/* Match any background containing bg-white */
+.dark-dashboard-container.dark [class*="bg-white"] {
+  background-color: #121214 !important;
+}
+
+/* Match bg-gray-50, bg-gray-100, etc. */
+.dark-dashboard-container.dark [class*="bg-gray-50"],
+.dark-dashboard-container.dark [class*="bg-gray-100"],
+.dark-dashboard-container.dark [class*="bg-gray-200"] {
+  background-color: #0A0A0C !important;
+}
+
+/* Match bg-[#EEF6EC] */
+.dark-dashboard-container.dark [class*="bg-[#EEF6EC]"] {
+  background-color: #1E2519 !important;
+  color: #A7D18C !important;
+}
+
+/* Match bg-[#EBF4DD] */
+.dark-dashboard-container.dark [class*="bg-[#EBF4DD]"] {
+  background-color: #1E2519 !important;
+}
+
+/* Text Overrides */
+.dark-dashboard-container.dark [class*="text-[#3B4953]"],
+.dark-dashboard-container.dark [class*="text-[#2d3748]"] {
+  color: #E4E4E7 !important;
+}
+
+.dark-dashboard-container.dark [class*="text-[#5A7863]"] {
+  color: #A7D18C !important;
+}
+
+.dark-dashboard-container.dark .text-slate-800,
+.dark-dashboard-container.dark .text-slate-750,
+.dark-dashboard-container.dark .text-slate-700,
+.dark-dashboard-container.dark .text-gray-800,
+.dark-dashboard-container.dark .text-gray-750,
+.dark-dashboard-container.dark .text-gray-700,
+.dark-dashboard-container.dark .text-zinc-800,
+.dark-dashboard-container.dark .text-zinc-700 {
+  color: #E4E4E7 !important;
+}
+
+.dark-dashboard-container.dark .text-slate-650,
+.dark-dashboard-container.dark .text-slate-600,
+.dark-dashboard-container.dark .text-slate-500,
+.dark-dashboard-container.dark .text-gray-600,
+.dark-dashboard-container.dark .text-gray-500,
+.dark-dashboard-container.dark .text-gray-400 {
+  color: #A1A1AA !important;
+}
+
+/* Border Overrides */
+.dark-dashboard-container.dark [class*="border-[#DDE7D8]"],
+.dark-dashboard-container.dark [class*="border-[#E8E8E8]"],
+.dark-dashboard-container.dark [class*="border-white"],
+.dark-dashboard-container.dark [class*="border-gray-150"],
+.dark-dashboard-container.dark [class*="border-gray-100"],
+.dark-dashboard-container.dark [class*="border-gray-200"],
+.dark-dashboard-container.dark [class*="border-gray-300"],
+.dark-dashboard-container.dark [class*="border-slate-100"],
+.dark-dashboard-container.dark [class*="border-slate-200"] {
+  border-color: #1F1F23 !important;
+}
+
+/* Hover Overrides */
+.dark-dashboard-container.dark [class*="hover:bg-[#F7F9F4]"]:hover,
+.dark-dashboard-container.dark [class*="hover:bg-zinc-50"]:hover,
+.dark-dashboard-container.dark [class*="hover:bg-gray-100"]:hover {
+  background-color: #18181B !important;
+}
+
+.dark-dashboard-container.dark [class*="hover:bg-[#EBF4DD]"]:hover,
+.dark-dashboard-container.dark [class*="hover:bg-[#EEF6EC]"]:hover {
+  background-color: #1E2519 !important;
+  color: #A7D18C !important;
+}
+
+/* Inputs and Forms dark mode styling */
+.dark-dashboard-container.dark input,
+.dark-dashboard-container.dark textarea,
+.dark-dashboard-container.dark select {
+  background-color: #18181B !important;
+  border-color: #27272A !important;
+  color: #F4F4F5 !important;
+}
+
+.dark-dashboard-container.dark input::placeholder,
+.dark-dashboard-container.dark textarea::placeholder {
+  color: #52525B !important;
 }
