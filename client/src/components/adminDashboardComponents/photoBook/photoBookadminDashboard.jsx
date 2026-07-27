@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import imageCompression from "browser-image-compression";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+import { uploadToDrive } from "../../../services/driveUpload";
 import {
   createWeddingStory,
   getAllWeddingStories,
@@ -67,7 +67,7 @@ const WeddingStoryDashboard = () => {
   };
 
   /* =========================
-      CREATE STORY (Direct Frontend Cloudinary Upload Flow with Auto-Compression)
+      CREATE STORY (Direct Frontend Google Drive Upload Flow with Auto-Compression)
   ========================= */
   const handleCreateStory = async (e) => {
     e.preventDefault();
@@ -81,9 +81,9 @@ const WeddingStoryDashboard = () => {
         finalCover = await imageCompression(coverImage, compressionOptions);
       }
 
-      setModalMessage("Uploading cover image to Cloudinary... 0%");
-      const coverUploadResponse = await uploadToCloudinary(finalCover, (percent) => {
-        setModalMessage(`Uploading cover image to Cloudinary... ${percent}%`);
+      setModalMessage("Uploading cover image to Google Drive... 0%");
+      const coverUploadResponse = await uploadToDrive(finalCover, (percent) => {
+        setModalMessage(`Uploading cover image to Google Drive... ${percent}%`);
       });
       const coverImageUrl = coverUploadResponse.secure_url;
 
@@ -98,7 +98,7 @@ const WeddingStoryDashboard = () => {
         }
 
         setModalMessage(`Uploading gallery frame ${i + 1} of ${galleryImages.length}... 0%`);
-        const galleryUploadResponse = await uploadToCloudinary(finalGalleryImg, (percent) => {
+        const galleryUploadResponse = await uploadToDrive(finalGalleryImg, (percent) => {
           setModalMessage(
             `Uploading gallery frame ${i + 1} of ${galleryImages.length}... ${percent}%`
           );
@@ -106,6 +106,7 @@ const WeddingStoryDashboard = () => {
 
         uploadedGalleryUrls.push(galleryUploadResponse.secure_url);
       }
+
 
       // 3. Send final JSON URLs payload to Database
       setModalMessage("Saving collection data to database...");

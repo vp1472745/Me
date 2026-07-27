@@ -1,44 +1,7 @@
 import multer from "multer";
-import pkg from "multer-storage-cloudinary";
-import cloudinary from "../config/cloudinary.js";
 
-const { CloudinaryStorage } = pkg;
+const storage = multer.memoryStorage();
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    const mimeType = file.mimetype;
-
-    // IMAGE
-    if (mimeType.startsWith("image/")) {
-      return {
-        folder: "stories/images",
-        resource_type: "image",
-        allowed_formats: ["jpg", "jpeg", "png", "webp"],
-      };
-    }
-
-    // VIDEO
-    if (mimeType.startsWith("video/")) {
-      return {
-        folder: "stories/videos",
-        resource_type: "video",
-        allowed_formats: ["mp4", "mov", "avi", "webm", "mkv"],
-      };
-    }
-
-    // AUDIO
-    if (mimeType.startsWith("audio/")) {
-      return {
-        folder: "stories/audio",
-        resource_type: "video", // Cloudinary treats audio as 'video' resource type
-        allowed_formats: ["mp3", "wav", "aac", "m4a"],
-      };
-    }
-
-    throw new Error("Unsupported file type");
-  },
-});
 
 export const upload = multer({
   storage,

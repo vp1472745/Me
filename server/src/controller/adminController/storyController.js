@@ -1,11 +1,23 @@
 import Story from "../../model/storyModel.js";
-import cloudinary from "../../config/cloudinary.js";
+import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 
 /**
- * Helper function to extract public_id safely from Cloudinary secure asset URL strings
+ * Helper function to extract public_id safely from Cloudinary or Google Drive secure URL strings
  */
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
+  if (url.includes("/uploads/")) {
+    return "local-" + url.split("/uploads/").pop();
+  }
+  if (url.includes("drive.google.com") || url.includes("id=")) {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.searchParams.get("id");
+    } catch (e) {
+      const match = url.match(/[?&]id=([^&]+)/);
+      return match ? match[1] : null;
+    }
+  }
   const parts = url.split("/upload/");
   if (parts.length < 2) return null;
 
@@ -133,25 +145,26 @@ export const updateStory = async (req, res) => {
 
     const cleanupPromises = [];
 
-    // Cloudinary purge if cover image string link changed
+    // Google Drive purge if cover image string link changed
     if (coverImage && coverImage !== story.coverImage && story.coverImage) {
       const oldCoverId = getPublicIdFromUrl(story.coverImage);
       if (oldCoverId) {
         cleanupPromises.push(
-          cloudinary.uploader.destroy(oldCoverId, { resource_type: "image" })
+          deletePublicAssetFromDrive(oldCoverId, req.user)
         );
       }
     }
 
-    // Cloudinary purge if audio string link changed
+    // Google Drive purge if audio string link changed
     if (audio && audio !== story.audio && story.audio) {
       const oldAudioId = getPublicIdFromUrl(story.audio);
       if (oldAudioId) {
         cleanupPromises.push(
-          cloudinary.uploader.destroy(oldAudioId, { resource_type: "video" })
+          deletePublicAssetFromDrive(oldAudioId, req.user)
         );
       }
     }
+
 
     if (cleanupPromises.length > 0) {
       await Promise.all(cleanupPromises);
@@ -207,7 +220,7 @@ export const deleteStory = async (req, res) => {
       const coverId = getPublicIdFromUrl(story.coverImage);
       if (coverId) {
         cleanupPromises.push(
-          cloudinary.uploader.destroy(coverId, { resource_type: "image" })
+          deletePublicAssetFromDrive(coverId, req.user)
         );
       }
     }
@@ -216,7 +229,7 @@ export const deleteStory = async (req, res) => {
       const audioId = getPublicIdFromUrl(story.audio);
       if (audioId) {
         cleanupPromises.push(
-          cloudinary.uploader.destroy(audioId, { resource_type: "video" })
+          deletePublicAssetFromDrive(audioId, req.user)
         );
       }
     }
@@ -226,7 +239,7 @@ export const deleteStory = async (req, res) => {
         const imgId = getPublicIdFromUrl(imgUrl);
         if (imgId) {
           cleanupPromises.push(
-            cloudinary.uploader.destroy(imgId, { resource_type: "image" })
+            deletePublicAssetFromDrive(imgId, req.user)
           );
         }
       });
@@ -237,11 +250,12 @@ export const deleteStory = async (req, res) => {
         const vidId = getPublicIdFromUrl(vidUrl);
         if (vidId) {
           cleanupPromises.push(
-            cloudinary.uploader.destroy(vidId, { resource_type: "video" })
+            deletePublicAssetFromDrive(vidId, req.user)
           );
         }
       });
     }
+
 
     if (cleanupPromises.length > 0) {
       await Promise.all(cleanupPromises);

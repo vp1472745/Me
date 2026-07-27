@@ -1,5 +1,5 @@
 import Video from "../../model/filmsModel.js";
-import cloudinary from "../../config/cloudinary.js";
+import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 
 // ==============================
 // CREATE VIDEO (YouTube URL only)
@@ -126,16 +126,15 @@ export const deleteVideo = async (req, res) => {
       });
     }
 
-    // Remove any Cloudinary asset if it exists (optional)
+    // Remove any Google Drive asset if it exists (optional)
     if (video.public_id) {
       try {
-        await cloudinary.uploader.destroy(video.public_id, {
-          resource_type: "video",
-        });
+        await deletePublicAssetFromDrive(video.public_id, req.user);
       } catch (cloudErr) {
-        console.warn("Cloudinary cleanup skipped:", cloudErr.message);
+        console.warn("Google Drive cleanup skipped:", cloudErr.message);
       }
     }
+
 
     await video.deleteOne();
 

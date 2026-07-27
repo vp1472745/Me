@@ -1,27 +1,19 @@
-// ======================================================
-// FILE: heroController.js - Cloud Optimized Media Controllers
-// ======================================================
 import HeroSection from "../../model/heroModel.js";
-import cloudinary from "../../config/cloudinary.js";
+import { uploadPublicAssetToDrive, deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 
-// Helper Function: Stream binary files seamlessly to Cloudinary
-const streamUploadToCloudinary = (fileBuffer, mediaType) => {
-  return new Promise((resolve, reject) => {
-    const resourceType = mediaType === "video" ? "video" : "image";
-    
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "hero_canvas_assets",
-        resource_type: resourceType,
-      },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-
-    uploadStream.end(fileBuffer);
-  });
+// Helper Function: Upload binary files to Google Drive
+const streamUploadToDrive = async (fileBuffer, mediaType, reqUser) => {
+  const result = await uploadPublicAssetToDrive(
+    `hero-${Date.now()}.${mediaType === "video" ? "mp4" : "jpg"}`,
+    fileBuffer,
+    mediaType === "video" ? "video/mp4" : "image/jpeg",
+    "Hero Sections",
+    reqUser
+  );
+  return {
+    secure_url: result.url,
+    public_id: result.id,
+  };
 };
 
 // ==============================
@@ -141,22 +133,21 @@ export const updateHeroSection = async (req, res) => {
 
     // If a brand new file is dispatched during the update transaction sequence
     if (req.file) {
-      // 1. Purge old asset tracker reference from Cloudinary system securely
+      // 1. Purge old asset tracker reference securely
       if (hero.public_id) {
         try {
-          await cloudinary.uploader.destroy(hero.public_id, {
-            resource_type: hero.mediaType === "video" ? "video" : "image",
-          });
+          await deletePublicAssetFromDrive(hero.public_id, req.user);
         } catch (cloudErr) {
-          console.warn("⚠️ Non-blocking warning: Failed to purge old asset from Cloud:", cloudErr.message);
+          console.warn("⚠️ Non-blocking warning: Failed to purge old asset from Drive:", cloudErr.message);
         }
       }
 
-      // 2. Upload substitute payload directly to engine
-      const freshCloudAsset = await streamUploadToCloudinary(req.file.buffer, mediaType);
+      // 2. Upload substitute payload directly to Google Drive
+      const freshCloudAsset = await streamUploadToDrive(req.file.buffer, mediaType, req.user);
       mediaUrl = freshCloudAsset.secure_url;
       public_id = freshCloudAsset.public_id;
     }
+
 
     hero.mediaUrl = mediaUrl;
     hero.mediaType = mediaType;
@@ -196,14 +187,13 @@ export const deleteHeroSection = async (req, res) => {
     // Attempt cloud asset erasure wrapped inside try-catch block to prevent server drop
     if (hero.public_id) {
       try {
-        await cloudinary.uploader.destroy(hero.public_id, {
-          resource_type: hero.mediaType === "video" ? "video" : "image",
-        });
+        await deletePublicAssetFromDrive(hero.public_id, req.user);
       } catch (cloudErr) {
-        console.error("🚨 Cloudinary asset destruction failed (possibly disabled cloud):", cloudErr.message);
+        console.error("🚨 Google Drive asset destruction failed:", cloudErr.message);
         // We continue execution so the database record can still be purged locally if needed
       }
     }
+
 
     await hero.deleteOne();
 

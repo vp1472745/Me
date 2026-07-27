@@ -3,6 +3,7 @@ import {
   uploadSingleFile,
   uploadMultipleFiles,
   uploadMiddleware,
+  uploadPublicAsset,
 } from "../../controller/adminController/uploadController.js";
 import { authMiddleware, roleMiddleware } from "../../middleware/authMiddleware.js";
 
@@ -16,5 +17,6 @@ router.use(roleMiddleware("ADMIN", "EDITOR"));
 router.post("/photo", uploadMiddleware.single("file"), uploadSingleFile);
 router.post("/video", uploadMiddleware.single("file"), uploadSingleFile);
 router.post("/multiple", uploadMiddleware.array("files", 20), uploadMultipleFiles);
+router.post("/public-asset", uploadMiddleware.single("file"), uploadPublicAsset);
 
 export default router;

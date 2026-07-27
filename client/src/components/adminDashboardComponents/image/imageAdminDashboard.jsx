@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+import { uploadToDrive } from "../../../services/driveUpload";
 import { createGallery, getAllGalleries, deleteGallery } from "../../../config/api";
 import {
     FaEye,
@@ -122,13 +122,14 @@ const GalleryUpload = () => {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 setModalMessage(`Uploading file ${i + 1} of ${files.length}...`);
-                const result = await uploadToCloudinary(file, (percent) => {
+                const result = await uploadToDrive(file, (percent) => {
                     progressMap[i] = percent;
                     setUploadProgress({ ...progressMap });
                     setModalMessage(
                         `Uploading file ${i + 1} of ${files.length}... ${percent}%`
                     );
                 });
+
                 uploadedUrls.push(result.secure_url);
                 progressMap[i] = 100;
                 setUploadProgress({ ...progressMap });

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { getDashboardAnalytics } from "../../config/api";
+import { 
+  getDashboardAnalytics,
+  getGoogleDriveStatus,
+  connectGoogleDrive,
+  disconnectGoogleDrive 
+} from "../../config/api";
 import {
   FaUsers,
   FaUserClock,
@@ -16,6 +21,7 @@ import {
 } from "react-icons/fa";
 
 const AdminOverview = () => {
+  const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
   const [stats, setStats] = useState({
     users: 0,
     pendingUsers: 0,
@@ -30,8 +36,28 @@ const AdminOverview = () => {
     storage: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [driveConnected, setDriveConnected] = useState(false);
+  const [driveEmail, setDriveEmail] = useState("");
 
   useEffect(() => {
+    // Parse Google Drive OAuth callback results from URL query parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    const googleStatus = queryParams.get("google");
+    if (googleStatus) {
+      if (googleStatus === "success") {
+        toast.success("Google Drive connected successfully!");
+      } else if (googleStatus === "failed") {
+        toast.error("Google Drive connection was cancelled.");
+      } else if (googleStatus === "error") {
+        toast.error(
+          "Failed to connect Google Drive. If you saw the 'Google hasn't verified this app' warning screen, you must click 'Advanced' -> 'Go to (unsafe)', and make sure you check/tick the Google Drive permission box to allow access.",
+          { autoClose: 10000 }
+        );
+      }
+      // Clean query parameters from URL without reloading page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     const fetchStats = async () => {
       try {
         const response = await getDashboardAnalytics();
@@ -45,8 +71,57 @@ const AdminOverview = () => {
         setLoading(false);
       }
     };
+
+    const fetchDriveStatus = async () => {
+      const userId = loggedInUser?.id || loggedInUser?._id;
+      if (!userId) return;
+      try {
+        const response = await getGoogleDriveStatus(userId);
+        if (response.data.success) {
+          setDriveConnected(response.data.connected);
+          setDriveEmail(response.data.googleEmail);
+        }
+      } catch (error) {
+        console.error("Failed to load Google Drive status:", error);
+      }
+    };
+
     fetchStats();
+    fetchDriveStatus();
   }, []);
+
+  const handleConnectDrive = async () => {
+    const userId = loggedInUser?.id || loggedInUser?._id;
+    if (!userId) return;
+    try {
+      const response = await connectGoogleDrive(userId);
+      if (response.data.success && response.data.authUrl) {
+        window.location.href = response.data.authUrl;
+      } else {
+        toast.error("Failed to generate Google Drive link");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to connect Google Drive.");
+    }
+  };
+
+  const handleDisconnectDrive = async () => {
+    const userId = loggedInUser?.id || loggedInUser?._id;
+    if (!userId) return;
+    if (!window.confirm("Are you sure you want to disconnect your Google Drive?")) return;
+    try {
+      const response = await disconnectGoogleDrive(userId);
+      if (response.data.success) {
+        toast.success("Google Drive disconnected successfully");
+        setDriveConnected(false);
+        setDriveEmail("");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to disconnect Google Drive.");
+    }
+  };
 
   const formatStorage = (bytes) => {
     if (!bytes) return "0.00 MB";
@@ -107,6 +182,45 @@ const AdminOverview = () => {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Google Drive Connection Section */}
+      <div className="bg-white rounded-3xl border border-[#DDE7D8] p-6 shadow-sm space-y-4">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl ${
+            driveConnected ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600"
+          }`}>
+            <FaGoogleDrive />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-slate-800">Admin Google Drive Sync</h3>
+            <p className="text-xs text-slate-400">
+              {driveConnected 
+                ? `Syncing Hero Content, Stories, Photo Books, Gallery, Films, and Pre-Wedding to Google Drive.`
+                : `Uploads are currently saving to local server storage because Google Drive is not connected.`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2 border-t border-slate-100">
+          <div className="text-sm font-semibold text-slate-700">
+            Status: {" "}
+            <span className={driveConnected ? "text-emerald-600" : "text-rose-600"}>
+              {driveConnected ? `Connected (${driveEmail})` : "Not Connected"}
+            </span>
+          </div>
+
+          <button
+            onClick={driveConnected ? handleDisconnectDrive : handleConnectDrive}
+            className={`px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition ${
+              driveConnected 
+                ? "bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
+            }`}
+          >
+            {driveConnected ? "Disconnect Account" : "Connect Google Drive"}
+          </button>
+        </div>
       </div>
     </div>
   );

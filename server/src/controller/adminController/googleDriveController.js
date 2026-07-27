@@ -28,11 +28,13 @@ export const connectDrive = async (req, res) => {
 // 2. Callback - Google OAuth redirect handler
 export const driveCallback = async (req, res) => {
   const { code, state: userId } = req.query;
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
 
   if (!code || !userId) {
-    return res.redirect("http://localhost:5173/dashboard/admin-all-users?google=failed");
+    return res.redirect(`${clientUrl}/dashboard/admin-overview?google=failed`);
   }
 
+  let userRole = "ADMIN";
   try {
     // Exchange code for tokens
     const tokenData = await getTokens(code);
@@ -45,6 +47,7 @@ export const driveCallback = async (req, res) => {
     if (!user) {
       return res.status(404).send("Client User not found");
     }
+    userRole = user.role;
 
     // Find or Create Root Folder in client's Google Drive: Name = client.name
     const rootFolderId = await findOrCreateFolder(access_token, user.name);
@@ -58,7 +61,7 @@ export const driveCallback = async (req, res) => {
       googleEmail,
       accessToken: access_token,
       // Only update refresh token if Google sent it (sent only on first consent/consent prompt)
-      refreshToken: refresh_token || user.googleDrive.refreshToken,
+      refreshToken: refresh_token || user.googleDrive?.refreshToken || "",
       rootFolderId,
       connectedAt: new Date(),
     };
@@ -73,11 +76,13 @@ export const driveCallback = async (req, res) => {
       remarks: `Connected Google Drive (${googleEmail}) with root folder '${user.name}'`,
     });
 
-    // Redirect to frontend dashboard users page
-    return res.redirect("http://localhost:5173/dashboard/admin-all-users?google=success");
+    // Redirect to frontend dashboard page based on role
+    const redirectPath = userRole === "ADMIN" ? "admin-overview" : "admin-all-users";
+    return res.redirect(`${clientUrl}/dashboard/${redirectPath}?google=success`);
   } catch (error) {
     console.error("Google Drive connection callback error:", error);
-    return res.redirect("http://localhost:5173/dashboard/admin-all-users?google=error");
+    const redirectPath = userRole === "ADMIN" ? "admin-overview" : "admin-all-users";
+    return res.redirect(`${clientUrl}/dashboard/${redirectPath}?google=error`);
   }
 };
 
@@ -90,10 +95,13 @@ export const driveStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    const envRefreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+    const isConnected = user.googleDrive?.connected || !!envRefreshToken;
+
     return res.status(200).json({
       success: true,
-      connected: user.googleDrive?.connected || false,
-      googleEmail: user.googleDrive?.googleEmail || "",
+      connected: isConnected,
+      googleEmail: user.googleDrive?.googleEmail || (envRefreshToken ? "Global / System Drive" : ""),
       connectedAt: user.googleDrive?.connectedAt || null,
       rootFolderId: user.googleDrive?.rootFolderId || "",
     });

@@ -3,7 +3,7 @@ import Work from "../../model/workModel.js";
 import User from "../../model/authModel.js";
 import History from "../../model/historyModel.js";
 import Notification from "../../model/notificationModel.js";
-import { getAccessToken, findOrCreateFolder, uploadFile } from "../../services/googleDriveService.js";
+import { getAccessToken, findOrCreateFolder, uploadFile, uploadPublicAssetToDrive } from "../../services/googleDriveService.js";
 
 // Multer memory configuration
 const storage = multer.memoryStorage();
@@ -186,3 +186,36 @@ export const uploadMultipleFiles = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// 3. Upload Public Asset
+export const uploadPublicAsset = async (req, res) => {
+  try {
+    const file = req.file;
+    const { subFolder } = req.body;
+
+    if (!file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const folderName = subFolder || "General Assets";
+
+    const uploadResult = await uploadPublicAssetToDrive(
+      file.originalname,
+      file.buffer,
+      file.mimetype,
+      folderName,
+      req.user
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Asset uploaded successfully to Google Drive",
+      url: uploadResult.url,
+      public_id: uploadResult.id,
+    });
+  } catch (error) {
+    console.error("Public asset upload controller error:", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+

@@ -1,8 +1,20 @@
 import Gallery from "../../model/imageModel.js";
-import cloudinary from "../../config/cloudinary.js";
+import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
+  if (url.includes("/uploads/")) {
+    return "local-" + url.split("/uploads/").pop();
+  }
+  if (url.includes("drive.google.com") || url.includes("id=")) {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.searchParams.get("id");
+    } catch (e) {
+      const match = url.match(/[?&]id=([^&]+)/);
+      return match ? match[1] : null;
+    }
+  }
   const parts = url.split("/upload/");
   if (parts.length < 2) return null;
   const pathWithoutVersion = parts[1].replace(/^v\d+\//, "");
@@ -75,12 +87,13 @@ export const deleteGallery = async (req, res) => {
       const deletePromises = gallery.images.map((imageUrl) => {
         const publicId = getPublicIdFromUrl(imageUrl);
         if (publicId) {
-          return cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+          return deletePublicAssetFromDrive(publicId, req.user);
         }
         return Promise.resolve();
       });
       await Promise.all(deletePromises);
     }
+
 
     await Gallery.findByIdAndDelete(req.params.id);
 

@@ -2,11 +2,23 @@
 // FILE: controller/weddingStoryController.js
 // ======================================================
 import WeddingStoryModel from "../../model/photoBook.js";
-import cloudinary from "../../config/cloudinary.js";
+import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 
 // Helper function to extract public_id safely from Cloudinary URL strings
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
+  if (url.includes("/uploads/")) {
+    return "local-" + url.split("/uploads/").pop();
+  }
+  if (url.includes("drive.google.com") || url.includes("id=")) {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.searchParams.get("id");
+    } catch (e) {
+      const match = url.match(/[?&]id=([^&]+)/);
+      return match ? match[1] : null;
+    }
+  }
   const parts = url.split("/upload/");
   if (parts.length < 2) return null;
   
@@ -152,7 +164,7 @@ export const deleteWeddingStory = async (req, res) => {
       const coverPublicId = getPublicIdFromUrl(story.coverImage);
       if (coverPublicId) {
         cleanupPromises.push(
-          cloudinary.uploader.destroy(coverPublicId, { resource_type: "image" })
+          deletePublicAssetFromDrive(coverPublicId, req.user)
         );
       }
     }
@@ -163,11 +175,12 @@ export const deleteWeddingStory = async (req, res) => {
         const galleryPublicId = getPublicIdFromUrl(imageUrl);
         if (galleryPublicId) {
           cleanupPromises.push(
-            cloudinary.uploader.destroy(galleryPublicId, { resource_type: "image" })
+            deletePublicAssetFromDrive(galleryPublicId, req.user)
           );
         }
       });
     }
+
 
     // Concurrent async cleanup process execution sequence
     if (cleanupPromises.length > 0) {

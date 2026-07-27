@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 
-// ✅ Import the Cloudinary upload helper
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+// ✅ Import the Google Drive upload helper
+import { uploadToDrive } from "../../../services/driveUpload";
 
 // ✅ API calls – these must now accept JSON (not FormData)
 import {
@@ -150,7 +150,7 @@ const PreWedding = () => {
   };
 
   // ======================================================
-  // CREATE STORY – with client‑side Cloudinary upload + progress
+  // CREATE STORY – with client‑side Google Drive upload + progress
   // ======================================================
   const handleCreateStory = async (e) => {
     e.preventDefault();
@@ -171,7 +171,7 @@ const PreWedding = () => {
 
       // 1️⃣ Upload cover image with progress
       const coverResult = await new Promise((resolve, reject) => {
-        uploadToCloudinary(coverImage, (percent) => {
+        uploadToDrive(coverImage, (percent) => {
           setUploadProgress((prev) => ({ ...prev, cover: percent }));
           setModalMessage(`Uploading cover image... ${percent}%`);
         })
@@ -187,7 +187,7 @@ const PreWedding = () => {
         const file = galleryImages[i];
         setModalMessage(`Uploading gallery image ${i + 1} of ${galleryImages.length}...`);
         const result = await new Promise((resolve, reject) => {
-          uploadToCloudinary(file, (percent) => {
+          uploadToDrive(file, (percent) => {
             setUploadProgress((prev) => ({
               ...prev,
               [`gallery-${i}`]: percent,
@@ -202,6 +202,7 @@ const PreWedding = () => {
         galleryResults.push(result);
         setUploadProgress((prev) => ({ ...prev, [`gallery-${i}`]: 100 }));
       }
+
 
       const galleryUrls = galleryResults.map((res) => res.secure_url);
 

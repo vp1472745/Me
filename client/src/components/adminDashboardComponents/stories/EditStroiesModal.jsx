@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { X, Upload, Music, Video, Plus, Trash2 } from "lucide-react";
 import CommonModal from "../../commonComponents/CommonModelComponents";
 import { updateStory } from "../../../config/api";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+import { uploadToDrive } from "../../../services/driveUpload";
 
 /**
  * EditStoryModal - Edit an existing story
@@ -124,27 +124,28 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
 
       // Upload new cover if provided
       if (newCoverFile) {
-        const result = await uploadToCloudinary(newCoverFile);
+        const result = await uploadToDrive(newCoverFile);
         coverUrl = result.secure_url;
       }
 
-      // Upload new audio if provided (handled as 'video' by Cloudinary)
+      // Upload new audio if provided
       if (newAudioFile) {
-        const result = await uploadToCloudinary(newAudioFile);
+        const result = await uploadToDrive(newAudioFile);
         audioUrl = result.secure_url;
       }
 
       // Upload new gallery images
       for (const file of newImages) {
-        const result = await uploadToCloudinary(file);
+        const result = await uploadToDrive(file);
         imageUrls.push(result.secure_url);
       }
 
       // Upload new gallery videos
       for (const file of newVideos) {
-        const result = await uploadToCloudinary(file);
+        const result = await uploadToDrive(file);
         videoUrls.push(result.secure_url);
       }
+
 
       // Build update payload
       const updateData = {

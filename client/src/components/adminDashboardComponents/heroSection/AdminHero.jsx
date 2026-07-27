@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Upload, Trash2, Eye, Image as ImageIcon, Video, X } from "lucide-react";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+import { uploadToDrive } from "../../../services/driveUpload";
 import { createHeroSection, getAllHeroSections, deleteHeroSection } from "../../../config/api";
 import LoadingModal from "../../commonComponents/CommonLoadingModal";
 import DeleteConfirmationModal from "../../../components/commonComponents/DeleteConfirmationModal";
@@ -56,7 +56,7 @@ const HeroManager = () => {
 
     try {
       setUploading(true);
-      const result = await uploadToCloudinary(selectedFile, (percent) => setUploadProgress(percent));
+      const result = await uploadToDrive(selectedFile, (percent) => setUploadProgress(percent));
       const { secure_url, public_id } = result;
       
       await createHeroSection({

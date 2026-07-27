@@ -58,6 +58,26 @@ function AdminUsers() {
   };
 
   useEffect(() => {
+    // Parse Google Drive OAuth callback results from URL query parameters
+    const queryParams = new URLSearchParams(window.location.search);
+    const googleStatus = queryParams.get("google");
+    if (googleStatus) {
+      if (googleStatus === "success") {
+        toast.success("Google Drive connected successfully!");
+      } else if (googleStatus === "failed") {
+        toast.error("Google Drive connection was cancelled.");
+      } else if (googleStatus === "error") {
+        toast.error(
+          "Failed to connect Google Drive. If you saw the 'Google hasn't verified this app' warning screen, you must click 'Advanced' -> 'Go to (unsafe)', and make sure you check/tick the Google Drive permission box to allow access.",
+          { autoClose: 10000 }
+        );
+      }
+      // Clean query parameters from URL without reloading page
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
     fetchData();
   }, [activeTab]);
 
@@ -214,7 +234,7 @@ function AdminUsers() {
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Role</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Status</th>
                   <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Drive Connection</th>
-                  {(activeTab === "pending" || activeTab === "users") && (
+                  {(activeTab === "pending" || activeTab === "users" || activeTab === "editors") && (
                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60 text-right">Actions</th>
                   )}
                 </tr>
@@ -297,24 +317,24 @@ function AdminUsers() {
                         </div>
                       </td>
                     )}
-                    {activeTab === "users" && (
+                    {(activeTab === "users" || activeTab === "editors") && (
                       <td className="px-6 py-4 text-right">
-                        {item.role === "USER" && (
-                          item.googleDrive?.connected ? (
+                        {item.googleDrive?.connected ? (
+                          <button
+                            onClick={() => handleDisconnectDrive(item._id)}
+                            className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-xl text-xs font-semibold transition"
+                          >
+                            Disconnect Drive
+                          </button>
+                        ) : (
+                          <div className="flex justify-end gap-2">
                             <button
-                              onClick={() => handleDisconnectDrive(item._id)}
-                              className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-xl text-xs font-semibold transition"
+                              onClick={() => handleConnectDrive(item._id)}
+                              className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 rounded-xl text-xs font-semibold transition"
                             >
-                              Disconnect Drive
+                              Connect Drive
                             </button>
-                          ) : (
-                            <div className="flex justify-end gap-2">
-                              <button
-                                onClick={() => handleConnectDrive(item._id)}
-                                className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 rounded-xl text-xs font-semibold transition"
-                              >
-                                Connect Drive
-                              </button>
+                            {item.role === "USER" && (
                               <button
                                 onClick={() => handleSendEmail(item._id)}
                                 disabled={actionLoading === item._id}
@@ -322,8 +342,8 @@ function AdminUsers() {
                               >
                                 {actionLoading === item._id ? "Sending..." : "Send Link"}
                               </button>
-                            </div>
-                          )
+                            )}
+                          </div>
                         )}
                       </td>
                     )}

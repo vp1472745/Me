@@ -29,9 +29,6 @@ import galleryRouter from "./src/router/adminRoutes/galleryRouter.js";
 import notificationRouter from "./src/router/adminRoutes/notificationRouter.js";
 import analyticsRouter from "./src/router/adminRoutes/analyticsRouter.js";
 
-// Cloudinary Configuration Verification Trigger
-import "../server/src/config/cloudinary.js";
-
 const app = express();
 
 // ==========================================
@@ -43,6 +40,7 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 app.use(cookieParser());
+app.use("/uploads", express.static("uploads"));
 
 const allowedOrigins = [
   "http://localhost:5173",

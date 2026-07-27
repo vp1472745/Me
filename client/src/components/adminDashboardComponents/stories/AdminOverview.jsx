@@ -22,7 +22,7 @@ import LoadingModal from "../../commonComponents/CommonLoadingModal";
 import DeleteConfirmationModal from "../../commonComponents/DeleteConfirmationModal";
 import { createStory, getAllStories, deleteStory } from "../../../config/api";
 import StoriesList from "./getAllStories";
-import { uploadToCloudinary } from "../../../services/cloudinaryUpload";
+import { uploadToDrive } from "../../../services/driveUpload";
 
 const StoryManager = () => {
   const [activeTab, setActiveTab] = useState("upload");
@@ -228,7 +228,7 @@ const StoryManager = () => {
     setVideoPreviews({});
   };
 
-  // Process and Sequentially Upload Asset Files straight to Cloudinary
+  // Process and Sequentially Upload Asset Files straight to Google Drive
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("Form submission started");
@@ -245,7 +245,7 @@ const StoryManager = () => {
       let uploadedCoverImageUrl = "";
       if (coverImage) {
         setModalMessage("Uploading cover image (0%)...");
-        const res = await uploadToCloudinary(coverImage, (percent) => {
+        const res = await uploadToDrive(coverImage, (percent) => {
           setModalMessage(`Uploading cover image (${percent}%)...`);
         });
         uploadedCoverImageUrl = res.secure_url;
@@ -255,7 +255,7 @@ const StoryManager = () => {
       let uploadedAudioUrl = "";
       if (audio) {
         setModalMessage("Uploading background audio (0%)...");
-        const res = await uploadToCloudinary(audio, (percent) => {
+        const res = await uploadToDrive(audio, (percent) => {
           setModalMessage(`Uploading background audio (${percent}%)...`);
         });
         uploadedAudioUrl = res.secure_url;
@@ -265,7 +265,7 @@ const StoryManager = () => {
       const uploadedGalleryImages = [];
       for (let i = 0; i < galleryImages.length; i++) {
         setModalMessage(`Uploading gallery image ${i + 1}/${galleryImages.length} (0%)...`);
-        const res = await uploadToCloudinary(galleryImages[i], (percent) => {
+        const res = await uploadToDrive(galleryImages[i], (percent) => {
           setModalMessage(`Uploading gallery image ${i + 1}/${galleryImages.length} (${percent}%)...`);
         });
         uploadedGalleryImages.push(res.secure_url);
@@ -275,11 +275,12 @@ const StoryManager = () => {
       const uploadedGalleryVideos = [];
       for (let i = 0; i < galleryVideos.length; i++) {
         setModalMessage(`Uploading video memory ${i + 1}/${galleryVideos.length} (0%)...`);
-        const res = await uploadToCloudinary(galleryVideos[i], (percent) => {
+        const res = await uploadToDrive(galleryVideos[i], (percent) => {
           setModalMessage(`Uploading video memory ${i + 1}/${galleryVideos.length} (${percent}%)...`);
         });
         uploadedGalleryVideos.push(res.secure_url);
       }
+
 
       // 5. Build clean JSON payload structure for Backend API endpoint
       setModalMessage("Saving story details to server...");
