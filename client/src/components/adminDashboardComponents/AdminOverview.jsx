@@ -221,26 +221,26 @@ const AdminOverview = () => {
         <div className="max-w-7xl mx-auto space-y-8 px-4 sm:px-6 animate-fade-in">
 
             {/* ─── HEADER ─── */}
-            {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DDE7D8] dark:border-[#1E1E22] pb-6">
-                <div>
-                    <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
-                        <PieChart size={26} className="text-[#5A7863] dark:text-[#A7D18C]" />
-                        Overview Dashboard
-                    </h2>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 font-medium flex items-center gap-1.5 flex-wrap">
-                        <Zap size={14} className="text-amber-400" />
-                        Real-time studio health, asset deliveries, editor workloads, and cloud drive sync pipelines.
-                    </p>
-                </div>
-                <button
-                    onClick={refreshAll}
-                    disabled={refreshing}
-                    className="self-start sm:self-auto px-4 py-2.5 bg-white dark:bg-[#18181B]/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300 transition flex items-center gap-2 shadow-sm disabled:opacity-60"
-                >
-                    <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
-                    {refreshing ? "Refreshing…" : "Sync Dashboard"}
-                </button>
-            </div> */}
+                {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#DDE7D8] dark:border-[#1E1E22] pb-6">
+                    <div>
+                        <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-50 tracking-tight flex items-center gap-2">
+                            <PieChart size={26} className="text-[#5A7863] dark:text-[#A7D18C]" />
+                            Overview Dashboard
+                        </h2>
+                        <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 font-medium flex items-center gap-1.5 flex-wrap">
+                            <Zap size={14} className="text-amber-400" />
+                            Real-time studio health, asset deliveries, editor workloads, and cloud drive sync pipelines.
+                        </p>
+                    </div>
+                    <button
+                        onClick={refreshAll}
+                        disabled={refreshing}
+                        className="self-start sm:self-auto px-4 py-2.5 bg-white dark:bg-[#18181B]/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800/80 rounded-xl text-xs font-bold uppercase tracking-wider text-zinc-600 dark:text-zinc-300 transition flex items-center gap-2 shadow-sm disabled:opacity-60"
+                    >
+                        <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
+                        {refreshing ? "Refreshing…" : "Sync Dashboard"}
+                    </button>
+                </div> */}
 
             {/* ─── STATS GRID ─── */}
             {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
