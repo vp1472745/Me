@@ -21,7 +21,7 @@ export const connectDrive = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const authUrl = getAuthUrl(userId);
+    const authUrl = getAuthUrl(userId, req);
     return res.status(200).json({ success: true, authUrl });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
@@ -40,7 +40,7 @@ export const driveCallback = async (req, res) => {
   let userRole = "ADMIN";
   try {
     // Exchange code for tokens
-    const tokenData = await getTokens(code);
+    const tokenData = await getTokens(code, req);
     const { access_token, refresh_token } = tokenData;
 
     // Get google email

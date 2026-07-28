@@ -3,10 +3,21 @@ import axios from "axios";
 /**
  * Construct Google OAuth authorize URL for Consent Screen
  */
-export const getAuthUrl = (userId) => {
+export const getAuthUrl = (userId, req = null) => {
   const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
+  
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  if (req) {
+    const host = req.get("host") || "";
+    // Note: Render uses HTTPS by default, so we can use https for deployed host
+    const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
+    redirectUri = isLocalHost 
+      ? "http://localhost:5000/api/google/callback" 
+      : `https://${host}/api/google/callback`;
+  }
+
   const options = {
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    redirect_uri: redirectUri,
     client_id: process.env.GOOGLE_CLIENT_ID,
     access_type: "offline",
     response_type: "code",
@@ -23,12 +34,21 @@ export const getAuthUrl = (userId) => {
 /**
  * Exchange OAuth auth code for access & refresh tokens
  */
-export const getTokens = async (code) => {
+export const getTokens = async (code, req = null) => {
+  let redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  if (req) {
+    const host = req.get("host") || "";
+    const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
+    redirectUri = isLocalHost 
+      ? "http://localhost:5000/api/google/callback" 
+      : `https://${host}/api/google/callback`;
+  }
+
   const response = await axios.post("https://oauth2.googleapis.com/token", {
     code,
     client_id: process.env.GOOGLE_CLIENT_ID,
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
-    redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+    redirect_uri: redirectUri,
     grant_type: "authorization_code",
   });
   return response.data;
