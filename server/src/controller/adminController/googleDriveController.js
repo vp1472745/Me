@@ -31,7 +31,9 @@ export const connectDrive = async (req, res) => {
 // 2. Callback - Google OAuth redirect handler
 export const driveCallback = async (req, res) => {
   const { code, state: userId } = req.query;
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const host = req.get("host") || "";
+  const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
+  const clientUrl = process.env.CLIENT_URL || (isLocalHost ? "http://localhost:5173" : "https://me-lyart-xi.vercel.app");
 
   if (!code || !userId) {
     return res.redirect(`${clientUrl}/dashboard/admin-overview?google=failed`);
@@ -160,7 +162,7 @@ export const sendDriveLinkEmail = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const authUrl = getAuthUrl(userId);
+    const authUrl = getAuthUrl(userId, req);
 
     // Setup nodemailer transport using OTP service configuration credentials
     const transporter = nodemailer.createTransport({
