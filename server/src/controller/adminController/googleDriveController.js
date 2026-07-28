@@ -22,6 +22,9 @@ export const connectDrive = async (req, res) => {
     }
 
     const authUrl = getAuthUrl(userId, req);
+    console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+    console.log("REDIRECT_URI:", process.env.GOOGLE_REDIRECT_URI);
+    console.log("AUTH_URL:", authUrl);
     return res.status(200).json({ success: true, authUrl });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

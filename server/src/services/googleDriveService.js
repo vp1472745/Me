@@ -5,20 +5,7 @@ import axios from "axios";
  */
 export const getAuthUrl = (userId, req = null) => {
   const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-  
-  let redirectUri = process.env.GOOGLE_REDIRECT_URI;
-  
-  // Determine if we are running in production
-  const host = req ? (req.get("host") || "") : "";
-  const isLocal = host.includes("localhost") || host.includes("127.0.0.1") || process.env.NODE_ENV !== "production" && !host;
-  
-  if (!isLocal) {
-    // In production, force the exact production callback URL registered in Google Console
-    redirectUri = "https://me-vp02.onrender.com/api/google/callback";
-  } else {
-    // In local development, use localhost
-    redirectUri = "http://localhost:5000/api/google/callback";
-  }
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   const options = {
     redirect_uri: redirectUri,
@@ -39,16 +26,7 @@ export const getAuthUrl = (userId, req = null) => {
  * Exchange OAuth auth code for access & refresh tokens
  */
 export const getTokens = async (code, req = null) => {
-  let redirectUri = process.env.GOOGLE_REDIRECT_URI;
-  
-  const host = req ? (req.get("host") || "") : "";
-  const isLocal = host.includes("localhost") || host.includes("127.0.0.1") || process.env.NODE_ENV !== "production" && !host;
-  
-  if (!isLocal) {
-    redirectUri = "https://me-vp02.onrender.com/api/google/callback";
-  } else {
-    redirectUri = "http://localhost:5000/api/google/callback";
-  }
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   const response = await axios.post("https://oauth2.googleapis.com/token", {
     code,
