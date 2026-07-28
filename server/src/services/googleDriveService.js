@@ -313,7 +313,8 @@ export const uploadPublicAssetToDrive = async (fileName, fileBuffer, mimeType, s
   // 4. Make the file publicly viewable
   await makeFilePublic(accessToken, uploadRes.id);
 
-  const serverUrl = process.env.SERVER_URL || "http://localhost:5000";
+  const isProd = process.env.NODE_ENV === "production";
+  const serverUrl = process.env.SERVER_URL || (isProd ? "https://me-vp02.onrender.com" : "http://localhost:5000");
   return {
     id: uploadRes.id,
     url: `${serverUrl}/api/google/file/${uploadRes.id}`,
