@@ -30,6 +30,7 @@ import notificationRouter from "./src/router/adminRoutes/notificationRouter.js";
 import analyticsRouter from "./src/router/adminRoutes/analyticsRouter.js";
 
 const app = express();
+app.set("trust proxy", true);
 
 // ==========================================
 // MIDDLEWARES PIPELINE
