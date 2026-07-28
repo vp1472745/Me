@@ -227,9 +227,11 @@
 // src/config/api.js
 import axios from "axios";
 
+const isLocal = typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+
 const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  "https://me-vp02.onrender.com/api" || 'http://localhost:5000/api';
+  (isLocal ? "http://localhost:5000/api" : "https://me-vp02.onrender.com/api");
 
 console.log("BASE_URL =", BASE_URL);
 
