@@ -1,4 +1,5 @@
 import User from "../../model/authModel.js";
+import config from "../../config/config.js";
 import History from "../../model/historyModel.js";
 import nodemailer from "nodemailer";
 import {
@@ -23,7 +24,7 @@ export const connectDrive = async (req, res) => {
 
     const authUrl = getAuthUrl(userId, req);
     console.log("CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-    console.log("REDIRECT_URI:", process.env.GOOGLE_REDIRECT_URI);
+    console.log("REDIRECT_URI:", config.GOOGLE_REDIRECT_URI);
     console.log("AUTH_URL:", authUrl);
     return res.status(200).json({ success: true, authUrl });
   } catch (error) {
@@ -34,9 +35,7 @@ export const connectDrive = async (req, res) => {
 // 2. Callback - Google OAuth redirect handler
 export const driveCallback = async (req, res) => {
   const { code, state: userId } = req.query;
-  const host = req.get("host") || "";
-  const isLocalHost = host.includes("localhost") || host.includes("127.0.0.1");
-  const clientUrl = process.env.CLIENT_URL || (isLocalHost ? "http://localhost:5173" : "https://me-lyart-xi.vercel.app");
+  const clientUrl = config.CLIENT_URL;
 
   if (!code || !userId) {
     return res.redirect(`${clientUrl}/dashboard/admin-overview?google=failed`);

@@ -1,11 +1,14 @@
 import axios from "axios";
+import config from "../config/config.js";
+
 
 /**
  * Construct Google OAuth authorize URL for Consent Screen
  */
 export const getAuthUrl = (userId, req = null) => {
   const rootUrl = "https://accounts.google.com/o/oauth2/v2/auth";
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const redirectUri = config.GOOGLE_REDIRECT_URI;
+
 
   const options = {
     redirect_uri: redirectUri,
@@ -26,7 +29,8 @@ export const getAuthUrl = (userId, req = null) => {
  * Exchange OAuth auth code for access & refresh tokens
  */
 export const getTokens = async (code, req = null) => {
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const redirectUri = config.GOOGLE_REDIRECT_URI;
+
 
   const response = await axios.post("https://oauth2.googleapis.com/token", {
     code,
@@ -291,8 +295,7 @@ export const uploadPublicAssetToDrive = async (fileName, fileBuffer, mimeType, s
   // 4. Make the file publicly viewable
   await makeFilePublic(accessToken, uploadRes.id);
 
-  const isProd = process.env.NODE_ENV === "production";
-  const serverUrl = process.env.SERVER_URL || (isProd ? "https://me-vp02.onrender.com" : "http://localhost:5000");
+  const serverUrl = config.SERVER_URL;
   return {
     id: uploadRes.id,
     url: `${serverUrl}/api/google/file/${uploadRes.id}`,
