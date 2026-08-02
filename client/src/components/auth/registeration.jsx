@@ -74,7 +74,7 @@ Last updated: January 2026
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-const Registration = () => {
+const Registration = ({ onSuccess }) => {
   const navigate = useNavigate();
   // --- Form fields ---
   const [name, setName] = useState("");
@@ -179,7 +179,11 @@ const Registration = () => {
 
       // Redirect to login after a brief delay so toast can be read
       setTimeout(() => {
-        navigate("/login");
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/login");
+        }
       }, 1500);
     } catch (error) {
       const errorMsg = error.response?.data?.message || "Registration failed. Please try again.";

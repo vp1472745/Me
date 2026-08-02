@@ -345,7 +345,7 @@ const Navbar = ({
 
             {/* Modal Body */}
             <div className="flex-1 overflow-y-auto">
-              {authMode === "signup" ? <Registeration /> : <Login />}
+              {authMode === "signup" ? <Registeration onSuccess={() => setAuthMode("login")} /> : <Login />}
             </div>
           </div>
         </div>
