@@ -2,6 +2,8 @@ import User from "../../model/authModel.js";
 import config from "../../config/config.js";
 import History from "../../model/historyModel.js";
 import nodemailer from "nodemailer";
+import TempFile from "../../model/tempFileModel.js";
+import { tempMemoryCache } from "../../utils/memoryCache.js";
 import {
   getAuthUrl,
   getTokens,
@@ -213,9 +215,29 @@ export const sendDriveLinkEmail = async (req, res) => {
 // 6. Proxy/Stream public file content from Google Drive
 export const proxyPublicFile = async (req, res) => {
   try {
-    const { fileId } = req.params;
+    let { fileId } = req.params;
     if (!fileId) {
       return res.status(400).json({ success: false, message: "File ID is required" });
+    }
+
+    // Check if it's a local/temporary ID
+    if (fileId.startsWith("local-")) {
+      // Serve from RAM cache if still syncing
+      if (tempMemoryCache.has(fileId)) {
+        const cached = tempMemoryCache.get(fileId);
+        res.setHeader("Content-Type", cached.mimeType || "application/octet-stream");
+        return res.send(cached.buffer);
+      }
+
+      // If missing from RAM cache, check if it has been synced to Google Drive in the background
+      const syncedFile = await TempFile.findOne({ localId: fileId });
+      if (syncedFile && syncedFile.status === "COMPLETED" && syncedFile.driveId) {
+        fileId = syncedFile.driveId; // Switch to the real Google Drive ID
+      } else if (syncedFile && syncedFile.status === "FAILED") {
+        return res.status(500).json({ success: false, message: `Background sync failed: ${syncedFile.error}` });
+      } else {
+        return res.status(404).json({ success: false, message: "File is syncing or not found" });
+      }
     }
 
     // Find connected Google Drive user (preferably an admin)

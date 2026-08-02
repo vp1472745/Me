@@ -42,7 +42,7 @@ const flimSchema =
       },
 
       // ==========================
-      // CLOUDINARY ID
+      // GOOGLE DRIVE FILE ID
       // ==========================
 
       public_id: {

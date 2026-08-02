@@ -1,5 +1,6 @@
 import Video from "../../model/filmsModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
+import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
 
 // ==============================
 // CREATE VIDEO (YouTube URL only)
@@ -40,11 +41,18 @@ export const createVideo = async (req, res) => {
 // ==============================
 export const getAllVideos = async (req, res) => {
   try {
-    const videos = await Video.find().sort({ createdAt: -1 });
+    const videos = await Video.find().sort({ createdAt: -1 }).lean();
+
+    const cleaned = videos.map((v) => ({
+      ...v,
+      videoUrl: getCleanMediaUrl(v.videoUrl),
+      thumbnail: getCleanMediaUrl(v.thumbnail),
+    }));
+
     return res.status(200).json({
       success: true,
-      count: videos.length,
-      videos,
+      count: cleaned.length,
+      videos: cleaned,
     });
   } catch (error) {
     console.error("GET VIDEOS ERROR:", error);
@@ -60,16 +68,23 @@ export const getAllVideos = async (req, res) => {
 // ==============================
 export const getSingleVideo = async (req, res) => {
   try {
-    const video = await Video.findById(req.params.id);
+    const video = await Video.findById(req.params.id).lean();
     if (!video) {
       return res.status(404).json({
         success: false,
         message: "Video Not Found",
       });
     }
+
+    const cleaned = {
+      ...video,
+      videoUrl: getCleanMediaUrl(video.videoUrl),
+      thumbnail: getCleanMediaUrl(video.thumbnail),
+    };
+
     return res.status(200).json({
       success: true,
-      video,
+      video: cleaned,
     });
   } catch (error) {
     console.error("GET VIDEO ERROR:", error);
@@ -114,7 +129,7 @@ export const updateVideo = async (req, res) => {
 };
 
 // ==============================
-// DELETE VIDEO (No Cloudinary cleanup needed)
+// DELETE VIDEO (No Google Drive cleanup needed)
 // ==============================
 export const deleteVideo = async (req, res) => {
   try {

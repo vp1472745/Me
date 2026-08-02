@@ -1,5 +1,6 @@
 import HeroSection from "../../model/heroModel.js";
 import { uploadPublicAssetToDrive, deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
+import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
 
 // Helper Function: Upload binary files to Google Drive
 const streamUploadToDrive = async (fileBuffer, mediaType, reqUser) => {
@@ -17,7 +18,7 @@ const streamUploadToDrive = async (fileBuffer, mediaType, reqUser) => {
 };
 
 // ==============================
-// CREATE HERO SECTION (Handles Client-Side Cloudinary Uploads)
+// CREATE HERO SECTION (Handles Google Drive Uploads)
 // ==============================
 export const createHeroSection = async (req, res) => {
   try {
@@ -68,12 +69,17 @@ export const getAllHeroSections = async (req, res) => {
   try {
     const heroes = await HeroSection.find().sort({
       createdAt: -1,
-    });
+    }).lean();
+
+    const cleaned = heroes.map((h) => ({
+      ...h,
+      mediaUrl: getCleanMediaUrl(h.mediaUrl),
+    }));
 
     return res.status(200).json({
       success: true,
-      count: heroes.length,
-      data: heroes,
+      count: cleaned.length,
+      data: cleaned,
     });
 
   } catch (error) {
@@ -90,7 +96,7 @@ export const getAllHeroSections = async (req, res) => {
 // ==============================
 export const getSingleHeroSection = async (req, res) => {
   try {
-    const hero = await HeroSection.findById(req.params.id);
+    const hero = await HeroSection.findById(req.params.id).lean();
 
     if (!hero) {
       return res.status(404).json({
@@ -98,6 +104,8 @@ export const getSingleHeroSection = async (req, res) => {
         message: "Requested hero canvas mapping not found.",
       });
     }
+
+    hero.mediaUrl = getCleanMediaUrl(hero.mediaUrl);
 
     return res.status(200).json({
       success: true,

@@ -3,6 +3,7 @@ import {
   FaYoutube,
   FaFacebookF,
 } from "react-icons/fa";
+import companyConfig from "../../config/companyConfig";
 
 const Footer = () => {
   return (
@@ -15,7 +16,9 @@ const Footer = () => {
 
           {/* INSTAGRAM */}
           <a
-            href="#"
+            href={companyConfig.socials.instagram}
+            target="_blank"
+            rel="noopener noreferrer"
             className="
               text-[#2d2d2d]
               text-[30px]
@@ -29,7 +32,9 @@ const Footer = () => {
 
           {/* YOUTUBE */}
           <a
-            href="#"
+            href={companyConfig.socials.youtube}
+            target="_blank"
+            rel="noopener noreferrer"
             className="
               text-[#2d2d2d]
               text-[30px]
@@ -43,7 +48,9 @@ const Footer = () => {
 
           {/* FACEBOOK */}
           <a
-            href="#"
+            href={companyConfig.socials.facebook}
+            target="_blank"
+            rel="noopener noreferrer"
             className="
               text-[#2d2d2d]
               text-[30px]
@@ -67,7 +74,7 @@ const Footer = () => {
             tracking-wide
           "
         >
-          The Wedding Story © 2023
+          {companyConfig.name} © {companyConfig.established}
         </p>
       </div>
     </footer>

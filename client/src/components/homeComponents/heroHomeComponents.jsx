@@ -1,8 +1,6 @@
 
-// ======================================================
-// FILE: HeroSection.jsx - Supporting Adaptive Dynamic Media Stream
-// ======================================================
 import  { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import "../../css/heroHoneComponents.css";
 import Footer from "../../components/homeComponents/footerHomeComponents";
 
@@ -17,21 +15,23 @@ import { getAllHeroSections } from "../../config/api";
 import { getCleanMediaUrl } from "../../utils/cleanUrl";
 
 const HeroSection = () => {
-  const [heroMedia, setHeroMedia] = useState(null);
+  const [heroes, setHeroes] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   // Fetch live background tracking from core API matrix
   const fetchHeroSection = async () => {
     try {
       const res = await getAllHeroSections();
-      const heroes = res?.data?.data || [];
+      const rawHeroes = res?.data?.data || [];
 
-      if (heroes.length > 0) {
-        // Fetching the first configuration item entry setup
-        const firstHero = heroes[0];
-        setHeroMedia({
-          ...firstHero,
-          mediaUrl: getCleanMediaUrl(firstHero.mediaUrl),
-        });
+      if (rawHeroes.length > 0) {
+        const cleaned = rawHeroes.map((hero) => ({
+          ...hero,
+          mediaUrl: getCleanMediaUrl(hero.mediaUrl),
+        }));
+        // Sort by sliderOrder
+        cleaned.sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
+        setHeroes(cleaned);
       }
     } catch (error) {
       console.log("Error fetching hero section content pipeline:", error);
@@ -42,70 +42,150 @@ const HeroSection = () => {
     fetchHeroSection();
   }, []);
 
+  // Auto transition interval
+  useEffect(() => {
+    if (heroes.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % heroes.length);
+    }, 6000); // 6 seconds auto-rotate
+    return () => clearInterval(interval);
+  }, [heroes]);
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev === 0 ? heroes.length - 1 : prev - 1));
+  };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % heroes.length);
+  };
+
+  const defaultHero = {
+    mediaUrl: HeroImage,
+    mediaType: "image",
+    title: "Welcome",
+    subtitle: "Creating Timeless Memories",
+    paragraph: "Imagine waking up to a job that lifts you up and transports you to a different world. A world populated with a billion heartfelt feelings and stories.",
+  };
+
+  const displayHeroes = heroes.length > 0 ? heroes : [defaultHero];
+
   return (
     <>
-      {/* Dynamic Main Entry Hero Section Layer */}
-      <section
-        className="relative h-screen flex items-center justify-center overflow-hidden bg-fixed bg-cover bg-no-repeat"
-        style={
-          !heroMedia || heroMedia.mediaType === "image"
-            ? {
-                backgroundImage: `url(${heroMedia ? heroMedia.mediaUrl : HeroImage})`,
-                backgroundPosition: "center 35%",
-              }
-            : {}
-        }
-      >
-        {/* Kinetic Motion Loop Stream Renderer (Video Mode Only) */}
-        {heroMedia && heroMedia.mediaType === "video" && (
-          <video
-            key={heroMedia.mediaUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ objectPosition: "center 35%" }}
-          >
-            <source src={heroMedia.mediaUrl} type="video/mp4" />
-          </video>
+      {/* Dynamic Carousel Slide Frame */}
+      <section className="relative h-screen overflow-hidden bg-black">
+        {displayHeroes.map((hero, index) => {
+          const isActive = index === currentIndex;
+          return (
+            <div
+              key={hero._id || index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              }`}
+            >
+              {/* Media Renderer */}
+              {hero.mediaType === "video" ? (
+                <video
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{ objectPosition: "center 35%" }}
+                >
+                  <source src={hero.mediaUrl} type="video/mp4" />
+                </video>
+              ) : (
+                <div
+                  className="absolute inset-0 bg-cover bg-no-repeat bg-center"
+                  style={{
+                    backgroundImage: `url(${hero.mediaUrl})`,
+                    backgroundPosition: "center 35%",
+                  }}
+                />
+              )}
+
+              {/* Tint Overlay Screen */}
+              <div
+                className="absolute inset-0 bg-black pointer-events-none"
+                style={{ opacity: hero.backgroundOverlay !== undefined ? hero.backgroundOverlay : 0.45 }}
+              />
+
+              {/* Content Panel overlays */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20">
+                <div className="max-w-4xl px-4 animate-fadeIn">
+                  <h1 className="luxury-title text-white text-2xl md:text-3xl lg:text-4xl tracking-widest mb-2 font-light">
+                    {hero.title || "Welcome"}
+                  </h1>
+
+                  {hero.subtitle && (
+                    <p className="text-white/80 text-xs md:text-sm tracking-[0.25em] uppercase font-medium mb-3">
+                      {hero.subtitle}
+                    </p>
+                  )}
+
+                  <div className="luxury-line"></div>
+
+                  <p className="luxury-text text-white text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+                    {hero.paragraph}
+                  </p>
+
+                  <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+                    {hero.primaryButtonText && (
+                      <a
+                        href={hero.primaryButtonLink || "#"}
+                        className="px-6 py-2.5 border border-white text-white text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 rounded font-medium"
+                      >
+                        {hero.primaryButtonText}
+                      </a>
+                    )}
+                    {hero.secondaryButtonText && (
+                      <a
+                        href={hero.secondaryButtonLink || "#"}
+                        className="px-6 py-2.5 bg-white text-black text-xs uppercase tracking-widest hover:bg-transparent hover:text-white border border-white transition-all duration-300 rounded font-medium"
+                      >
+                        {hero.secondaryButtonText}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Carousel Chevrons & Bullets */}
+        {displayHeroes.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-6 top-1/2 -translate-y-1/2 z-30 text-white/40 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all duration-300"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft size={32} />
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-6 top-1/2 -translate-y-1/2 z-30 text-white/40 hover:text-white p-3 rounded-full hover:bg-white/10 transition-all duration-300"
+              aria-label="Next slide"
+            >
+              <ChevronRight size={32} />
+            </button>
+
+            {/* Bottom dots */}
+            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+              {displayHeroes.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    idx === currentIndex ? "bg-white scale-125" : "bg-white/30 hover:bg-white/60"
+                  }`}
+                  aria-label={`Slide index indicator ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </>
         )}
-
-        {/* Global Cinematic Contrast Tint Overlay Veil */}
-        <div className="absolute inset-0 bg-black/20 z-0 pointer-events-none"></div>
-
-        {/* LUXURY LAYOUT CONTENT */}
-        <div className="relative z-10 text-center px-6">
-          {/* TITLE */}
-          <h1 className="luxury-title text-white text-2xl md:text-2xl md:mt-65">
-            Welcome
-          </h1>
-
-          {/* LINE */}
-          <div className="luxury-line"></div>
-
-          {/* TEXT */}
-          <p className="luxury-text text-white text-lg md:text-1xl max-w-5xl mx-auto">
-            Imagine waking up to a job that lifts you up and transports you to a
-            different world.
-          </p>
-
-          <p className="luxury-text text-white/90 text-base md:text-xl max-w-6xl mx-auto">
-            A world populated with a billion heartfelt feelings and stories
-            etched ceremoniously in magic, love and joie de vivre.
-          </p>
-
-          <p className="luxury-text text-white/90 text-base md:text-xl max-w-6xl mx-auto">
-            Perfect with its Disney-like happy endings, sworn vows and the
-            promises of forever.
-          </p>
-
-          <p className="luxury-text text-white text-lg md:text-2xl max-w-5xl mx-auto">
-            This is our world. The Wedding Story world!
-          </p>
-
-          <div className="luxury-line"></div>
-        </div>
       </section>
 
       {/* Quote Section Block Frame */}

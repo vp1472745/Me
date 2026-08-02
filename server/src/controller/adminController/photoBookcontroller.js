@@ -3,8 +3,9 @@
 // ======================================================
 import WeddingStoryModel from "../../model/photoBook.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
+import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
 
-// Helper function to extract public_id safely from Cloudinary URL strings
+// Helper function to extract public_id safely from Google Drive URL strings
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
   if (url.includes("/uploads/")) {
@@ -19,12 +20,7 @@ const getPublicIdFromUrl = (url) => {
       return match ? match[1] : null;
     }
   }
-  const parts = url.split("/upload/");
-  if (parts.length < 2) return null;
-  
-  // Strip out versioning prefix strings and trailing image file extensions
-  const pathWithoutVersion = parts[1].replace(/^v\d+\//, "");
-  return pathWithoutVersion.substring(0, pathWithoutVersion.lastIndexOf("."));
+  return null;
 };
 
 /* =========================
@@ -101,11 +97,17 @@ export const createWeddingStory = async (req, res) => {
 ========================= */
 export const getAllWeddingStories = async (req, res) => {
   try {
-    const stories = await WeddingStoryModel.find().sort({ createdAt: -1 });
+    const stories = await WeddingStoryModel.find().sort({ createdAt: -1 }).lean();
+
+    const cleaned = stories.map((story) => ({
+      ...story,
+      coverImage: getCleanMediaUrl(story.coverImage),
+      galleryImages: story.galleryImages ? story.galleryImages.map((img) => getCleanMediaUrl(img)) : [],
+    }));
 
     return res.status(200).json({
       success: true,
-      data: stories,
+      data: cleaned,
     });
   } catch (error) {
     console.error("Core global fetching error on story structures:", error);
@@ -121,7 +123,7 @@ export const getAllWeddingStories = async (req, res) => {
 ========================= */
 export const getSingleWeddingStory = async (req, res) => {
   try {
-    const story = await WeddingStoryModel.findById(req.params.id);
+    const story = await WeddingStoryModel.findById(req.params.id).lean();
 
     if (!story) {
       return res.status(404).json({
@@ -130,9 +132,15 @@ export const getSingleWeddingStory = async (req, res) => {
       });
     }
 
+    const cleaned = {
+      ...story,
+      coverImage: getCleanMediaUrl(story.coverImage),
+      galleryImages: story.galleryImages ? story.galleryImages.map((img) => getCleanMediaUrl(img)) : [],
+    };
+
     return res.status(200).json({
       success: true,
-      data: story,
+      data: cleaned,
     });
   } catch (error) {
     console.error("Individual entity lookup failure:", error);

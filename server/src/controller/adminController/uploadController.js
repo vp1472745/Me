@@ -3,7 +3,9 @@ import Work from "../../model/workModel.js";
 import User from "../../model/authModel.js";
 import History from "../../model/historyModel.js";
 import Notification from "../../model/notificationModel.js";
-import { getAccessToken, findOrCreateFolder, uploadFile, uploadPublicAssetToDrive } from "../../services/googleDriveService.js";
+import TempFile from "../../model/tempFileModel.js";
+import { tempMemoryCache } from "../../utils/memoryCache.js";
+import { getAccessToken, findOrCreateFolder, uploadFile, uploadPublicAssetToDrive, makeFilePublic } from "../../services/googleDriveService.js";
 
 // Multer memory configuration
 const storage = multer.memoryStorage();
@@ -12,7 +14,157 @@ export const uploadMiddleware = multer({
   limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
 });
 
-// Single Upload (Photo / Video / deliverable)
+// Helper for Background Syncing of Public Assets using RAM Cache
+const uploadPublicAssetBackground = async (originalName, mimeType, folderName, userContext, localId) => {
+  try {
+    const cachedItem = tempMemoryCache.get(localId);
+    if (!cachedItem) {
+      throw new Error("Temporary file buffer missing from RAM cache");
+    }
+
+    const buffer = cachedItem.buffer;
+    
+    // Find connected Google Drive user
+    const User = (await import("../../model/authModel.js")).default;
+    let driveUser = null;
+    if (userContext) {
+      driveUser = await User.findById(userContext._id);
+    }
+    if (!driveUser || !driveUser.googleDrive?.connected) {
+      driveUser = await User.findOne({ "googleDrive.connected": true, role: "ADMIN" });
+      if (!driveUser) {
+        driveUser = await User.findOne({ "googleDrive.connected": true });
+      }
+    }
+
+    let accessToken = null;
+    const envRefreshToken = process.env.GOOGLE_REFRESH_TOKEN;
+
+    if (driveUser) {
+      accessToken = await getAccessToken(driveUser);
+    } else if (envRefreshToken) {
+      accessToken = await getAccessTokenFromRefreshToken(envRefreshToken);
+    }
+
+    if (!accessToken) {
+      throw new Error("Failed to refresh Google Drive access token");
+    }
+
+    // 1. Find or create root folder "Studio Public Assets"
+    const rootFolderId = await findOrCreateFolder(accessToken, "Studio Public Assets");
+
+    // 2. Find or create subfolder inside root folder
+    const subFolderId = await findOrCreateFolder(accessToken, folderName, rootFolderId);
+
+    // 3. Upload file
+    const uploadRes = await uploadFile(accessToken, subFolderId, originalName, buffer, mimeType);
+
+    // 4. Make the file publicly viewable
+    await makeFilePublic(accessToken, uploadRes.id);
+
+    // 5. Update status
+    await TempFile.findOneAndUpdate(
+      { localId },
+      { status: "COMPLETED", driveId: uploadRes.id }
+    );
+
+    // 6. Delete from RAM cache immediately to free memory!
+    tempMemoryCache.delete(localId);
+    console.log(`Background public sync completed for ${localId} -> Google Drive: ${uploadRes.id}`);
+  } catch (error) {
+    console.error(`Background public sync failed for ${localId}:`, error.message);
+    await TempFile.findOneAndUpdate(
+      { localId },
+      { status: "FAILED", error: error.message }
+    );
+    // Delete from RAM cache even on failure to avoid leak
+    tempMemoryCache.delete(localId);
+  }
+};
+
+// Helper for Background Syncing of Deliverables using RAM Cache
+const uploadDeliverableBackground = async (originalName, mimeType, subFolder, clientId, workId, localId) => {
+  try {
+    const cachedItem = tempMemoryCache.get(localId);
+    if (!cachedItem) {
+      throw new Error("Temporary deliverable buffer missing from RAM cache");
+    }
+
+    const buffer = cachedItem.buffer;
+    const User = (await import("../../model/authModel.js")).default;
+    const Work = (await import("../../model/workModel.js")).default;
+
+    const clientUser = await User.findById(clientId);
+    if (!clientUser || !clientUser.googleDrive?.connected) {
+      throw new Error("Client's Google Drive is not connected");
+    }
+
+    // Refresh client's Google Drive access token
+    const accessToken = await getAccessToken(clientUser);
+
+    // Resolve or Create subfolder inside Client's Root Folder
+    const subFolderId = await findOrCreateFolder(
+      accessToken,
+      subFolder,
+      clientUser.googleDrive.rootFolderId
+    );
+
+    // Upload file to client's Drive
+    const uploadRes = await uploadFile(
+      accessToken,
+      subFolderId,
+      originalName,
+      buffer,
+      mimeType
+    );
+
+    // Update TempFile tracking
+    await TempFile.findOneAndUpdate(
+      { localId },
+      { status: "COMPLETED", driveId: uploadRes.id }
+    );
+
+    // Update the fileId in Work deliverables
+    const work = await Work.findById(workId);
+    if (work) {
+      const del = work.deliverables.find(d => d.fileId === localId);
+      if (del) {
+        del.fileId = uploadRes.id;
+        await work.save();
+      }
+    }
+
+    // Delete from RAM cache immediately to free memory!
+    tempMemoryCache.delete(localId);
+
+    // Log History
+    await History.create({
+      workId,
+      action: "Upload Completed",
+      remarks: `Background sync completed for file '${originalName}'`,
+    });
+
+    // Notify Client User
+    await Notification.create({
+      recipient: clientId,
+      message: `A new file '${originalName}' has been successfully synced to your '${subFolder}' folder.`,
+      type: "UPLOAD_COMPLETED",
+      link: `/dashboard/gallery`,
+    });
+
+    console.log(`Background deliverable sync completed for ${localId} -> Google Drive: ${uploadRes.id}`);
+  } catch (error) {
+    console.error(`Background deliverable sync failed for ${localId}:`, error.message);
+    await TempFile.findOneAndUpdate(
+      { localId },
+      { status: "FAILED", error: error.message }
+    );
+    // Delete from RAM cache even on failure to avoid leak
+    tempMemoryCache.delete(localId);
+  }
+};
+
+// 1. Single Upload (Photo / Video / deliverable)
 export const uploadSingleFile = async (req, res) => {
   try {
     const { workId, subFolder } = req.body;
@@ -36,28 +188,23 @@ export const uploadSingleFile = async (req, res) => {
       });
     }
 
-    // Refresh client's Google Drive access token
-    const accessToken = await getAccessToken(clientUser);
+    // Generate local temp ID
+    const fileExt = file.originalname.split(".").pop();
+    const localFileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${fileExt}`;
+    const localId = `local-${localFileName}`;
 
-    // Resolve or Create subfolder inside Client's Root Folder
-    const subFolderId = await findOrCreateFolder(
-      accessToken,
-      subFolder,
-      clientUser.googleDrive.rootFolderId
-    );
+    // Save in RAM cache (Zero Disk Writes)
+    tempMemoryCache.set(localId, file.buffer, file.mimetype);
 
-    // Upload file to client's Drive
-    const uploadRes = await uploadFile(
-      accessToken,
-      subFolderId,
-      file.originalname,
-      file.buffer,
-      file.mimetype
-    );
+    // Create TempFile entry
+    await TempFile.create({
+      localId,
+      status: "PENDING",
+    });
 
-    // Add deliverable to Work document
+    // Add deliverable to Work document instantly!
     const newDeliverable = {
-      fileId: uploadRes.id,
+      fileId: localId, // Immediate local ID
       name: file.originalname,
       category: subFolder,
       size: file.size,
@@ -70,26 +217,22 @@ export const uploadSingleFile = async (req, res) => {
     work.deliverables.push(newDeliverable);
     await work.save();
 
+    // Trigger background sync using RAM buffer
+    uploadDeliverableBackground(file.originalname, file.mimetype, subFolder, clientUser._id, workId, localId)
+      .catch(err => console.error(`Background deliverable sync fail for ${localId}:`, err));
+
     // Log History
     await History.create({
       workId: work._id,
-      action: "Upload Completed",
+      action: "Upload Initiated",
       performedBy: req.user._id,
       role: req.user.role,
-      remarks: `Uploaded file '${file.originalname}' (${subFolder}) into client's Google Drive`,
-    });
-
-    // Notify Client User
-    await Notification.create({
-      recipient: work.client,
-      message: `A new file '${file.originalname}' has been uploaded to your '${subFolder}' folder.`,
-      type: "UPLOAD_COMPLETED",
-      link: `/dashboard/gallery`,
+      remarks: `Initiated upload of '${file.originalname}' (${subFolder})`,
     });
 
     return res.status(200).json({
       success: true,
-      message: "File uploaded successfully to client's Google Drive.",
+      message: "File upload initiated successfully (syncing in background).",
       deliverable: newDeliverable,
     });
   } catch (error) {
@@ -98,7 +241,7 @@ export const uploadSingleFile = async (req, res) => {
   }
 };
 
-// Multiple Uploads
+// 2. Multiple Uploads
 export const uploadMultipleFiles = async (req, res) => {
   try {
     const { workId, subFolder } = req.body;
@@ -121,29 +264,24 @@ export const uploadMultipleFiles = async (req, res) => {
       });
     }
 
-    // Refresh client's token
-    const accessToken = await getAccessToken(clientUser);
+    const deliverables = [];
 
-    // Resolve or Create subfolder
-    const subFolderId = await findOrCreateFolder(
-      accessToken,
-      subFolder,
-      clientUser.googleDrive.rootFolderId
-    );
-
-    const uploadedDeliverables = [];
-
+    // Save all files in RAM cache and trigger background uploads
     for (const file of files) {
-      const uploadRes = await uploadFile(
-        accessToken,
-        subFolderId,
-        file.originalname,
-        file.buffer,
-        file.mimetype
-      );
+      const fileExt = file.originalname.split(".").pop();
+      const localFileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${fileExt}`;
+      const localId = `local-${localFileName}`;
 
-      const deliverable = {
-        fileId: uploadRes.id,
+      // Save in RAM cache (Zero Disk Writes)
+      tempMemoryCache.set(localId, file.buffer, file.mimetype);
+
+      await TempFile.create({
+        localId,
+        status: "PENDING",
+      });
+
+      const newDeliverable = {
+        fileId: localId,
         name: file.originalname,
         category: subFolder,
         size: file.size,
@@ -153,33 +291,29 @@ export const uploadMultipleFiles = async (req, res) => {
         status: "APPROVED",
       };
 
-      work.deliverables.push(deliverable);
-      uploadedDeliverables.push(deliverable);
+      deliverables.push(newDeliverable);
+
+      // Trigger background upload
+      uploadDeliverableBackground(file.originalname, file.mimetype, subFolder, clientUser._id, workId, localId)
+        .catch(err => console.error(`Background deliverable sync fail for ${localId}:`, err));
     }
 
+    work.deliverables.push(...deliverables);
     await work.save();
 
     // Log History
     await History.create({
       workId: work._id,
-      action: "Upload Completed",
+      action: "Upload Initiated",
       performedBy: req.user._id,
       role: req.user.role,
-      remarks: `Uploaded ${files.length} files (${subFolder}) into client's Google Drive`,
-    });
-
-    // Notify Client
-    await Notification.create({
-      recipient: work.client,
-      message: `${files.length} new files have been uploaded to your '${subFolder}' folder.`,
-      type: "UPLOAD_COMPLETED",
-      link: `/dashboard/gallery`,
+      remarks: `Initiated upload of ${files.length} files (${subFolder})`,
     });
 
     return res.status(200).json({
       success: true,
-      message: `Successfully uploaded ${files.length} files.`,
-      deliverables: uploadedDeliverables,
+      message: `Initiated upload of ${files.length} files (syncing in background).`,
+      deliverables,
     });
   } catch (error) {
     console.error("Multiple files upload error:", error);
@@ -199,23 +333,36 @@ export const uploadPublicAsset = async (req, res) => {
 
     const folderName = subFolder || "General Assets";
 
-    const uploadResult = await uploadPublicAssetToDrive(
-      file.originalname,
-      file.buffer,
-      file.mimetype,
-      folderName,
-      req.user
-    );
+    // Generate local temp ID
+    const fileExt = file.originalname.split(".").pop();
+    const localFileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${fileExt}`;
+    const localId = `local-${localFileName}`;
+    
+    // Save in RAM cache (Zero Disk Writes)
+    tempMemoryCache.set(localId, file.buffer, file.mimetype);
 
+    // Create tracking doc
+    await TempFile.create({
+      localId,
+      status: "PENDING",
+    });
+
+    // Start background sync
+    const userContext = req.user ? { _id: req.user._id, role: req.user.role } : null;
+    
+    uploadPublicAssetBackground(file.originalname, file.mimetype, folderName, userContext, localId)
+      .catch(err => console.error(`Background upload fail for ${localId}:`, err));
+
+    // Respond immediately to the frontend
+    const instantUrl = `https://drive.google.com/uc?export=view&id=${localId}`;
     return res.status(200).json({
       success: true,
-      message: "Asset uploaded successfully to Google Drive",
-      url: uploadResult.url,
-      public_id: uploadResult.id,
+      message: "Asset uploaded successfully (local caching pending Google Drive sync)",
+      url: instantUrl,
+      public_id: localId,
     });
   } catch (error) {
     console.error("Public asset upload controller error:", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
-

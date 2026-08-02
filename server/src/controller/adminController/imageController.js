@@ -1,5 +1,6 @@
 import Gallery from "../../model/imageModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
+import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
 
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
@@ -15,10 +16,7 @@ const getPublicIdFromUrl = (url) => {
       return match ? match[1] : null;
     }
   }
-  const parts = url.split("/upload/");
-  if (parts.length < 2) return null;
-  const pathWithoutVersion = parts[1].replace(/^v\d+\//, "");
-  return pathWithoutVersion.substring(0, pathWithoutVersion.lastIndexOf("."));
+  return null;
 };
 
 // ==============================
@@ -26,7 +24,7 @@ const getPublicIdFromUrl = (url) => {
 // ==============================
 export const createGallery = async (req, res) => {
   try {
-    const { images } = req.body; // Array of Cloudinary URLs from frontend
+    const { images } = req.body; // Array of Google Drive URLs from frontend
 
     if (!images || images.length === 0) {
       return res.status(400).json({ success: false, message: "No images provided" });
@@ -49,8 +47,12 @@ export const createGallery = async (req, res) => {
 // ==============================
 export const getAllGalleries = async (req, res) => {
   try {
-    const galleries = await Gallery.find().sort({ createdAt: -1 });
-    return res.status(200).json({ success: true, data: galleries });
+    const galleries = await Gallery.find().sort({ createdAt: -1 }).lean();
+    const cleaned = galleries.map((g) => ({
+      ...g,
+      images: g.images ? g.images.map((img) => getCleanMediaUrl(img)) : [],
+    }));
+    return res.status(200).json({ success: true, data: cleaned });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -62,9 +64,12 @@ export const getAllGalleries = async (req, res) => {
 // ==============================
 export const getSingleGallery = async (req, res) => {
   try {
-    const gallery = await Gallery.findById(req.params.id);
+    const gallery = await Gallery.findById(req.params.id).lean();
     if (!gallery) {
       return res.status(404).json({ success: false, message: "Gallery Not Found" });
+    }
+    if (gallery.images) {
+      gallery.images = gallery.images.map((img) => getCleanMediaUrl(img));
     }
     return res.status(200).json({ success: true, data: gallery });
   } catch (error) {
@@ -74,7 +79,7 @@ export const getSingleGallery = async (req, res) => {
 };
 
 // ==============================
-// DELETE GALLERY (with Cloudinary cleanup)
+// DELETE GALLERY (with Google Drive cleanup)
 // ==============================
 export const deleteGallery = async (req, res) => {
   try {

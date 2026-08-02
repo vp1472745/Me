@@ -1,6 +1,8 @@
 import Work from "../../model/workModel.js";
 import User from "../../model/authModel.js";
 import History from "../../model/historyModel.js";
+import TempFile from "../../model/tempFileModel.js";
+import { tempMemoryCache } from "../../utils/memoryCache.js";
 import { getAccessToken, getFileStream } from "../../services/googleDriveService.js";
 
 // 1. Get Gallery deliverables
@@ -46,10 +48,28 @@ export const getGallery = async (req, res) => {
 // 2. Download / Proxy file from Google Drive
 export const downloadFile = async (req, res) => {
   try {
-    const { fileId, workId } = req.query;
+    let { fileId, workId } = req.query;
 
     if (!fileId || !workId) {
       return res.status(400).json({ success: false, message: "File ID and Work ID are required" });
+    }
+
+    // Serve local file from RAM cache if it's not yet synced
+    if (fileId.startsWith("local-")) {
+      if (tempMemoryCache.has(fileId)) {
+        const cached = tempMemoryCache.get(fileId);
+        res.setHeader("Content-Disposition", `attachment; filename="${fileId}"`);
+        res.setHeader("Content-Type", cached.mimeType || "application/octet-stream");
+        return res.send(cached.buffer);
+      }
+
+      // If missing from RAM cache, check if it has been synced to Google Drive
+      const syncedFile = await TempFile.findOne({ localId: fileId });
+      if (syncedFile && syncedFile.status === "COMPLETED" && syncedFile.driveId) {
+        fileId = syncedFile.driveId; // Switch to the Google Drive ID
+      } else {
+        return res.status(404).json({ success: false, message: "File is still uploading or has failed." });
+      }
     }
 
     const work = await Work.findById(workId);

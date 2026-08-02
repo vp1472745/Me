@@ -228,7 +228,10 @@ export const getFileStream = async (accessToken, fileId) => {
     );
     return response;
   } catch (error) {
-    console.error("Error downloading file from Drive:", error.response?.data || error.message);
+    if (error.response && error.response.data && typeof error.response.data.destroy === "function") {
+      error.response.data.destroy(); // Safely destroy the error stream to prevent process crashes
+    }
+    console.error("Error downloading file from Drive:", error.message);
     throw new Error("Failed to retrieve file content from Google Drive");
   }
 };
