@@ -295,10 +295,9 @@ export const uploadPublicAssetToDrive = async (fileName, fileBuffer, mimeType, s
   // 4. Make the file publicly viewable
   await makeFilePublic(accessToken, uploadRes.id);
 
-  const serverUrl = config.SERVER_URL;
   return {
     id: uploadRes.id,
-    url: `${serverUrl}/api/google/file/${uploadRes.id}`,
+    url: `https://drive.google.com/uc?export=view&id=${uploadRes.id}`,
   };
 };
 
