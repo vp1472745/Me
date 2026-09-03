@@ -29,6 +29,13 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import CommonModal from "../../../components/commonComponents/CommonModelComponents";
+import {
+  getAllDirectoryUsers,
+  createAdminUser,
+  createEditorUser,
+  createClientUser,
+  updateEditorPermissions,
+} from "../../../config/api";
 
 // ============================================================
 // PERMISSIONS CONFIG
@@ -181,8 +188,8 @@ const StatCard = ({ label, value, icon, tone = "emerald" }) => {
 // MAIN COMPONENT
 // ============================================================
 const CreateUsers = () => {
-  const [users, setUsers] = useState(MOCK_USERS);
-  const [filteredUsers, setFilteredUsers] = useState(MOCK_USERS);
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -194,26 +201,27 @@ const CreateUsers = () => {
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
-    phone: "",
-    password: "",
     role: "USER",
     permissions: ["view_dashboard"],
   });
-
-  // OTP states
-  const [otpStep, setOtpStep] = useState(false); // false = form, true = otp verification
-  const [otp, setOtp] = useState("");
-  const [generatedOtp, setGeneratedOtp] = useState("");
-  const [otpError, setOtpError] = useState(false);
 
   const searchInputRef = useRef(null);
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setUsers(MOCK_USERS);
-    setFilteredUsers(MOCK_USERS);
-    setLoadingUsers(false);
+    try {
+      const response = await getAllDirectoryUsers();
+      if (response.data.success) {
+        const fetchedUsers = response.data.users || [];
+        setUsers(fetchedUsers);
+        setFilteredUsers(fetchedUsers);
+      }
+    } catch (error) {
+      console.error("Fetch Users Error:", error);
+      toast.error(error.response?.data?.message || "Failed to load directory users");
+    } finally {
+      setLoadingUsers(false);
+    }
   };
 
   useEffect(() => {
@@ -262,132 +270,81 @@ const CreateUsers = () => {
     }
 
     setSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      const response = await updateEditorPermissions({
+        userId: selectedUser._id,
+        role: editRole,
+        permissions: editPermissions,
+      });
 
-    const updatedUsers = users.map((u) =>
-      u._id === selectedUser._id
-        ? { ...u, role: editRole, permissions: editPermissions }
-        : u
-    );
-
-    setUsers(updatedUsers);
-    setFilteredUsers(
-      updatedUsers.filter((u) => {
-        const lower = searchTerm.toLowerCase();
-        return (
-          u.name?.toLowerCase().includes(lower) ||
-          u.role?.toLowerCase().includes(lower) ||
-          u.email?.toLowerCase().includes(lower)
-        );
-      })
-    );
-
-    const updatedSelected = updatedUsers.find((u) => u._id === selectedUser._id);
-    setSelectedUser(updatedSelected);
-    toast.success("Permissions updated successfully!");
-    setSaving(false);
+      if (response.data.success) {
+        toast.success(response.data.message || "User role & permissions updated successfully!");
+        await fetchUsers();
+        setSelectedUser((prev) => ({
+          ...prev,
+          role: editRole,
+          permissions: editPermissions,
+        }));
+      }
+    } catch (error) {
+      console.error("Save Permissions Error:", error);
+      toast.error(error.response?.data?.message || "Failed to update permissions");
+    } finally {
+      setSaving(false);
+    }
   };
 
   // ============================================================
-  // OTP FLOW
+  // CREATE USER API CALL
   // ============================================================
   const handleCreateUser = async (e) => {
     e.preventDefault();
 
-    // Validation for the form
-    if (!newUser.username || !newUser.password) {
-      toast.error("Username and password are required");
+    if (!newUser.username || !newUser.username.trim()) {
+      toast.error("Full Name / Username is required");
       return;
     }
-    if (!newUser.email) {
+    if (!newUser.email || !newUser.email.trim()) {
       toast.error("Email is required");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(newUser.email)) {
+    if (!emailRegex.test(newUser.email.trim())) {
       toast.error("Please enter a valid email address");
       return;
     }
-    if (!newUser.phone) {
-      toast.error("Phone number is required");
-      return;
-    }
 
-    // Simulate sending OTP
-    setCreating(true);
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    setGeneratedOtp(otpCode);
-    toast.info(`OTP sent to ${newUser.email} (demo: ${otpCode})`);
-    setOtpStep(true); // show OTP input
-    setCreating(false);
-  };
-
-  const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
-      setOtpError(true);
-      toast.error("Please enter a 6-digit OTP");
-      return;
-    }
-
-    if (otp !== generatedOtp) {
-      setOtpError(true);
-      toast.error("Invalid OTP. Please try again.");
-      return;
-    }
-
-    // OTP matched – create user
     setCreating(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      const newUserObj = {
-        _id: Date.now().toString(),
-        name: newUser.username,
-        email: newUser.email,
-        phone: newUser.phone,
-        role: newUser.role,
-        permissions: newUser.permissions,
-        verified: true,
+      let response;
+      const payload = {
+        name: newUser.username.trim(),
+        email: newUser.email.trim(),
       };
 
-      const updatedUsers = [...users, newUserObj];
-      setUsers(updatedUsers);
-      setFilteredUsers(updatedUsers);
+      if (newUser.role === "ADMIN") {
+        response = await createAdminUser(payload);
+      } else if (newUser.role === "EDITOR") {
+        response = await createEditorUser(payload);
+      } else {
+        response = await createClientUser(payload);
+      }
 
-      toast.success(
-        <div className="flex items-center gap-2">
-          <FaCheckCircle className="text-green-500" />
-          <span>
-            <strong>{newUser.username}</strong> created successfully! (Verified via OTP)
-          </span>
-        </div>
-      );
-
-      // Close modal and reset
-      setCreateModalOpen(false);
-      setOtpStep(false);
-      setOtp("");
-      setGeneratedOtp("");
-      setOtpError(false);
-      setNewUser({
-        username: "",
-        email: "",
-        phone: "",
-        password: "",
-        role: "USER",
-        permissions: ["view_dashboard"],
-      });
+      if (response.data.success) {
+        toast.success(
+          response.data.message || `${newUser.role} user created successfully!`
+        );
+        handleModalClose();
+        await fetchUsers();
+      }
     } catch (error) {
-      toast.error("User creation failed. Please try again.");
+      console.error("Create User Error:", error);
+      toast.error(
+        error.response?.data?.message || "User creation failed. Please try again."
+      );
     } finally {
       setCreating(false);
     }
-  };
-
-  const goBackToForm = () => {
-    setOtpStep(false);
-    setOtp("");
-    setOtpError(false);
-    setGeneratedOtp("");
   };
 
   const clearSearch = () => {
@@ -405,15 +362,9 @@ const CreateUsers = () => {
 
   const handleModalClose = () => {
     setCreateModalOpen(false);
-    setOtpStep(false);
-    setOtp("");
-    setGeneratedOtp("");
-    setOtpError(false);
     setNewUser({
       username: "",
       email: "",
-      phone: "",
-      password: "",
       role: "USER",
       permissions: ["view_dashboard"],
     });
@@ -775,221 +726,103 @@ const CreateUsers = () => {
       <CommonModal
         isOpen={createModalOpen}
         onClose={handleModalClose}
-        title={otpStep ? "Verify OTP" : "Create New User"}
+        title="Create New User"
         size="md"
       >
-        {!otpStep ? (
-          // ---- Form Step ----
-          <form onSubmit={handleCreateUser} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Username <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input
-                  type="text"
-                  value={newUser.username}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, username: e.target.value })
-                  }
-                  placeholder="Enter username"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Email <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input
-                  type="email"
-                  value={newUser.email}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, email: e.target.value })
-                  }
-                  placeholder="Enter email"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-                  required
-                />
-              </div>
-              <p className="text-xs text-slate-400 mt-1.5">
-                We'll send a verification OTP to this email.
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Phone Number <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <FaPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input
-                  type="tel"
-                  value={newUser.phone}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, phone: e.target.value })
-                  }
-                  placeholder="Enter phone number"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Password <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <FaKey className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) =>
-                    setNewUser({ ...newUser, password: e.target.value })
-                  }
-                  placeholder="Enter password"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Role
-              </label>
-              <select
-                value={newUser.role}
-                onChange={(e) =>
-                  setNewUser({
-                    ...newUser,
-                    role: e.target.value,
-                    permissions: PERMISSIONS[e.target.value] || [],
-                  })
-                }
-                className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-              >
-                <option value="ADMIN">Administrator</option>
-                <option value="EDITOR">Editor</option>
-                <option value="USER">User</option>
-              </select>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={handleModalClose}
-                className="px-5 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={creating}
-                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2"
-              >
-                {creating ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Sending OTP...
-                  </>
-                ) : (
-                  <>
-                    <FaPlus />
-                    Create User
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        ) : (
-          // ---- OTP Verification Step ----
-          <div className="space-y-4">
-            <div className="text-center mb-2">
-              <FaEnvelope className="text-4xl text-[#5A7863] mx-auto mb-2" />
-              <p className="text-sm text-slate-600">
-                We've sent a 6-digit OTP to <br />
-                <strong className="text-slate-800">{newUser.email}</strong>
-              </p>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Enter OTP
-              </label>
+        <form onSubmit={handleCreateUser} className="space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              Full Name / Username <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
               <input
                 type="text"
-                maxLength="6"
-                value={otp}
-                onChange={(e) => {
-                  const val = e.target.value.replace(/\D/g, "");
-                  setOtp(val);
-                  setOtpError(false);
-                }}
-                placeholder="Enter 6-digit OTP"
-                className={`w-full h-12 px-4 rounded-2xl border ${
-                  otpError ? "border-rose-400 ring-rose-100" : "border-slate-200"
-                } bg-slate-50/80 text-slate-700 text-center text-xl tracking-widest font-mono outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition`}
-                autoFocus
+                value={newUser.username}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, username: e.target.value })
+                }
+                placeholder="e.g. John Doe"
+                className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                required
               />
-              {otpError && (
-                <p className="text-xs text-rose-500 mt-1">
-                  Invalid OTP. Please try again.
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center justify-between gap-3 pt-2">
-              <button
-                type="button"
-                onClick={goBackToForm}
-                className="px-4 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition flex items-center gap-2 text-sm font-medium"
-              >
-                <FaArrowLeft size={14} />
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={handleVerifyOtp}
-                disabled={creating || otp.length !== 6}
-                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2"
-              >
-                {creating ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Verifying...
-                  </>
-                ) : (
-                  <>
-                    <FaCheckCircle />
-                    Verify & Create
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div className="text-center text-xs text-slate-400 mt-2">
-              Didn't receive OTP?{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
-                  setGeneratedOtp(newOtp);
-                  toast.info(`New OTP sent (demo: ${newOtp})`);
-                }}
-                className="text-[#5A7863] hover:underline font-semibold"
-              >
-                Resend OTP
-              </button>
             </div>
           </div>
-        )}
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              Email Address <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+              <input
+                type="email"
+                value={newUser.email}
+                onChange={(e) =>
+                  setNewUser({ ...newUser, email: e.target.value })
+                }
+                placeholder="e.g. john@example.com"
+                className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              Role
+            </label>
+            <select
+              value={newUser.role}
+              onChange={(e) =>
+                setNewUser({
+                  ...newUser,
+                  role: e.target.value,
+                  permissions: PERMISSIONS[e.target.value] || [],
+                })
+              }
+              className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+            >
+              <option value="ADMIN">Administrator (Full Access)</option>
+              <option value="EDITOR">Editor (Studio Workspace)</option>
+              <option value="USER">User (Client Access)</option>
+            </select>
+          </div>
+
+          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500 space-y-1">
+            <p className="font-semibold text-slate-700">🔐 Automatic Provisioning:</p>
+            <p>
+              A secure temporary password (e.g. <code>FirstName@123</code>) will be generated and emailed to the user, allowing instant login.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleModalClose}
+              className="px-5 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={creating}
+              className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2"
+            >
+              {creating ? (
+                <>
+                  <FaSpinner className="animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <FaPlus />
+                  Create User
+                </>
+              )}
+            </button>
+          </div>
+        </form>
       </CommonModal>
 
       <style jsx>{`

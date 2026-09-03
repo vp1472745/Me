@@ -19,25 +19,31 @@ const sendCredentialsEmail = async (user, tempPassword) => {
     (process.env.EMAIL_USER && process.env.EMAIL_PASS);
 
   if (hasEmailConfig) {
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER || process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Your Account Credentials - Photo Studio Portal",
-      html: `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #5a7863;">Welcome to Photo Studio!</h2>
-          <p>Hello <strong>${user.name}</strong>,</p>
-          <p>Your account has been created by the administrator. You can now login to your dashboard using the following credentials:</p>
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #e0e0e0;">
-            <p style="margin: 5px 0;"><strong>Role:</strong> ${user.role}</p>
-            <p style="margin: 5px 0;"><strong>Email:</strong> ${user.email}</p>
-            <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
+    try {
+      await transporter.sendMail({
+        from: process.env.GMAIL_USER || process.env.EMAIL_USER,
+        to: user.email,
+        subject: "Your Account Credentials - Photo Studio Portal",
+        html: `
+          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #5a7863;">Welcome to Photo Studio!</h2>
+            <p>Hello <strong>${user.name}</strong>,</p>
+            <p>Your account has been created by the administrator. You can now login to your dashboard using the following credentials:</p>
+            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #e0e0e0;">
+              <p style="margin: 5px 0;"><strong>Role:</strong> ${user.role}</p>
+              <p style="margin: 5px 0;"><strong>Email:</strong> ${user.email}</p>
+              <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
+            </div>
+            <p>Please change your password after logging in for security.</p>
+            <p>Warm regards,<br/>The Photo Studio Team</p>
           </div>
-          <p>Please change your password after logging in for security.</p>
-          <p>Warm regards,<br/>The Photo Studio Team</p>
-        </div>
-      `,
-    });
+        `,
+      });
+      console.log(`[EMAIL] Credentials email successfully sent to: ${user.email}`);
+    } catch (err) {
+      console.error("[EMAIL ERROR] Failed to send credentials email:", err.message);
+      console.log(`[DEV FALLBACK] Credentials for ${user.email}: Password = ${tempPassword}`);
+    }
   } else {
     console.log("=========================================");
     console.log(`[DEV ONLY] Credentials email to: ${user.email}`);
@@ -82,7 +88,10 @@ export const createAdmin = async (req, res) => {
       remarks: `Created Admin account for ${name} (${emailLower})`,
     });
 
-    await sendCredentialsEmail(newUser, tempPassword);
+    // Send credentials email asynchronously
+    sendCredentialsEmail(newUser, tempPassword).catch((e) =>
+      console.error("[EMAIL ERROR]", e.message)
+    );
 
     return res.status(201).json({
       success: true,
@@ -131,7 +140,10 @@ export const createEditor = async (req, res) => {
       remarks: `Created Editor account for ${name} (${emailLower})`,
     });
 
-    await sendCredentialsEmail(newUser, tempPassword);
+    // Send credentials email asynchronously
+    sendCredentialsEmail(newUser, tempPassword).catch((e) =>
+      console.error("[EMAIL ERROR]", e.message)
+    );
 
     return res.status(201).json({
       success: true,
@@ -180,7 +192,10 @@ export const createUser = async (req, res) => {
       remarks: `Created User account for ${name} (${emailLower})`,
     });
 
-    await sendCredentialsEmail(newUser, tempPassword);
+    // Send credentials email asynchronously
+    sendCredentialsEmail(newUser, tempPassword).catch((e) =>
+      console.error("[EMAIL ERROR]", e.message)
+    );
 
     return res.status(201).json({
       success: true,
@@ -246,7 +261,10 @@ export const approveUser = async (req, res) => {
     const firstName = user.name.trim().split(/\s+/)[0];
     const formattedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
     const tempPassword = `${formattedFirstName}@123`;
-    await sendCredentialsEmail(user, tempPassword);
+    // Send credentials email asynchronously
+    sendCredentialsEmail(user, tempPassword).catch((e) =>
+      console.error("[EMAIL ERROR]", e.message)
+    );
 
     return res.status(200).json({ success: true, message: "User approved successfully" });
   } catch (error) {

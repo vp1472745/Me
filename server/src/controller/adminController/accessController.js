@@ -33,34 +33,32 @@ export const getAllEditors =
 // Update Permissions
 // ==========================
 
-export const updatePermissions =
-  async (req, res) => {
+export const updatePermissions = async (req, res) => {
+  try {
+    const { userId, permissions, role } = req.body;
+    const updateData = {};
+    if (permissions !== undefined) updateData.permissions = permissions;
+    if (role !== undefined) updateData.role = role;
 
-    try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true }
+    ).select("-password");
 
-      const {
-        userId,
-        permissions,
-      } = req.body;
-
-      await User.findByIdAndUpdate(
-        userId,
-        {
-          permissions,
-        },
-      );
-
-      res.status(200).json({
-        success: true,
-        message:
-          "Permissions Updated",
-      });
-
-    } catch (error) {
-
-      res.status(500).json({
-        success: false,
-        message: error.message,
-      });
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
-  };
+
+    res.status(200).json({
+      success: true,
+      message: "Permissions and Role Updated Successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

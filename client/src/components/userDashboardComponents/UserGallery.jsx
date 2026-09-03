@@ -6,6 +6,7 @@ import {
   createCorrectionRequest,
   approveCorrectedImage,
   getCorrectionRequestHistory,
+  BASE_URL,
 } from "../../config/api";
 import {
   FaHeart,
@@ -147,8 +148,7 @@ const UserGallery = () => {
   };
 
   const getMediaUrl = (item) => {
-    const baseUrl = import.meta.env.VITE_API_URL || "https://me-vp02.onrender.com/api";
-    return `${baseUrl}/gallery/download?fileId=${item.fileId}&workId=${item.projectId}`;
+    return `${BASE_URL}/gallery/download?fileId=${item.fileId}&workId=${item.projectId}`;
   };
 
   const getCategoryColor = (cat) => {

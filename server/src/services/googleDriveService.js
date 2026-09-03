@@ -12,7 +12,7 @@ export const getAuthUrl = (userId, req = null) => {
 
   const options = {
     redirect_uri: redirectUri,
-    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_id: process.env.GOOGLE_CLIENT_ID?.trim(),
     access_type: "offline",
     response_type: "code",
     prompt: "consent",
@@ -34,8 +34,8 @@ export const getTokens = async (code, req = null) => {
 
   const response = await axios.post("https://oauth2.googleapis.com/token", {
     code,
-    client_id: process.env.GOOGLE_CLIENT_ID,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    client_id: process.env.GOOGLE_CLIENT_ID?.trim(),
+    client_secret: process.env.GOOGLE_CLIENT_SECRET?.trim(),
     redirect_uri: redirectUri,
     grant_type: "authorization_code",
   });

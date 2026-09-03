@@ -36,16 +36,20 @@ const Login = () => {
     try {
       const response = await loginUser({ email, password });
       const user = response.data.user;
+      const token = response.data.token;
 
       // Restrict to EDITOR and USER roles only
-      if (user.role === "ADMIN") {
+      if (user?.role === "ADMIN") {
         toast.error("Admin login is not allowed on this page. Please use the Admin login page.");
         setLoading(false);
         return;
       }
 
       // Save user to localStorage
-      localStorage.setItem("user", JSON.stringify(user));
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      localStorage.setItem("user", JSON.stringify({ ...user, token }));
       toast.success("Login successful!");
 
       // Role Based Redirect

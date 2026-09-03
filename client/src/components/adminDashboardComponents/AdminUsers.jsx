@@ -46,6 +46,7 @@ function AdminUsers() {
       if (error.response?.status === 401) {
         toast.error("Session expired. Please log in again.");
         localStorage.removeItem("user");
+        localStorage.removeItem("token");
         setTimeout(() => {
           window.location.replace("/adminlogin");
         }, 1500);

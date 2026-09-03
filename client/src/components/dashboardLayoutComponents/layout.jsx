@@ -21,6 +21,7 @@ import {
   ChevronRight,
   Users,
   UserCheck,
+  UserPlus,
   Menu,
   X,
   Bell,
@@ -86,6 +87,7 @@ function Layout({ roleType }) {
       console.log(error);
     } finally {
       localStorage.removeItem("user");
+      localStorage.removeItem("token");
       toast.success("Logout Successfully");
       navigate("/");
     }
@@ -95,11 +97,12 @@ function Layout({ roleType }) {
     { to: "/dashboard/admin-overview", label: "Overview", icon: Home },
     { to: "/dashboard/admin-hero", label: "Hero Banner", icon: LayoutTemplate },
     { to: "/dashboard/admin-stories", label: "Stories", icon: ScrollText },
-    { to: "/dashboard/photobooks-admin", label: "Photo Books", icon: BookImage },
-    { to: "/dashboard/images-admin", label: "Gallery", icon: ImagePlus },
+    // { to: "/dashboard/photobooks-admin", label: "Photo Books", icon: BookImage },
+    { to: "/dashboard/images-admin", label: "Image", icon: ImagePlus },
     { to: "/dashboard/admin-Films", label: "Films", icon: Clapperboard },
-    { to: "/dashboard/admin-PreWedding", label: "Pre-Wedding", icon: HeartHandshake },
+    // { to: "/dashboard/admin-PreWedding", label: "Pre-Wedding", icon: HeartHandshake },
     { to: "/dashboard/assign-work", label: "Assign Work", icon: Briefcase },
+    { to: "/dashboard/admin-users", label: "Create Users", icon: UserPlus },
     { to: "/dashboard/admin-all-users", label: "Directory", icon: UserCheck },
   ];
 

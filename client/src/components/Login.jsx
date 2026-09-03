@@ -25,10 +25,15 @@ function Login() {
     try {
       setLoading(true);
       const response = await loginUser(formData);
-      const userRole = response.data.user.role;
+      const user = response.data.user;
+      const token = response.data.token;
+      const userRole = user?.role;
 
-      // Save user session
-      localStorage.setItem("user", JSON.stringify(response.data.user));
+      // Save user session and token
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      localStorage.setItem("user", JSON.stringify({ ...user, token }));
       toast.success(response.data.message || "Login successful!");
 
       // Role Based Redirect

@@ -46,22 +46,30 @@ app.use("/uploads", express.static("uploads"));
 const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://localhost:5174",
+  "http://localhost:5175",
   "https://me-lyart-xi.vercel.app",
   "https://me-git-main-vineetpancheshwar1611gmailcoms-projects.vercel.app",
-];
+  process.env.CLIENT_URL?.trim(),
+  process.env.PROD_CLIENT_URL?.trim(),
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (
-        !origin ||
-        allowedOrigins.includes(origin) ||
-        origin.endsWith(".vercel.app") ||
-        origin.includes("vineetpancheshwar1611gmailcoms-projects.vercel.app")
-      ) {
+      // Allow requests with no origin (like mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      const isLocalhost = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+      const isVercel = origin.endsWith(".vercel.app") || origin.includes("vineetpancheshwar1611gmailcoms-projects.vercel.app");
+      const isAllowedExplicitly = allowedOrigins.includes(origin);
+
+      if (isLocalhost || isVercel || isAllowedExplicitly) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS blocked: ${origin}`));
+        console.warn(`[CORS] Rejected origin: ${origin}`);
+        callback(null, false);
       }
     },
     credentials: true,
