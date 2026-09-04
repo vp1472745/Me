@@ -311,7 +311,9 @@ const CreateUsers = () => {
     } catch (error) {
       console.error("Send OTP Error:", error);
       toast.error(
-        error.response?.data?.message || "Failed to send verification OTP. Please try again."
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to send verification OTP. Please try again."
       );
     } finally {
       setSendingOtp(false);
@@ -377,7 +379,11 @@ const CreateUsers = () => {
       setOtpCountdown(30);
       setEnteredOtp("");
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to resend OTP");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to resend OTP"
+      );
     } finally {
       setSendingOtp(false);
     }

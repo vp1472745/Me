@@ -17,36 +17,29 @@ export const sendOTP = async (req, res) => {
     const { email } = req.body;
 
     // Check email required
-    if (!email) {
+    if (!email || !email.trim()) {
       return res.status(400).json({
         success: false,
         message: "Email is required",
       });
     }
 
-    const emailLower = email.toLowerCase();
+    const emailLower = email.toLowerCase().trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailLower)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please enter a valid email address",
+      });
+    }
 
     // Check duplicate email
     const existingUser = await User.findOne({ email: emailLower });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "Email is already registered",
+        message: "Email is already registered. Please log in.",
       });
-    }
-
-    // Check duplicate username if schema contains username
-    if (User.schema.path("username")) {
-      const username = req.body.username || req.body.name;
-      if (username) {
-        const existingUsername = await User.findOne({ username });
-        if (existingUsername) {
-          return res.status(400).json({
-            success: false,
-            message: "Username is already taken",
-          });
-        }
-      }
     }
 
     // Call service to send OTP
@@ -54,12 +47,13 @@ export const sendOTP = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: "OTP sent successfully",
+      message: "OTP sent successfully to your email address",
     });
   } catch (error) {
+    console.error("[SEND OTP ERROR]", error);
     return res.status(500).json({
       success: false,
-      message: "An unexpected error occurred while sending OTP",
+      message: error.message || "An unexpected error occurred while sending OTP",
       error: error.message,
     });
   }
@@ -73,13 +67,13 @@ export const register = async (req, res) => {
     const { name, email, role, otp } = req.body;
 
     // Validation checks for required registration fields
-    if (!name) {
+    if (!name || !name.trim()) {
       return res.status(400).json({
         success: false,
         message: "Name is required",
       });
     }
-    if (!email) {
+    if (!email || !email.trim()) {
       return res.status(400).json({
         success: false,
         message: "Email is required",
@@ -98,29 +92,16 @@ export const register = async (req, res) => {
       });
     }
 
-    const emailLower = email.toLowerCase();
+    const emailLower = email.toLowerCase().trim();
+    const cleanOtp = String(otp).trim();
 
     // Check duplicate email
     const existingUser = await User.findOne({ email: emailLower });
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "Email is already registered",
+        message: "Email is already registered. Please log in.",
       });
-    }
-
-    // Check duplicate username if schema contains username
-    if (User.schema.path("username")) {
-      const username = req.body.username || name;
-      if (username) {
-        const existingUsername = await User.findOne({ username });
-        if (existingUsername) {
-          return res.status(400).json({
-            success: false,
-            message: "Username is already taken",
-          });
-        }
-      }
     }
 
     // Check OTP in database first to identify if invalid or expired
@@ -132,10 +113,10 @@ export const register = async (req, res) => {
       });
     }
 
-    if (otpRecord.otp !== otp) {
+    if (otpRecord.otp !== cleanOtp) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP",
+        message: "Invalid OTP. Please enter the correct code.",
       });
     }
 
@@ -143,16 +124,16 @@ export const register = async (req, res) => {
       await Otp.deleteOne({ _id: otpRecord._id });
       return res.status(400).json({
         success: false,
-        message: "Expired OTP",
+        message: "Expired OTP. Please request a new code.",
       });
     }
 
     // Verify OTP using the service (which deletes OTP record and returns validation result)
-    const isOtpVerified = await verifyOTP(emailLower, otp);
+    const isOtpVerified = await verifyOTP(emailLower, cleanOtp);
     if (!isOtpVerified) {
       return res.status(400).json({
         success: false,
-        message: "OTP verification failed",
+        message: "OTP verification failed. Please try again.",
       });
     }
 
@@ -167,10 +148,10 @@ export const register = async (req, res) => {
 
     // Create user with status = "PENDING" and googleDrive.connected = false
     const user = await User.create({
-      name,
+      name: name.trim(),
       email: emailLower,
       password: hashedPassword,
-      role,
+      role: role || "USER",
       status: "PENDING",
       googleDrive: {
         connected: false,
@@ -194,9 +175,10 @@ export const register = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("[REGISTER ERROR]", error);
     return res.status(500).json({
       success: false,
-      message: "An unexpected error occurred during registration",
+      message: error.message || "An unexpected error occurred during registration",
       error: error.message,
     });
   }

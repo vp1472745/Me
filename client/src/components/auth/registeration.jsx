@@ -95,25 +95,30 @@ const Registration = ({ onSuccess }) => {
   const handleSendOtp = async (e) => {
     e.preventDefault();
 
+    const trimmedName = name.trim();
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedPhone = phoneNumber.trim();
+
     // Validation
-    if (!name || !username) {
+    if (!trimmedName || !trimmedUsername) {
       toast.error("Name and username are required");
       return;
     }
-    if (!email) {
+    if (!trimmedEmail) {
       toast.error("Email is required");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(trimmedEmail)) {
       toast.error("Please enter a valid email address");
       return;
     }
-    if (!phoneNumber) {
+    if (!trimmedPhone) {
       toast.error("Phone number is required");
       return;
     }
-    if (phoneNumber.replace(/\D/g, "").length < 7) {
+    if (trimmedPhone.replace(/\D/g, "").length < 7) {
       toast.error("Please enter a valid phone number (min 7 digits)");
       return;
     }
@@ -125,11 +130,15 @@ const Registration = ({ onSuccess }) => {
     setLoading(true);
     try {
       // Call actual sendOTP API
-      const response = await sendOTP(email);
-      toast.success(`OTP sent to ${email} successfully!`);
+      const response = await sendOTP(trimmedEmail);
+      toast.success(`OTP verification code sent to ${trimmedEmail}!`);
       setStep("otp");
     } catch (error) {
-      const errorMsg = error.response?.data?.message || "Failed to send OTP. Please try again.";
+      console.error("Registration Send OTP Error:", error);
+      const errorMsg =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to send OTP. Please check your email address and try again.";
       toast.error(errorMsg);
     } finally {
       setLoading(false);
@@ -138,9 +147,10 @@ const Registration = ({ onSuccess }) => {
 
   // --- Verify OTP and register user ---
   const handleVerifyOtp = async () => {
-    if (otp.length !== 6) {
+    const cleanOtp = otp.trim();
+    if (cleanOtp.length !== 6) {
       setOtpError(true);
-      toast.error("Please enter a 6-digit OTP");
+      toast.error("Please enter a valid 6-digit OTP code");
       return;
     }
 
@@ -148,10 +158,10 @@ const Registration = ({ onSuccess }) => {
     try {
       // Prepare data for registration (only fields expected by backend)
       const userData = {
-        name,
-        email,
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
         role: "USER",
-        otp, // the OTP entered by user
+        otp: cleanOtp,
       };
 
       // Call actual register API
@@ -161,7 +171,7 @@ const Registration = ({ onSuccess }) => {
         <div className="flex items-center gap-2">
           <FaCheckCircle className="text-green-500" />
           <span>
-            <strong>{name}</strong> registered successfully!
+            <strong>{name.trim()}</strong> registered successfully!
           </span>
         </div>
       );

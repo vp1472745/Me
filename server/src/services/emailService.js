@@ -5,8 +5,8 @@ import { config } from "../config/config.js";
 // Nodemailer Transporter Configuration
 // ==========================================
 const createTransporter = () => {
-  const user = process.env.EMAIL_USER || process.env.GMAIL_USER;
-  const pass = process.env.EMAIL_PASS || process.env.GMAIL_PASS;
+  const user = (process.env.EMAIL_USER || process.env.GMAIL_USER || "").trim();
+  const pass = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || "").trim();
 
   return nodemailer.createTransport({
     service: "gmail",
@@ -14,10 +14,16 @@ const createTransporter = () => {
       user,
       pass,
     },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
   });
 };
 
-const FROM_SENDER = `"The Wedding Sedding" <${process.env.EMAIL_USER || process.env.GMAIL_USER || "noreply@theweddingsedding.com"}>`;
+const getFromSender = () => {
+  const user = (process.env.EMAIL_USER || process.env.GMAIL_USER || "voteease1611@gmail.com").trim();
+  return `"The Wedding Sedding" <${user}>`;
+};
 
 // ==========================================
 // Reusable Modern Luxury Studio Email Wrapper
@@ -237,9 +243,9 @@ const getEmailWrapper = ({ title, subtitle, content }) => {
 // 1. Send OTP Email
 // =================================================================
 export const sendOtpEmail = async (email, otp) => {
-  const hasCreds =
-    (process.env.EMAIL_USER && process.env.EMAIL_PASS) ||
-    (process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  const user = (process.env.EMAIL_USER || process.env.GMAIL_USER || "").trim();
+  const pass = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || "").trim();
+  const hasCreds = Boolean(user && pass);
 
   if (hasCreds) {
     try {
@@ -268,8 +274,8 @@ export const sendOtpEmail = async (email, otp) => {
       `;
 
       await transporter.sendMail({
-        from: FROM_SENDER,
-        to: email,
+        from: getFromSender(),
+        to: email.trim(),
         subject: `Verification Code: ${otp} - The Wedding Sedding Photo Studio`,
         html: getEmailWrapper({
           title: "Verify Your Email - The Wedding Sedding",
@@ -282,11 +288,11 @@ export const sendOtpEmail = async (email, otp) => {
     } catch (error) {
       console.error("[EMAIL ERROR] Failed to send OTP email:", error.message);
       console.log(`[DEV FALLBACK] OTP for ${email} is: ${otp}`);
-      return false;
+      throw new Error(`Failed to deliver OTP email: ${error.message}`);
     }
   } else {
     console.log("=========================================");
-    console.log(`[DEV ONLY] OTP for ${email} is: ${otp}`);
+    console.log(`[DEV ONLY - NO SMTP CREDENTIALS] OTP for ${email} is: ${otp}`);
     console.log("=========================================");
     return true;
   }
@@ -296,9 +302,9 @@ export const sendOtpEmail = async (email, otp) => {
 // 2. Send Welcome & Credentials Email (User ID + Password + Portal)
 // =================================================================
 export const sendCredentialsEmail = async (user, tempPassword) => {
-  const hasCreds =
-    (process.env.EMAIL_USER && process.env.EMAIL_PASS) ||
-    (process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  const userEnv = (process.env.EMAIL_USER || process.env.GMAIL_USER || "").trim();
+  const passEnv = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || "").trim();
+  const hasCreds = Boolean(userEnv && passEnv);
 
   const clientUrl = config.CLIENT_URL || "http://localhost:5173";
   const loginUrl =
@@ -363,8 +369,8 @@ export const sendCredentialsEmail = async (user, tempPassword) => {
       `;
 
       await transporter.sendMail({
-        from: FROM_SENDER,
-        to: user.email,
+        from: getFromSender(),
+        to: user.email.trim(),
         subject: `Welcome to The Wedding Sedding - Your Studio Account Credentials`,
         html: getEmailWrapper({
           title: "Account Provisioned - The Wedding Sedding",
@@ -395,9 +401,9 @@ export const sendCredentialsEmail = async (user, tempPassword) => {
 // 3. Send Account Approved Email
 // =================================================================
 export const sendApprovalEmail = async (user, tempPassword) => {
-  const hasCreds =
-    (process.env.EMAIL_USER && process.env.EMAIL_PASS) ||
-    (process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  const userEnv = (process.env.EMAIL_USER || process.env.GMAIL_USER || "").trim();
+  const passEnv = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || "").trim();
+  const hasCreds = Boolean(userEnv && passEnv);
 
   const clientUrl = config.CLIENT_URL || "http://localhost:5173";
   const loginUrl =
@@ -450,8 +456,8 @@ export const sendApprovalEmail = async (user, tempPassword) => {
       `;
 
       await transporter.sendMail({
-        from: FROM_SENDER,
-        to: user.email,
+        from: getFromSender(),
+        to: user.email.trim(),
         subject: `Account Approved! - The Wedding Sedding Photo Studio`,
         html: getEmailWrapper({
           title: "Account Approved - The Wedding Sedding",
@@ -478,9 +484,9 @@ export const sendApprovalEmail = async (user, tempPassword) => {
 // 4. Send Google Drive Connection Email
 // =================================================================
 export const sendDriveConnectEmail = async (user, authUrl) => {
-  const hasCreds =
-    (process.env.EMAIL_USER && process.env.EMAIL_PASS) ||
-    (process.env.GMAIL_USER && process.env.GMAIL_PASS);
+  const userEnv = (process.env.EMAIL_USER || process.env.GMAIL_USER || "").trim();
+  const passEnv = (process.env.EMAIL_PASS || process.env.GMAIL_PASS || "").trim();
+  const hasCreds = Boolean(userEnv && passEnv);
 
   if (hasCreds) {
     try {
@@ -506,8 +512,8 @@ export const sendDriveConnectEmail = async (user, authUrl) => {
       `;
 
       await transporter.sendMail({
-        from: FROM_SENDER,
-        to: user.email,
+        from: getFromSender(),
+        to: user.email.trim(),
         subject: `Connect Google Drive - The Wedding Sedding Photo Studio`,
         html: getEmailWrapper({
           title: "Connect Google Drive - The Wedding Sedding",
