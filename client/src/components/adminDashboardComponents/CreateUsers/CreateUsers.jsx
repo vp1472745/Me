@@ -27,6 +27,7 @@ import {
   FaKey,
   FaCheckCircle,
   FaArrowLeft,
+  FaRedo,
 } from "react-icons/fa";
 import CommonModal from "../../../components/commonComponents/CommonModelComponents";
 import {
@@ -35,6 +36,7 @@ import {
   createEditorUser,
   createClientUser,
   updateEditorPermissions,
+  sendOTP,
 } from "../../../config/api";
 
 // ============================================================
@@ -112,44 +114,6 @@ const PERMISSION_ICONS = {
 };
 
 // ============================================================
-// DUMMY DATA
-// ============================================================
-const MOCK_USERS = [
-  {
-    _id: "1",
-    name: "Vineet Sharma",
-    email: "vineet@example.com",
-    phone: "+91 98765 43210",
-    role: "ADMIN",
-    permissions: PERMISSIONS.ADMIN,
-  },
-  {
-    _id: "2",
-    name: "Priya Singh",
-    email: "priya@example.com",
-    phone: "+91 98765 43211",
-    role: "EDITOR",
-    permissions: PERMISSIONS.EDITOR,
-  },
-  {
-    _id: "3",
-    name: "Rahul Verma",
-    email: "rahul@example.com",
-    phone: "+91 98765 43212",
-    role: "USER",
-    permissions: PERMISSIONS.USER,
-  },
-  {
-    _id: "4",
-    name: "Ananya Gupta",
-    email: "ananya@example.com",
-    phone: "+91 98765 43213",
-    role: "EDITOR",
-    permissions: ["view_dashboard", "manage_stories", "manage_gallery"],
-  },
-];
-
-// ============================================================
 // SMALL UI HELPERS
 // ============================================================
 const SectionTitle = ({ title, subtitle, right }) => (
@@ -196,8 +160,15 @@ const CreateUsers = () => {
   const [saving, setSaving] = useState(false);
   const [editRole, setEditRole] = useState("");
   const [editPermissions, setEditPermissions] = useState([]);
+
+  // Modal & OTP State
   const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState("form"); // "form" | "otp"
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [enteredOtp, setEnteredOtp] = useState("");
+  const [otpCountdown, setOtpCountdown] = useState(0);
+
   const [newUser, setNewUser] = useState({
     username: "",
     email: "",
@@ -207,6 +178,7 @@ const CreateUsers = () => {
 
   const searchInputRef = useRef(null);
 
+  // Fetch all live directory users
   const fetchUsers = async () => {
     setLoadingUsers(true);
     try {
@@ -215,6 +187,9 @@ const CreateUsers = () => {
         const fetchedUsers = response.data.users || [];
         setUsers(fetchedUsers);
         setFilteredUsers(fetchedUsers);
+        if (!selectedUser && fetchedUsers.length > 0) {
+          handleSelectUser(fetchedUsers[0]);
+        }
       }
     } catch (error) {
       console.error("Fetch Users Error:", error);
@@ -228,6 +203,7 @@ const CreateUsers = () => {
     fetchUsers();
   }, []);
 
+  // Filter users by search term
   useEffect(() => {
     const lower = searchTerm.trim().toLowerCase();
     if (!lower) {
@@ -244,17 +220,28 @@ const CreateUsers = () => {
     }
   }, [searchTerm, users]);
 
+  // Countdown timer for resending OTP
+  useEffect(() => {
+    let timer;
+    if (otpCountdown > 0) {
+      timer = setInterval(() => {
+        setOtpCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [otpCountdown]);
+
   const stats = useMemo(() => {
     const admins = users.filter((u) => u.role === "ADMIN").length;
     const editors = users.filter((u) => u.role === "EDITOR").length;
-    return { admins, editors, total: users.length };
+    const clients = users.filter((u) => u.role === "USER").length;
+    return { admins, editors, clients, total: users.length };
   }, [users]);
 
   const handleSelectUser = (user) => {
     setSelectedUser(user);
     setEditRole(user.role || "USER");
-    setEditPermissions(user.permissions || []);
-    setSearchTerm(user.name || "");
+    setEditPermissions(user.permissions || PERMISSIONS[user.role || "USER"] || []);
   };
 
   const togglePermission = (perm) => {
@@ -295,9 +282,9 @@ const CreateUsers = () => {
   };
 
   // ============================================================
-  // CREATE USER API CALL
+  // STEP 1: SEND OTP FOR USER CREATION
   // ============================================================
-  const handleCreateUser = async (e) => {
+  const handleSendOtp = async (e) => {
     e.preventDefault();
 
     if (!newUser.username || !newUser.username.trim()) {
@@ -314,12 +301,44 @@ const CreateUsers = () => {
       return;
     }
 
+    setSendingOtp(true);
+    try {
+      const emailLower = newUser.email.trim().toLowerCase();
+      await sendOTP(emailLower);
+      toast.success(`Verification OTP sent to ${emailLower} from The Wedding Sedding!`);
+      setModalStep("otp");
+      setOtpCountdown(30);
+    } catch (error) {
+      console.error("Send OTP Error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to send verification OTP. Please try again."
+      );
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // ============================================================
+  // STEP 2: VERIFY OTP & CREATE USER
+  // ============================================================
+  const handleVerifyAndCreateUser = async (e) => {
+    e.preventDefault();
+
+    const cleanOtp = enteredOtp.trim();
+    if (cleanOtp.length !== 6) {
+      toast.error("Please enter the complete 6-digit OTP");
+      return;
+    }
+
     setCreating(true);
     try {
       let response;
       const payload = {
         name: newUser.username.trim(),
-        email: newUser.email.trim(),
+        email: newUser.email.trim().toLowerCase(),
+        otp: cleanOtp,
+        role: newUser.role,
+        permissions: newUser.permissions || PERMISSIONS[newUser.role] || [],
       };
 
       if (newUser.role === "ADMIN") {
@@ -332,7 +351,8 @@ const CreateUsers = () => {
 
       if (response.data.success) {
         toast.success(
-          response.data.message || `${newUser.role} user created successfully!`
+          response.data.message ||
+            `${newUser.role} user created successfully! Credentials emailed with The Wedding Sedding branding.`
         );
         handleModalClose();
         await fetchUsers();
@@ -340,10 +360,26 @@ const CreateUsers = () => {
     } catch (error) {
       console.error("Create User Error:", error);
       toast.error(
-        error.response?.data?.message || "User creation failed. Please try again."
+        error.response?.data?.message || "User creation failed. Please check the OTP and try again."
       );
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (otpCountdown > 0) return;
+    setSendingOtp(true);
+    try {
+      const emailLower = newUser.email.trim().toLowerCase();
+      await sendOTP(emailLower);
+      toast.success(`New OTP sent to ${emailLower}`);
+      setOtpCountdown(30);
+      setEnteredOtp("");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to resend OTP");
+    } finally {
+      setSendingOtp(false);
     }
   };
 
@@ -362,6 +398,9 @@ const CreateUsers = () => {
 
   const handleModalClose = () => {
     setCreateModalOpen(false);
+    setModalStep("form");
+    setEnteredOtp("");
+    setOtpCountdown(0);
     setNewUser({
       username: "",
       email: "",
@@ -388,36 +427,39 @@ const CreateUsers = () => {
                       User Management
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                      Search, edit roles, manage permissions, and create users from one dashboard.
+                      Manage photo studio roles, permissions, and create verified accounts with Email OTP.
                     </p>
                   </div>
                 </div>
               </div>
 
               <button
-                onClick={() => setCreateModalOpen(true)}
+                onClick={() => {
+                  setModalStep("form");
+                  setCreateModalOpen(true);
+                }}
                 className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#5A7863] text-white font-medium shadow-md hover:bg-[#4A6853] transition"
               >
                 <FaUserPlus />
-                New User
+                Create New User
               </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
               <StatCard
-                label="Total Users"
+                label="Total Studio Users"
                 value={users.length}
                 icon={<FaUsersCog />}
                 tone="emerald"
               />
               <StatCard
-                label="Editors"
+                label="Studio Editors"
                 value={stats.editors}
                 icon={<FaRegEdit />}
                 tone="sky"
               />
               <StatCard
-                label="Admins"
+                label="Administrators"
                 value={stats.admins}
                 icon={<FaShieldAlt />}
                 tone="violet"
@@ -431,10 +473,10 @@ const CreateUsers = () => {
               <div className="rounded-3xl border border-white/70 bg-white shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-100">
                   <SectionTitle
-                    title="Users"
-                    subtitle="Search by name, role, or email"
+                    title="Studio Users"
+                    subtitle="Search directory by name, role, or email"
                     right={
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600">
                         {filteredUsers.length} found
                       </span>
                     }
@@ -445,10 +487,10 @@ const CreateUsers = () => {
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Search users..."
+                      placeholder="Search by name, email, or role..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full h-12 pl-11 pr-12 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                      className="w-full h-12 pl-11 pr-12 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition text-sm"
                     />
                     {searchTerm && (
                       <button
@@ -462,7 +504,7 @@ const CreateUsers = () => {
 
                   <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
                     <FaFilter />
-                    Tip: type a user name, role, or email
+                    Filter active: live database synchronized
                   </div>
                 </div>
 
@@ -487,7 +529,7 @@ const CreateUsers = () => {
                       <FaUserCircle className="text-6xl text-slate-200 mx-auto mb-3" />
                       <p className="text-slate-600 font-medium">No users found</p>
                       <p className="text-sm text-slate-400 mt-1">
-                        Try a different search term
+                        Try searching a different name or role
                       </p>
                     </div>
                   ) : (
@@ -518,12 +560,12 @@ const CreateUsers = () => {
                                   {user.name}
                                 </p>
                                 {active && (
-                                  <FaCheck className="text-[#5A7863] shrink-0" />
+                                  <FaCheck className="text-[#5A7863] shrink-0 text-sm" />
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-1 flex-wrap">
                                 <span
-                                  className={`text-[10px] px-2.5 py-1 rounded-full font-semibold uppercase tracking-wide ${getRoleBadgeClass(
+                                  className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wide ${getRoleBadgeClass(
                                     user.role
                                   )}`}
                                 >
@@ -533,7 +575,7 @@ const CreateUsers = () => {
                                   {user.permissions?.length || 0} permissions
                                 </span>
                                 {user.email && (
-                                  <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
+                                  <span className="text-[11px] text-slate-400 truncate max-w-[120px]">
                                     {user.email}
                                   </span>
                                 )}
@@ -561,38 +603,41 @@ const CreateUsers = () => {
                         <h2 className="text-xl md:text-2xl font-bold text-slate-800">
                           {selectedUser.name}
                         </h2>
-                        <p className="text-sm text-slate-500 mt-1">
-                          User ID: {selectedUser._id}
-                        </p>
                         {selectedUser.email && (
-                          <p className="text-sm text-slate-500 flex items-center gap-1">
-                            <FaEnvelope size={12} /> {selectedUser.email}
+                          <p className="text-sm text-slate-600 flex items-center gap-1.5 mt-0.5">
+                            <FaEnvelope size={12} className="text-[#5A7863]" /> {selectedUser.email}
                           </p>
                         )}
-                        {selectedUser.phone && (
-                          <p className="text-sm text-slate-500 flex items-center gap-1">
-                            <FaPhone size={12} /> {selectedUser.phone}
-                          </p>
-                        )}
-                        <p className="text-sm text-slate-400 mt-1">
-                          Choose role and permissions for this user
+                        <p className="text-xs text-slate-400 mt-1">
+                          Account ID: <span className="font-mono">{selectedUser._id}</span>
                         </p>
                       </div>
                     </div>
 
-                    <span
-                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getRoleRingClass(
-                        selectedUser.role
-                      )}`}
-                    >
-                      {selectedUser.role}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getRoleRingClass(
+                          selectedUser.role
+                        )}`}
+                      >
+                        {selectedUser.role}
+                      </span>
+                      {selectedUser.status && (
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase ${
+                          selectedUser.status === "APPROVED"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : "bg-amber-50 text-amber-700"
+                        }`}>
+                          {selectedUser.status}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Role */}
+                  {/* Role Selector */}
                   <div className="mt-6">
                     <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Role
+                      Assigned Role
                     </label>
                     <select
                       value={editRole}
@@ -601,23 +646,23 @@ const CreateUsers = () => {
                         setEditRole(role);
                         setEditPermissions(PERMISSIONS[role] || []);
                       }}
-                      className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                      className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 font-medium outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
                     >
-                      <option value="ADMIN">Administrator</option>
-                      <option value="EDITOR">Editor</option>
-                      <option value="USER">User</option>
+                      <option value="ADMIN">Administrator (Full System Access)</option>
+                      <option value="EDITOR">Editor (Photography & Story Management)</option>
+                      <option value="USER">Client User (Gallery & Deliverables)</option>
                     </select>
                   </div>
 
-                  {/* Permissions */}
+                  {/* Permissions Selection */}
                   <div className="mt-6">
                     <div className="flex items-center justify-between gap-3 mb-3">
                       <div>
                         <h3 className="text-sm font-semibold text-slate-700">
-                          Permissions
+                          Role Permissions
                         </h3>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Select the permissions this role should have
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Toggle module permissions granted to this user
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
@@ -626,14 +671,14 @@ const CreateUsers = () => {
                           onClick={() =>
                             setEditPermissions(PERMISSIONS[editRole] || [])
                           }
-                          className="px-3 py-2 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition"
+                          className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition"
                         >
                           Select All
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditPermissions([])}
-                          className="px-3 py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold hover:bg-rose-100 transition"
+                          className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold hover:bg-rose-100 transition"
                         >
                           Clear All
                         </button>
@@ -658,7 +703,7 @@ const CreateUsers = () => {
                               onChange={() => togglePermission(perm)}
                               className="w-4 h-4 accent-[#5A7863] cursor-pointer"
                             />
-                            <span className="flex items-center gap-2 text-sm text-slate-700">
+                            <span className="flex items-center gap-2 text-sm text-slate-700 font-medium">
                               <span className="text-[#5A7863]">
                                 {PERMISSION_ICONS[perm]}
                               </span>
@@ -670,14 +715,14 @@ const CreateUsers = () => {
                     </div>
 
                     <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
-                      <span>{editPermissions.length} permissions selected</span>
+                      <span>{editPermissions.length} permissions configured</span>
                       <span className="font-semibold text-[#5A7863]">
                         {PERMISSIONS[editRole]?.length
                           ? `${Math.round(
                               (editPermissions.length /
                                 PERMISSIONS[editRole].length) *
                                 100
-                            )}%`
+                            )}% enabled`
                           : "0%"}
                       </span>
                     </div>
@@ -691,12 +736,12 @@ const CreateUsers = () => {
                     {saving ? (
                       <>
                         <FaSpinner className="animate-spin" />
-                        Saving...
+                        Saving Permissions...
                       </>
                     ) : (
                       <>
                         <FaSave />
-                        Save Changes
+                        Save Permissions & Role
                       </>
                     )}
                   </button>
@@ -707,11 +752,10 @@ const CreateUsers = () => {
                     <FaUserCircle className="text-5xl text-slate-300" />
                   </div>
                   <h3 className="text-xl font-semibold text-slate-800">
-                    No user selected
+                    No User Selected
                   </h3>
                   <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
-                    Select a user from the left panel to edit role and
-                    permissions.
+                    Select a user from the left directory to view details, assign roles, and configure studio permissions.
                   </p>
                 </div>
               )}
@@ -721,108 +765,197 @@ const CreateUsers = () => {
       </div>
 
       {/* ====================================================== */}
-      {/* CREATE USER MODAL – with OTP Verification */}
+      {/* 2-STEP CREATE USER MODAL WITH EMAIL OTP VERIFICATION   */}
       {/* ====================================================== */}
       <CommonModal
         isOpen={createModalOpen}
         onClose={handleModalClose}
-        title="Create New User"
+        title={
+          modalStep === "form"
+            ? "Create New Studio User (Email OTP Verification)"
+            : "Verify OTP & Provision Account"
+        }
         size="md"
       >
-        <form onSubmit={handleCreateUser} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Full Name / Username <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+        {modalStep === "form" ? (
+          <form onSubmit={handleSendOtp} className="space-y-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Full Name / Username <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  value={newUser.username}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, username: e.target.value })
+                  }
+                  placeholder="e.g. John Doe"
+                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Email Address <span className="text-rose-500">*</span>
+              </label>
+              <div className="relative">
+                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="email"
+                  value={newUser.email}
+                  onChange={(e) =>
+                    setNewUser({ ...newUser, email: e.target.value })
+                  }
+                  placeholder="e.g. john@example.com"
+                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                  required
+                />
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                A 6-digit verification code will be dispatched to this email from <strong>The Wedding Sedding</strong>.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                Account Role <span className="text-rose-500">*</span>
+              </label>
+              <select
+                value={newUser.role}
+                onChange={(e) =>
+                  setNewUser({
+                    ...newUser,
+                    role: e.target.value,
+                    permissions: PERMISSIONS[e.target.value] || [],
+                  })
+                }
+                className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 font-medium outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+              >
+                <option value="ADMIN">Administrator (Full Dashboard Access)</option>
+                <option value="EDITOR">Editor (Studio Content & Assignments)</option>
+                <option value="USER">User (Client Gallery & Deliverables)</option>
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-xs text-emerald-800 space-y-1">
+              <p className="font-semibold flex items-center gap-1.5">
+                <span>📸</span> The Wedding Sedding Account Provisioning:
+              </p>
+              <p className="text-emerald-700">
+                After verifying OTP, the account will be created and an official email containing their <strong>User ID</strong> and <strong>temporary password</strong> will be automatically sent.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleModalClose}
+                className="px-5 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={sendingOtp}
+                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2 text-sm shadow-sm"
+              >
+                {sendingOtp ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Sending OTP...
+                  </>
+                ) : (
+                  <>
+                    <FaEnvelope />
+                    Send Verification OTP
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        ) : (
+          /* STEP 2: OTP ENTRY */
+          <form onSubmit={handleVerifyAndCreateUser} className="space-y-4">
+            <div className="text-center py-2">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-[#5A7863] flex items-center justify-center text-2xl mb-3 shadow-inner">
+                <FaKey />
+              </div>
+              <h4 className="text-base font-bold text-slate-800">
+                Enter Verification OTP
+              </h4>
+              <p className="text-xs text-slate-500 mt-1">
+                We sent a 6-digit code to <strong className="text-slate-700">{newUser.email}</strong> from <strong>The Wedding Sedding</strong>.
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 text-center">
+                6-Digit OTP Code
+              </label>
               <input
                 type="text"
-                value={newUser.username}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, username: e.target.value })
-                }
-                placeholder="e.g. John Doe"
-                className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                maxLength="6"
+                value={enteredOtp}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, "");
+                  setEnteredOtp(val);
+                }}
+                placeholder="• • • • • •"
+                className="w-full h-14 px-4 rounded-2xl border border-slate-300 bg-slate-50 text-slate-800 text-center text-2xl tracking-[12px] font-mono outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/15 transition font-bold"
+                autoFocus
                 required
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Email Address <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input
-                type="email"
-                value={newUser.email}
-                onChange={(e) =>
-                  setNewUser({ ...newUser, email: e.target.value })
-                }
-                placeholder="e.g. john@example.com"
-                className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-              Role
-            </label>
-            <select
-              value={newUser.role}
-              onChange={(e) =>
-                setNewUser({
-                  ...newUser,
-                  role: e.target.value,
-                  permissions: PERMISSIONS[e.target.value] || [],
-                })
-              }
-              className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
-            >
-              <option value="ADMIN">Administrator (Full Access)</option>
-              <option value="EDITOR">Editor (Studio Workspace)</option>
-              <option value="USER">User (Client Access)</option>
-            </select>
-          </div>
-
-          <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500 space-y-1">
-            <p className="font-semibold text-slate-700">🔐 Automatic Provisioning:</p>
-            <p>
-              A secure temporary password (e.g. <code>FirstName@123</code>) will be generated and emailed to the user, allowing instant login.
-            </p>
-          </div>
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={handleModalClose}
-              className="px-5 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={creating}
-              className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2"
-            >
-              {creating ? (
-                <>
-                  <FaSpinner className="animate-spin" />
-                  Creating...
-                </>
+            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+              <span>OTP valid for 5 minutes</span>
+              {otpCountdown > 0 ? (
+                <span className="text-slate-400">Resend in {otpCountdown}s</span>
               ) : (
-                <>
-                  <FaPlus />
-                  Create User
-                </>
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  disabled={sendingOtp}
+                  className="text-[#5A7863] font-semibold hover:underline flex items-center gap-1"
+                >
+                  <FaRedo size={10} /> Resend OTP
+                </button>
               )}
-            </button>
-          </div>
-        </form>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 pt-3">
+              <button
+                type="button"
+                onClick={() => setModalStep("form")}
+                className="px-4 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium text-sm flex items-center gap-2"
+              >
+                <FaArrowLeft size={12} />
+                Edit Details
+              </button>
+              <button
+                type="submit"
+                disabled={creating || enteredOtp.length !== 6}
+                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2 text-sm shadow-md"
+              >
+                {creating ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Verifying & Creating...
+                  </>
+                ) : (
+                  <>
+                    <FaCheckCircle />
+                    Verify & Create {newUser.role}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        )}
       </CommonModal>
 
       <style jsx>{`

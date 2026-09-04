@@ -2,22 +2,12 @@ import User from "../../model/authModel.js";
 import Otp from "../../model/otpModel.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
 import {
   sendOTP as sendOTPService,
   verifyOTP,
 } from "../../services/otpService.js";
+import { sendApprovalEmail } from "../../services/emailService.js";
 
-// ==========================
-// Nodemailer Transporter Configuration
-// ==========================
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER || process.env.EMAIL_USER,
-    pass: process.env.GMAIL_PASS || process.env.EMAIL_PASS,
-  },
-});
 
 // ==========================
 // 1. Send OTP
@@ -432,43 +422,16 @@ export const approveUser = async (req, res) => {
     user.status = "APPROVED";
     await user.save();
 
-    // Send email with credentials details
+    // Send email with credentials details using The Wedding Sedding branding
     const firstName = user.name.trim().split(/\s+/)[0];
     const formattedFirstName =
       firstName.charAt(0).toUpperCase() + firstName.slice(1);
     const tempPassword = `${formattedFirstName}@123`;
 
-    const hasEmailConfig =
-      (process.env.GMAIL_USER && process.env.GMAIL_PASS) ||
-      (process.env.EMAIL_USER && process.env.EMAIL_PASS);
+    sendApprovalEmail(user, tempPassword).catch((e) =>
+      console.error("[EMAIL ERROR]", e.message)
+    );
 
-    if (hasEmailConfig) {
-      await transporter.sendMail({
-        from: process.env.GMAIL_USER || process.env.EMAIL_USER,
-        to: user.email,
-        subject: "Account Approved",
-        html: `
-          <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-            <h2 style="color: #2e7d32;">Account Approved</h2>
-            <p>Hello <strong>${user.name}</strong>,</p>
-            <p>Your account has been approved by the administrator.</p>
-            <p>You can now log in using the credentials below:</p>
-            <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #e0e0e0;">
-              <p style="margin: 5px 0;"><strong>Email:</strong> ${user.email}</p>
-              <p style="margin: 5px 0;"><strong>Temporary Password:</strong> <code>${tempPassword}</code></p>
-            </div>
-            <p>Please change your password immediately after logging in for security reasons.</p>
-            <p>Warm regards,<br/>The Wedding Sedding Team</p>
-          </div>
-        `,
-      });
-    } else {
-      console.log("=========================================");
-      console.log(`[DEV ONLY] Approval email not sent (missing SMTP configs).`);
-      console.log(`To: ${user.email}`);
-      console.log(`Temp Password: ${tempPassword}`);
-      console.log("=========================================");
-    }
 
     return res.status(200).json({
       success: true,

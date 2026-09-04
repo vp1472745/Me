@@ -1,9 +1,9 @@
 import User from "../../model/authModel.js";
 import config from "../../config/config.js";
 import History from "../../model/historyModel.js";
-import nodemailer from "nodemailer";
 import TempFile from "../../model/tempFileModel.js";
 import { tempMemoryCache } from "../../utils/memoryCache.js";
+import { sendDriveConnectEmail } from "../../services/emailService.js";
 import {
   getAuthUrl,
   getTokens,
@@ -14,6 +14,7 @@ import {
   getAccessToken,
   getAccessTokenFromRefreshToken,
 } from "../../services/googleDriveService.js";
+
 
 // 1. Connect drive - return authUrl
 export const connectDrive = async (req, res) => {
@@ -168,39 +169,7 @@ export const sendDriveLinkEmail = async (req, res) => {
 
     const authUrl = getAuthUrl(userId, req);
 
-    // Setup nodemailer transport using OTP service configuration credentials
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_USER || process.env.EMAIL_USER,
-        pass: process.env.GMAIL_PASS || process.env.EMAIL_PASS,
-      },
-    });
-
-    const hasCreds = (process.env.GMAIL_USER && process.env.GMAIL_PASS) || (process.env.EMAIL_USER && process.env.EMAIL_PASS);
-
-    if (hasCreds) {
-      await transporter.sendMail({
-        from: process.env.GMAIL_USER || process.env.EMAIL_USER,
-        to: user.email,
-        subject: "Action Required: Connect Google Drive to Photo Studio Management System",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 25px; border: 1px solid #DDE7D8; border-radius: 16px; background-color: #F7F9F4; color: #3B4953;">
-            <h2 style="color: #5A7863; border-bottom: 2px solid #DDE7D8; pb-10px; margin-bottom: 20px;">Connect Your Google Drive</h2>
-            <p>Hello <b>${user.name}</b>,</p>
-            <p style="line-height: 1.6;">To enable automated deliverables syncing and wedding photo delivery directly to your personal Google Drive, please connect your account by clicking the secure authorization button below:</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${authUrl}" style="background-color: #5A7863; color: white; padding: 12px 28px; border-radius: 12px; text-decoration: none; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(90,120,99,0.15);">Connect Google Drive</a>
-            </div>
-            <p style="font-size: 11px; color: #90AB8B; text-align: center; margin-top: 25px;">This is a secure connection handled directly via Google OAuth authorization screen.</p>
-          </div>
-        `,
-      });
-    } else {
-      console.log("=========================================");
-      console.log(`[DEV ONLY] Send Google Drive connection email for ${user.email}. URL: ${authUrl}`);
-      console.log("=========================================");
-    }
+    await sendDriveConnectEmail(user, authUrl);
 
     return res.status(200).json({
       success: true,
@@ -211,6 +180,7 @@ export const sendDriveLinkEmail = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 // 6. Proxy/Stream public file content from Google Drive
 export const proxyPublicFile = async (req, res) => {
