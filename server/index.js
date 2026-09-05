@@ -28,6 +28,7 @@ import correctionRouter from "./src/router/adminRoutes/correctionRouter.js";
 import galleryRouter from "./src/router/adminRoutes/galleryRouter.js";
 import notificationRouter from "./src/router/adminRoutes/notificationRouter.js";
 import analyticsRouter from "./src/router/adminRoutes/analyticsRouter.js";
+import { verifyEmailTransporter } from "./src/services/emailService.js";
 
 const app = express();
 app.set("trust proxy", true);
@@ -142,6 +143,10 @@ const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
   console.log(`📡 Production Pipeline actively dispatching objects on Interface Port: ${PORT}`);
+  // Verify SMTP Email connectivity
+  verifyEmailTransporter().catch((err) =>
+    console.error("❌ Email Transporter startup check error:", err.message)
+  );
 });
 
 // Set server socket thresholds to 10 minutes to fully support continuous stream chunks upload (500MB files)

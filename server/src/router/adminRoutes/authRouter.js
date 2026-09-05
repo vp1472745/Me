@@ -10,6 +10,7 @@ import {
   getPendingUsers,
   approveUser,
   rejectUser,
+  testEmailController,
 } from "../../controller/adminController/authController.js";
 
 import {
@@ -22,6 +23,9 @@ const router = express.Router();
 // ==========================
 // Public Routes
 // ==========================
+
+// Diagnostic SMTP Test
+router.get("/test-email", testEmailController);
 
 // Send OTP
 router.post("/send-otp", sendOTP);

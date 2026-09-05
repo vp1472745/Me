@@ -6,7 +6,7 @@ import {
   sendOTP as sendOTPService,
   verifyOTP,
 } from "../../services/otpService.js";
-import { sendApprovalEmail } from "../../services/emailService.js";
+import { sendApprovalEmail, sendTestDiagnosticEmail } from "../../services/emailService.js";
 
 
 // ==========================
@@ -461,6 +461,27 @@ export const rejectUser = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "An unexpected error occurred while rejecting the user",
+      error: error.message,
+    });
+  }
+};
+
+// ==========================
+// 10. Test Email Diagnostic (For Deployment Health Check)
+// ==========================
+export const testEmailController = async (req, res) => {
+  try {
+    const targetEmail = req.query.email || req.query.to || req.body?.email;
+    const result = await sendTestDiagnosticEmail(targetEmail);
+    return res.status(200).json({
+      success: true,
+      message: `Diagnostic email dispatched successfully in ${result.durationMs}ms to ${result.email}`,
+      data: result,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to deliver test email",
       error: error.message,
     });
   }

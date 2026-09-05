@@ -18,7 +18,7 @@ import { loginUser } from "../../config/api";
 // ============================================================
 // LOGIN COMPONENT
 // ============================================================
-const Login = () => {
+const Login = ({ isModal = false }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,11 +34,11 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      const response = await loginUser({ email, password });
+      const response = await loginUser({ email: email.trim().toLowerCase(), password });
       const user = response.data.user;
       const token = response.data.token;
 
-      // Restrict to EDITOR and USER roles only
+      // Restrict to EDITOR and USER roles only on this client portal
       if (user?.role === "ADMIN") {
         toast.error("Admin login is not allowed on this page. Please use the Admin login page.");
         setLoading(false);
@@ -69,145 +69,156 @@ const Login = () => {
     }
   };
 
-  return (
-    <>
-      <ToastContainer position="top-right" />
-      <div className="flex items-center justify-center bg-[#1a1a1a]  ">
-        <div className="w-full max-w-5xl overflow-hidden shadow-2xl bg-white flex flex-col md:flex-row">
-          
-          {/* ========== LEFT SIDE – IMAGE WITH OVERLAY ========== */}
-          <div className="hidden md:flex md:w-2/5 relative overflow-hidden bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${Image})` }}>
-            <img
-              src={Image}
-              alt="Photography"
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-black/70" />
+  const loginContent = (
+    <div className="w-full bg-white flex flex-col md:flex-row overflow-hidden">
+      {/* ========== LEFT SIDE – IMAGE WITH OVERLAY ========== */}
+      <div className="hidden md:flex md:w-5/12 relative overflow-hidden bg-[#18231c] min-h-[480px]">
+        <img
+          src={Image}
+          alt="Photography"
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+        />
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#121c16]/90 via-[#18231c]/60 to-transparent" />
 
-            <div className="relative z-10 flex flex-col justify-between p-8 h-full text-white">
-              <div>
-                <div className="flex items-center gap-2">
-                  <MdPhotoCamera className="text-[#C9A96E] text-2xl" />
-                  <span className="text-white/80 text-sm tracking-[0.3em] uppercase font-light">
-                    Photography
-                  </span>
-                </div>
+        <div className="relative z-10 flex flex-col justify-between p-8 h-full text-white">
+          <div>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[#C9A96E]/20 border border-[#C9A96E]/40 flex items-center justify-center">
+                <MdPhotoCamera className="text-[#C9A96E] text-lg" />
               </div>
-              <div>
-                <h2 className="text-white text-4xl font-light tracking-[0.15em] leading-tight">
-                  WELCOME
-                  <br />
-                  BACK
-                </h2>
-                <div className="mt-4 flex items-center gap-4">
-                  <div className="w-12 h-0.5 bg-[#C9A96E]" />
-                  <span className="text-white/70 text-xs tracking-widest uppercase">
-                    Log in to continue
-                  </span>
-                </div>
-              </div>
-              <div className="flex justify-between text-white/40 text-xs tracking-widest uppercase">
-                <span>✦ Fine art</span>
-                <span>✦ Wedding</span>
-                <span>✦ Portrait</span>
-              </div>
+              <span className="text-white/80 text-xs tracking-[0.25em] uppercase font-light">
+                The Wedding Sedding
+              </span>
             </div>
           </div>
-
-          {/* ========== RIGHT SIDE – FORM ========== */}
-          <div className="w-full md:w-3/5 p-6 md:p-8 lg:p-10 overflow-y-auto  flex flex-col justify-center bg-white">
-       
-
-   
-
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                  Email or Username <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <FaEnvelope className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                  <input
-                    type="text"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email or username"
-                    className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#C9A96E] focus:ring-2 focus:ring-[#C9A96E]/20 transition"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
-                  Password <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <FaKey className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full h-10 pl-9 pr-10 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#C9A96E] focus:ring-2 focus:ring-[#C9A96E]/20 transition"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
-                  >
-                    {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    className="w-4 h-4 accent-[#C9A96E] rounded border-slate-300"
-                  />
-                  Remember me
-                </label>
-                <Link
-                  to="/forgot-password"
-                  className="text-sm text-[#C9A96E] hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-11 rounded-xl bg-[#C9A96E] text-white font-semibold hover:bg-[#B8975E] transition disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Logging in...
-                  </>
-                ) : (
-                  <>
-                    <FaSignInAlt />
-                    Login
-                  </>
-                )}
-              </button>
-
-              <p className="text-center text-sm text-slate-500 mt-4">
-                Don't have an account?{" "}
-                <Link to="/register" className="text-[#C9A96E] font-semibold hover:underline">
-                  Sign up
-                </Link>
-              </p>
-            </form>
+          <div>
+            <div className="inline-block px-3 py-1 rounded-full bg-[#C9A96E]/20 border border-[#C9A96E]/30 text-[#C9A96E] text-[10px] font-bold uppercase tracking-wider mb-3">
+              Client Portal
+            </div>
+            <h2 className="text-white text-3xl font-light tracking-[0.1em] leading-tight">
+              WELCOME
+              <br />
+              <span className="font-bold text-[#C9A96E]">BACK</span>
+            </h2>
+            <div className="mt-4 flex items-center gap-4">
+              <div className="w-10 h-0.5 bg-[#C9A96E]" />
+              <span className="text-white/70 text-xs tracking-widest uppercase">
+                Sign in to your account
+              </span>
+            </div>
+          </div>
+          <div className="flex justify-between text-white/40 text-[11px] tracking-widest uppercase">
+            <span>✦ High-Res Gallery</span>
+            <span>✦ Photo Books</span>
           </div>
         </div>
       </div>
+
+      {/* ========== RIGHT SIDE – FORM ========== */}
+      <div className="w-full md:w-7/12 p-6 sm:p-8 bg-white flex flex-col justify-center">
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Email or Username <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email or username"
+                className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-2 focus:ring-[#5A7863]/15 transition"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+              Password <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <FaKey className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full h-11 pl-9 pr-10 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-2 focus:ring-[#5A7863]/15 transition"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition"
+              >
+                {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs pt-1">
+            <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-[#5A7863] rounded border-slate-300"
+              />
+              Remember me
+            </label>
+            <Link
+              to="/forgot-password"
+              className="text-[#5A7863] hover:underline font-semibold"
+            >
+              Forgot password?
+            </Link>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 rounded-xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center justify-center gap-2 text-sm shadow-sm"
+          >
+            {loading ? (
+              <>
+                <FaSpinner className="animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              <>
+                <FaSignInAlt />
+                Sign In
+              </>
+            )}
+          </button>
+
+          {!isModal && (
+            <p className="text-center text-xs text-slate-500 mt-4">
+              Don't have an account?{" "}
+              <Link to="/register" className="text-[#5A7863] font-semibold hover:underline">
+                Sign up
+              </Link>
+            </p>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <ToastContainer position="top-right" />
+      {isModal ? (
+        loginContent
+      ) : (
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 flex items-center justify-center p-4">
+          <div className="w-full max-w-5xl overflow-hidden shadow-2xl rounded-3xl">
+            {loginContent}
+          </div>
+        </div>
+      )}
     </>
   );
 };
