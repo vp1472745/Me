@@ -77,7 +77,6 @@ const Registration = ({ onSuccess, isModal = false }) => {
 
   // --- Form fields ---
   const [name, setName] = useState("");
-  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -107,13 +106,12 @@ const Registration = ({ onSuccess, isModal = false }) => {
     e.preventDefault();
 
     const trimmedName = name.trim();
-    const trimmedUsername = username.trim();
     const trimmedEmail = email.trim().toLowerCase();
     const trimmedPhone = phoneNumber.trim();
 
     // Validation
-    if (!trimmedName || !trimmedUsername) {
-      toast.error("Name and username are required");
+    if (!trimmedName) {
+      toast.error("Full name is required");
       return;
     }
     if (!trimmedEmail) {
@@ -210,7 +208,6 @@ const Registration = ({ onSuccess, isModal = false }) => {
 
       // Reset form
       setName("");
-      setUsername("");
       setEmail("");
       setCountryCode("+91");
       setPhoneNumber("");
@@ -303,23 +300,6 @@ const Registration = ({ onSuccess, isModal = false }) => {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Vineet Pancheshwar"
-                  className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-2 focus:ring-[#5A7863]/15 transition"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Username <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Choose a username"
                   className="w-full h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/80 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-2 focus:ring-[#5A7863]/15 transition"
                   required
                 />

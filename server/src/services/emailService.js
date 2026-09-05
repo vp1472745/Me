@@ -63,6 +63,11 @@ const createTransporter = (options = {}) => {
     host,
     port: usePort,
     secure: useSecure,
+    family: 4, // Strictly force IPv4 to eliminate Render/cloud IPv6 ENETUNREACH errors
+    lookup: (hostname, dnsOptions, callback) => {
+      // Direct IPv4 lookup
+      return dns.lookup(hostname, { family: 4, all: false }, callback);
+    },
     pool: true,
     maxConnections: 5,
     maxMessages: 100,

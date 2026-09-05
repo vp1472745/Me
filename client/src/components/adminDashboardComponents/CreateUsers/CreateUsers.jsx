@@ -787,7 +787,7 @@ const CreateUsers = () => {
           <form onSubmit={handleSendOtp} className="space-y-4">
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                Full Name / Username <span className="text-rose-500">*</span>
+                Full Name <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
