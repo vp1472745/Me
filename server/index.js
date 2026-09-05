@@ -1,6 +1,15 @@
 // ======================================================
 // FILE: server.js (Main Core Entry Point)
 // ======================================================
+import dns from "node:dns";
+try {
+  if (typeof dns.setDefaultResultOrder === "function") {
+    dns.setDefaultResultOrder("ipv4first");
+  }
+} catch (e) {
+  // Ignore
+}
+
 import "dotenv/config";
 
 import express from "express";

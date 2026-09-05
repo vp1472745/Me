@@ -62,11 +62,14 @@ const createPrimaryTransporter = () => {
 
   if (isGmail) {
     return nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: { user, pass },
       tls: {
         rejectUnauthorized: false,
       },
+      family: 4,
       connectionTimeout: 8000,
       greetingTimeout: 8000,
       socketTimeout: 12000,
@@ -82,6 +85,7 @@ const createPrimaryTransporter = () => {
       rejectUnauthorized: false,
       minVersion: "TLSv1.2",
     },
+    family: 4,
     connectionTimeout: 8000,
     greetingTimeout: 8000,
     socketTimeout: 12000,
@@ -100,6 +104,7 @@ const createFallbackTransporter = () => {
       rejectUnauthorized: false,
       minVersion: "TLSv1.2",
     },
+    family: 4,
     connectionTimeout: 10000,
     greetingTimeout: 10000,
     socketTimeout: 15000,
@@ -524,7 +529,7 @@ export const sendOtpEmail = async (email, otp) => {
   } catch (error) {
     console.error("[EMAIL ERROR] Failed to send OTP email:", error.message);
     console.log(`[DEV FALLBACK] OTP for ${cleanEmail} is: ${otp}`);
-    throw new Error(`Failed to deliver OTP email: ${error.message}`);
+    throw error;
   }
 };
 
