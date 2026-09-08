@@ -124,26 +124,69 @@ export const updateEditorPermissions = async (data) => {
 };
 
 // ==========================
+// In-Memory Client Cache for Instant Navigation
+// ==========================
+const clientCache = new Map();
+const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes fresh cache
+
+export const clearClientCache = (pattern) => {
+  if (!pattern) {
+    clientCache.clear();
+    return;
+  }
+  for (const key of clientCache.keys()) {
+    if (key.includes(pattern)) {
+      clientCache.delete(key);
+    }
+  }
+};
+
+export const cachedGet = async (url, config = {}) => {
+  const cacheKey = url + JSON.stringify(config.params || {});
+  const now = Date.now();
+  const cached = clientCache.get(cacheKey);
+
+  if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    // Background stale-while-revalidate if cache is older than 20 seconds
+    if (now - cached.timestamp > 20000) {
+      API.get(url, config)
+        .then((res) => {
+          clientCache.set(cacheKey, { timestamp: Date.now(), data: res });
+        })
+        .catch(() => {});
+    }
+    return cached.data;
+  }
+
+  const res = await API.get(url, config);
+  clientCache.set(cacheKey, { timestamp: Date.now(), data: res });
+  return res;
+};
+
+// ==========================
 // Hero Section APIs
 // ==========================
 
 export const createHeroSection = async (data) => {
+  clearClientCache("/hero");
   return API.post("/hero/create", data);
 };
 
 export const getAllHeroSections = async () => {
-  return API.get("/hero/all");
+  return cachedGet("/hero/all");
 };
 
 export const getSingleHeroSection = async (id) => {
-  return API.get(`/hero/${id}`);
+  return cachedGet(`/hero/${id}`);
 };
 
 export const updateHeroSection = async (id, data) => {
+  clearClientCache("/hero");
   return API.put(`/hero/update/${id}`, data);
 };
 
 export const deleteHeroSection = async (id) => {
+  clearClientCache("/hero");
   return API.delete(`/hero/delete/${id}`);
 };
 
@@ -152,22 +195,25 @@ export const deleteHeroSection = async (id) => {
 // ==========================
 
 export const createStory = async (data) => {
+  clearClientCache("/story");
   return API.post("/story/create", data);
 };
 
 export const getAllStories = async () => {
-  return API.get("/story/all");
+  return cachedGet("/story/all");
 };
 
 export const getSingleStory = async (id) => {
-  return API.get(`/story/${id}`);
+  return cachedGet(`/story/${id}`);
 };
 
 export const updateStory = async (id, data) => {
+  clearClientCache("/story");
   return API.put(`/story/update/${id}`, data);
 };
 
 export const deleteStory = async (id) => {
+  clearClientCache("/story");
   return API.delete(`/story/delete/${id}`);
 };
 
@@ -176,22 +222,25 @@ export const deleteStory = async (id) => {
 // ==========================
 
 export const createWeddingStory = async (data) => {
+  clearClientCache("/photo-book");
   return API.post("/photo-book/create", data);
 };
 
 export const getAllWeddingStories = async () => {
-  return API.get("/photo-book/all");
+  return cachedGet("/photo-book/all");
 };
 
 export const getSingleWeddingStory = async (id) => {
-  return API.get(`/photo-book/${id}`);
+  return cachedGet(`/photo-book/${id}`);
 };
 
 export const updateWeddingStory = async (id, data) => {
+  clearClientCache("/photo-book");
   return API.put(`/photo-book/update/${id}`, data);
 };
 
 export const deleteWeddingStory = async (id) => {
+  clearClientCache("/photo-book");
   return API.delete(`/photo-book/delete/${id}`);
 };
 
@@ -200,22 +249,25 @@ export const deleteWeddingStory = async (id) => {
 // ==========================
 
 export const createGallery = async (data) => {
+  clearClientCache("/image");
   return API.post("/image/create", data);
 };
 
 export const getAllGalleries = async () => {
-  return API.get("/image/all");
+  return cachedGet("/image/all");
 };
 
 export const getSingleGallery = async (id) => {
-  return API.get(`/image/${id}`);
+  return cachedGet(`/image/${id}`);
 };
 
 export const updateGallery = async (id, data) => {
+  clearClientCache("/image");
   return API.put(`/image/update/${id}`, data);
 };
 
 export const deleteGallery = async (id) => {
+  clearClientCache("/image");
   return API.delete(`/image/delete/${id}`);
 };
 
@@ -224,22 +276,25 @@ export const deleteGallery = async (id) => {
 // ==========================
 
 export const createVideo = async (data) => {
+  clearClientCache("/film");
   return API.post("/film/create", data);
 };
 
 export const getAllVideos = async () => {
-  return API.get("/film/all");
+  return cachedGet("/film/all");
 };
 
 export const getSingleVideo = async (id) => {
-  return API.get(`/film/${id}`);
+  return cachedGet(`/film/${id}`);
 };
 
 export const updateVideo = async (id, data) => {
+  clearClientCache("/film");
   return API.put(`/film/update/${id}`, data);
 };
 
 export const deleteVideo = async (id) => {
+  clearClientCache("/film");
   return API.delete(`/film/delete/${id}`);
 };
 
@@ -248,22 +303,25 @@ export const deleteVideo = async (id) => {
 // ==========================
 
 export const createPreWeddingStory = async (data) => {
+  clearClientCache("/pre-wedding");
   return API.post("/pre-wedding/create", data);
 };
 
 export const getAllPreWeddingStories = async () => {
-  return API.get("/pre-wedding/all");
+  return cachedGet("/pre-wedding/all");
 };
 
 export const getSinglePreWeddingStory = async (id) => {
-  return API.get(`/pre-wedding/${id}`);
+  return cachedGet(`/pre-wedding/${id}`);
 };
 
 export const updatePreWeddingStory = async (id, data) => {
+  clearClientCache("/pre-wedding");
   return API.put(`/pre-wedding/update/${id}`, data);
 };
 
 export const deletePreWeddingStory = async (id) => {
+  clearClientCache("/pre-wedding");
   return API.delete(`/pre-wedding/delete/${id}`);
 };
 

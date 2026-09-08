@@ -41,40 +41,11 @@ const Stories = () => {
     navigate(`/story/${story._id}`, { state: story });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="relative">
-          <div className="w-16 h-16 border-4 border-[#e0d6cc] border-t-[#8b7355] rounded-full animate-spin"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-8 h-8 bg-[#8b7355]/20 rounded-full animate-pulse"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center px-4">
-        <div className="bg-white/60 p-6 sm:p-8 rounded-2xl text-center">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button
-            onClick={fetchStories}
-            className="px-6 py-2 bg-[#8b7355] text-white rounded-full hover:bg-[#6b5b4b] transition"
-          >
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-    <Navbar textColor="text-black/50" />
-    <StoriesHeroSection />
-      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 ">
+      <Navbar textColor="text-black/50" />
+      <StoriesHeroSection />
+      <div className="min-h-screen px-4 sm:px-6 md:px-8 lg:px-20 py-10">
         <div className="max-w-7xl mx-auto">
           {/* Header - responsive text and spacing */}
           <div className="text-center mb-8 md:mb-12">
@@ -88,8 +59,34 @@ const Stories = () => {
             <div className="border-b border-[#cfc6bb] w-full max-w-4xl mx-auto mt-5 md:mt-6"></div>
           </div>
 
-          {/* Stories Grid - fully responsive columns */}
-          {stories.length === 0 ? (
+          {/* Error Message */}
+          {error && (
+            <div className="text-center py-10 bg-white/60 p-6 sm:p-8 rounded-2xl mb-8">
+              <p className="text-red-500 mb-4">{error}</p>
+              <button
+                onClick={fetchStories}
+                className="px-6 py-2 bg-[#8b7355] text-white rounded-full hover:bg-[#6b5b4b] transition shadow"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+
+          {/* Skeleton Loaders during fetch */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 md:gap-6 lg:gap-7">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                <div key={n} className="bg-white rounded-2xl overflow-hidden shadow-sm animate-pulse">
+                  <div className="aspect-[4/3] md:aspect-[16/10] bg-[#e8dfd1]/60" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-[#e8dfd1]/80 rounded w-3/4" />
+                    <div className="h-3 bg-[#e8dfd1]/50 rounded w-1/2" />
+                    <div className="h-3 bg-[#e8dfd1]/40 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : stories.length === 0 ? (
             <div className="text-center py-16 md:py-20 bg-white/30 rounded-2xl backdrop-blur-sm px-4">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-[#e8dfd1] rounded-full mb-4">
                 <svg className="w-10 h-10 text-[#8b7355]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,10 +105,12 @@ const Stories = () => {
                   onClick={() => handleReadMore(story)}
                 >
                   {/* Cover Image - responsive aspect ratio */}
-                  <div className="relative overflow-hidden aspect-[4/3] md:aspect-[16/10]">
+                  <div className="relative overflow-hidden aspect-[4/3] md:aspect-[16/10] bg-[#e8dfd1]/20">
                     <img
                       src={story.coverImage || "https://images.unsplash.com/photo-1519741497674-611481863552?w=800"}
                       alt={story.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                       onError={(e) => {
                         e.target.src = "https://via.placeholder.com/800x600?text=No+Image";

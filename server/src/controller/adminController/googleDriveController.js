@@ -237,6 +237,7 @@ export const proxyPublicFile = async (req, res) => {
     const contentLength = driveRes.headers["content-length"];
 
     res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
     if (contentLength) {
       res.setHeader("Content-Length", contentLength);
     }

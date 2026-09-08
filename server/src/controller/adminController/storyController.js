@@ -1,6 +1,7 @@
 import Story from "../../model/storyModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
+import serverCache from "../../utils/apiCache.js";
 
 /**
  * Helper function to extract public_id safely from Google Drive secure URL strings
@@ -52,6 +53,8 @@ export const createStory = async (req, res) => {
       galleryVideos: galleryVideos || [],
     });
 
+    serverCache.clearPattern("stories");
+
     return res.status(201).json({
       success: true,
       message: "Story Created Successfully",
@@ -71,6 +74,12 @@ export const createStory = async (req, res) => {
 // ==========================
 export const getAllStories = async (req, res) => {
   try {
+    const cached = serverCache.get("stories:all");
+    if (cached) {
+      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      return res.status(200).json(cached);
+    }
+
     const stories = await Story.find().sort({ createdAt: -1 }).lean();
 
     const cleaned = stories.map((story) => ({
@@ -81,10 +90,15 @@ export const getAllStories = async (req, res) => {
       galleryVideos: story.galleryVideos ? story.galleryVideos.map((vid) => getCleanMediaUrl(vid)) : [],
     }));
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       stories: cleaned,
-    });
+    };
+
+    serverCache.set("stories:all", responsePayload, 30);
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error("Error fetching all stories:", error);
     return res.status(500).json({
@@ -198,6 +212,8 @@ export const updateStory = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    serverCache.clearPattern("stories");
+
     return res.status(200).json({
       success: true,
       message: "Story Updated Successfully",
@@ -274,6 +290,8 @@ export const deleteStory = async (req, res) => {
     }
 
     await Story.findByIdAndDelete(req.params.id);
+
+    serverCache.clearPattern("stories");
 
     return res.status(200).json({
       success: true,

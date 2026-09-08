@@ -1,39 +1,27 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Layout from "./components/dashboardLayoutComponents/layout";
-import Film from "./components/films/films";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import PublicRoute from "./utils/PublicRoute";
-import PreWeddingGallery from "./components/preWedding/preWedding";
 import { ToastContainer } from "react-toastify";
 import RouteLoader from "./components/commonComponents/RouteLoader/RouteLoader";
-import Contact from "./components/contact/contact";
-import Home from "./pages/homePage";
 import "react-toastify/dist/ReactToastify.css";
 
 /* ==========================
-   STORY PAGES
+   PUBLIC PAGES (Lazy Loaded)
 ========================== */
-import StoryManager from "./components/storiesComponents/mainFile";
-import StoryDetails from "./components/storiesComponents/StoryDetails";
-import StoriesList from "./components/storiesComponents/mainFile";
-import Registeration from "./components/auth/registeration"
-import Login from "./components/auth/login"
-
-/* ==========================
-   PHOTOBOOKS
-========================== */
-import PhotoBooks from "./pages/photoBookPage";
-
-/* ==========================
-   IMAGES PAGE
-========================== */
-import ImagesPage from "./components/image/image";
-
-/* ==========================
-   FAQ
-========================== */
-import FAQ from "./components/FAQ/faq";
+const Home = lazy(() => import("./pages/homePage"));
+const Film = lazy(() => import("./components/films/films"));
+const PreWeddingGallery = lazy(() => import("./components/preWedding/preWedding"));
+const Contact = lazy(() => import("./components/contact/contact"));
+const StoryManager = lazy(() => import("./components/storiesComponents/mainFile"));
+const StoryDetails = lazy(() => import("./components/storiesComponents/StoryDetails"));
+const StoriesList = lazy(() => import("./components/storiesComponents/mainFile"));
+const Registeration = lazy(() => import("./components/auth/registeration"));
+const Login = lazy(() => import("./components/auth/login"));
+const PhotoBooks = lazy(() => import("./pages/photoBookPage"));
+const ImagesPage = lazy(() => import("./components/image/image"));
+const FAQ = lazy(() => import("./components/FAQ/faq"));
 
 /* ==========================
    ADMIN PAGES

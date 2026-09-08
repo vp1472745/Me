@@ -1,6 +1,7 @@
 import HeroSection from "../../model/heroModel.js";
 import { uploadPublicAssetToDrive, deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
+import serverCache from "../../utils/apiCache.js";
 
 // Helper Function: Upload binary files to Google Drive
 const streamUploadToDrive = async (fileBuffer, mediaType, reqUser) => {
@@ -48,6 +49,8 @@ export const createHeroSection = async (req, res) => {
       public_id,
     });
 
+    serverCache.clearPattern("hero");
+
     return res.status(201).json({
       success: true,
       data: hero,
@@ -67,6 +70,12 @@ export const createHeroSection = async (req, res) => {
 // ==============================
 export const getAllHeroSections = async (req, res) => {
   try {
+    const cached = serverCache.get("hero:all");
+    if (cached) {
+      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      return res.status(200).json(cached);
+    }
+
     const heroes = await HeroSection.find().sort({
       createdAt: -1,
     }).lean();
@@ -76,11 +85,16 @@ export const getAllHeroSections = async (req, res) => {
       mediaUrl: getCleanMediaUrl(h.mediaUrl),
     }));
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       count: cleaned.length,
       data: cleaned,
-    });
+    };
+
+    serverCache.set("hero:all", responsePayload, 30);
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+
+    return res.status(200).json(responsePayload);
 
   } catch (error) {
     console.error("GET HEROES ERROR:", error);
@@ -163,6 +177,8 @@ export const updateHeroSection = async (req, res) => {
 
     await hero.save();
 
+    serverCache.clearPattern("hero");
+
     return res.status(200).json({
       success: true,
       message: "Hero media tracking schema refreshed successfully.",
@@ -204,6 +220,8 @@ export const deleteHeroSection = async (req, res) => {
 
 
     await hero.deleteOne();
+
+    serverCache.clearPattern("hero");
 
     return res.status(200).json({
       success: true,

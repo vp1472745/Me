@@ -1,6 +1,7 @@
 import Gallery from "../../model/imageModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
+import serverCache from "../../utils/apiCache.js";
 
 const getPublicIdFromUrl = (url) => {
   if (!url) return null;
@@ -35,6 +36,8 @@ export const createGallery = async (req, res) => {
       images,
     });
 
+    serverCache.clearPattern("gallery");
+
     return res.status(201).json({ success: true, data: gallery });
   } catch (error) {
     console.error("Gallery creation error:", error);
@@ -47,12 +50,23 @@ export const createGallery = async (req, res) => {
 // ==============================
 export const getAllGalleries = async (req, res) => {
   try {
+    const cached = serverCache.get("gallery:all");
+    if (cached) {
+      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      return res.status(200).json(cached);
+    }
+
     const galleries = await Gallery.find().sort({ createdAt: -1 }).lean();
     const cleaned = galleries.map((g) => ({
       ...g,
       images: g.images ? g.images.map((img) => getCleanMediaUrl(img)) : [],
     }));
-    return res.status(200).json({ success: true, data: cleaned });
+
+    const responsePayload = { success: true, data: cleaned };
+    serverCache.set("gallery:all", responsePayload, 30);
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Internal Server Error" });
@@ -99,8 +113,9 @@ export const deleteGallery = async (req, res) => {
       await Promise.all(deletePromises);
     }
 
-
     await Gallery.findByIdAndDelete(req.params.id);
+
+    serverCache.clearPattern("gallery");
 
     return res.status(200).json({
       success: true,

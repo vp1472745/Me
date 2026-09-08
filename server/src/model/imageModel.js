@@ -22,6 +22,8 @@ const gallerySchema = new mongoose.Schema(
   }
 );
 
+gallerySchema.index({ createdAt: -1 });
+
 const Gallery =
   mongoose.model(
     "Gallery",

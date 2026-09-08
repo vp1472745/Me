@@ -11,7 +11,7 @@ const HeroSection = () => {
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           className="w-full h-full object-cover object-center pointer-events-none"
         >
           <source src={HeroVideo} type="video/mp4" />

@@ -37,58 +37,45 @@ const GallerySection = () => {
   const [openModal, setOpenModal] =
     useState(false);
 
+  const [loading, setLoading] = useState(true);
+
   // =====================================
   // FETCH GALLERY
   // =====================================
 
-  const fetchGalleries =
-    async () => {
-
-      try {
-
-        const res =
-          await getAllGalleries();
-
-        setGalleries(
-          res?.data?.data || []
-        );
-
-      } catch (error) {
-
-        console.log(error);
-      }
-    };
+  const fetchGalleries = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllGalleries();
+      setGalleries(res?.data?.data || []);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-
     fetchGalleries();
-
   }, []);
 
   // =====================================
   // OPEN SLIDER
   // =====================================
 
-  const handleOpenSlider =
-    (images, index) => {
-
-      setSelectedImages(images || []);
-
-      setCurrentIndex(index);
-
-      setOpenModal(true);
-    };
+  const handleOpenSlider = (images, index) => {
+    setSelectedImages(images || []);
+    setCurrentIndex(index);
+    setOpenModal(true);
+  };
 
   // =====================================
   // NEXT IMAGE
   // =====================================
 
   const nextSlide = () => {
-
     setCurrentIndex((prev) =>
-      prev === selectedImages.length - 1
-        ? 0
-        : prev + 1
+      prev === selectedImages.length - 1 ? 0 : prev + 1
     );
   };
 
@@ -97,157 +84,72 @@ const GallerySection = () => {
   // =====================================
 
   const prevSlide = () => {
-
     setCurrentIndex((prev) =>
-      prev === 0
-        ? selectedImages.length - 1
-        : prev - 1
+      prev === 0 ? selectedImages.length - 1 : prev - 1
     );
   };
 
   return (
-
     <>
-<Navbar textColor="text-black/50" />
-<ImageHeroSection />
+      <Navbar textColor="text-black/50" />
+      <ImageHeroSection />
+
       {/* =====================================
           GALLERY SECTION
       ===================================== */}
-
-      <section
-        className="
-  
-          
-          px-4
-          md:px-10
-        "
-      >
-
-        <div
-          className="
-            max-w-7xl
-            mx-auto
-          "
-        >
-
+      <section className="px-4 md:px-10 py-10">
+        <div className="max-w-7xl mx-auto">
           {/* TITLE */}
-
-          <div
-            className="
-              text-center
-              mb-2
-            "
-          >
-
-            <div
-              className="
-                w-full
-                h-[1px]
-              
-                mb-10
-              "
-            ></div>
-
-            <h1
-              className="
-                text-[#8d8479]
-                text-2xl
-                md:text-2xl
-                tracking-[12px]
-                uppercase
-                font-light
-              "
-            >
+          <div className="text-center mb-12">
+            <div className="w-full h-[1px] mb-8 bg-[#cfc6bb] max-w-4xl mx-auto"></div>
+            <h1 className="text-[#8d8479] text-2xl md:text-3xl tracking-[12px] uppercase font-light">
               Images
             </h1>
-
-            <div
-              className="
-                w-full
-                h-[1px]
-          
-                mt-10
-              "
-            ></div>
-
+            <div className="w-full h-[1px] mt-8 bg-[#cfc6bb] max-w-4xl mx-auto"></div>
           </div>
 
-          {/* =====================================
-              GALLERY LOOP
-          ===================================== */}
-
-          {galleries.map(
-            (gallery) => (
-
-              <div
-                key={gallery._id}
-                className="mb-28"
-              >
-
-
-                {/* IMAGE GRID */}
-
+          {/* SKELETON LOADERS */}
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-28">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <div
-                  className="
-                    grid
-                    grid-cols-2
-                    md:grid-cols-3
-                    lg:grid-cols-4
-                    gap-6
-                
-
-                  "
-                >
-
-                  {(gallery.images || []).map(
-                    (image, index) => (
-
-                      <div
-                        key={index}
-                        className="
-                          overflow-hidden
-                          cursor-pointer
-                          group
-                         
-                         
-                             rounded-2xl
-                        "
-                        onClick={() =>
-                          handleOpenSlider(
-                            gallery.images || [],
-                            index
-                          )
-                        }
-                      >
-
-<img
-  src={image}
-  alt=""
-  className="
-    w-full
-    h-[220px]
-    md:h-[350px]
-    object-cover
-    rounded-2xl
-    transition-transform
-    duration-700
-    ease-in-out
-    group-hover:scale-110
-  "
-/>
-
-                      </div>
-                    )
-                  )}
-
+                  key={n}
+                  className="w-full h-[220px] md:h-[350px] rounded-2xl bg-gray-200/70 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : galleries.length === 0 ? (
+            <div className="text-center py-16 bg-white/30 rounded-2xl backdrop-blur-sm max-w-2xl mx-auto">
+              <p className="text-[#8d8479] text-lg font-light">No image galleries found.</p>
+            </div>
+          ) : (
+            /* GALLERY LOOP */
+            galleries.map((gallery) => (
+              <div key={gallery._id} className="mb-28">
+                {/* IMAGE GRID */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {(gallery.images || []).map((image, index) => (
+                    <div
+                      key={index}
+                      className="overflow-hidden cursor-pointer group rounded-2xl bg-gray-100"
+                      onClick={() =>
+                        handleOpenSlider(gallery.images || [], index)
+                      }
+                    >
+                      <img
+                        src={image}
+                        alt=""
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-[220px] md:h-[350px] object-cover rounded-2xl transition-transform duration-700 ease-in-out group-hover:scale-110"
+                      />
+                    </div>
+                  ))}
                 </div>
-
               </div>
-            )
+            ))
           )}
-
         </div>
-
       </section>
 
       {/* =====================================

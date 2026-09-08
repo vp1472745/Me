@@ -1,6 +1,7 @@
 import Video from "../../model/filmsModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
+import serverCache from "../../utils/apiCache.js";
 
 // ==============================
 // CREATE VIDEO (YouTube URL only)
@@ -22,6 +23,8 @@ export const createVideo = async (req, res) => {
       youtubeUrl,
     });
 
+    serverCache.clearPattern("films");
+
     return res.status(201).json({
       success: true,
       message: "Video Added Successfully",
@@ -41,6 +44,12 @@ export const createVideo = async (req, res) => {
 // ==============================
 export const getAllVideos = async (req, res) => {
   try {
+    const cached = serverCache.get("films:all");
+    if (cached) {
+      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      return res.status(200).json(cached);
+    }
+
     const videos = await Video.find().sort({ createdAt: -1 }).lean();
 
     const cleaned = videos.map((v) => ({
@@ -49,11 +58,16 @@ export const getAllVideos = async (req, res) => {
       thumbnail: getCleanMediaUrl(v.thumbnail),
     }));
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       count: cleaned.length,
       videos: cleaned,
-    });
+    };
+
+    serverCache.set("films:all", responsePayload, 30);
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error("GET VIDEOS ERROR:", error);
     return res.status(500).json({
@@ -114,6 +128,8 @@ export const updateVideo = async (req, res) => {
 
     await video.save();
 
+    serverCache.clearPattern("films");
+
     return res.status(200).json({
       success: true,
       message: "Video Updated Successfully",
@@ -150,8 +166,9 @@ export const deleteVideo = async (req, res) => {
       }
     }
 
-
     await video.deleteOne();
+
+    serverCache.clearPattern("films");
 
     return res.status(200).json({
       success: true,

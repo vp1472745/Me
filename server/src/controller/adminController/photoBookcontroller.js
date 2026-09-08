@@ -4,6 +4,7 @@
 import WeddingStoryModel from "../../model/photoBook.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
+import serverCache from "../../utils/apiCache.js";
 
 // Helper function to extract public_id safely from Google Drive URL strings
 const getPublicIdFromUrl = (url) => {
@@ -70,6 +71,8 @@ export const createWeddingStory = async (req, res) => {
       galleryImages: galleryImages || [], // Array of URL strings saved
     });
 
+    serverCache.clearPattern("photobook");
+
     return res.status(201).json({
       success: true,
       message: "Wedding story created successfully",
@@ -97,6 +100,12 @@ export const createWeddingStory = async (req, res) => {
 ========================= */
 export const getAllWeddingStories = async (req, res) => {
   try {
+    const cached = serverCache.get("photobook:all");
+    if (cached) {
+      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      return res.status(200).json(cached);
+    }
+
     const stories = await WeddingStoryModel.find().sort({ createdAt: -1 }).lean();
 
     const cleaned = stories.map((story) => ({
@@ -105,10 +114,15 @@ export const getAllWeddingStories = async (req, res) => {
       galleryImages: story.galleryImages ? story.galleryImages.map((img) => getCleanMediaUrl(img)) : [],
     }));
 
-    return res.status(200).json({
+    const responsePayload = {
       success: true,
       data: cleaned,
-    });
+    };
+
+    serverCache.set("photobook:all", responsePayload, 30);
+    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+
+    return res.status(200).json(responsePayload);
   } catch (error) {
     console.error("Core global fetching error on story structures:", error);
     return res.status(500).json({
@@ -197,6 +211,8 @@ export const deleteWeddingStory = async (req, res) => {
 
     // Clear document from database collection
     await WeddingStoryModel.findByIdAndDelete(req.params.id);
+
+    serverCache.clearPattern("photobook");
 
     return res.status(200).json({
       success: true,

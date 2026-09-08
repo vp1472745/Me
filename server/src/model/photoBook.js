@@ -35,6 +35,8 @@ const weddingStorySchema = new mongoose.Schema(
   }
 );
 
+weddingStorySchema.index({ createdAt: -1 });
+
 const WeddingStoryModel = mongoose.model(
   "WeddingStory",
   weddingStorySchema

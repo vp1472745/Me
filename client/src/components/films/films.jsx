@@ -35,62 +35,73 @@ function InstaCuts() {
     fetchVideos();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f5f1ea]">
-        <h1 className="text-3xl text-gray-600">Loading...</h1>
-      </div>
-    );
-  }
-
   return (
     <>
-   < Navbar textColor="text-black/50" />
-    <FlimHeroSection />
-      <div className="min-h-screen px-5 md:px-16 ">
+      <Navbar textColor="text-black/50" />
+      <FlimHeroSection />
+      <div className="min-h-screen px-5 md:px-16 py-10">
         {/* HEADER */}
-        <div className="text-center mb-20">
-          <div className="border-t border-gray-300 mb-10" />
+        <div className="text-center mb-16">
+          <div className="border-t border-gray-300 mb-8 max-w-4xl mx-auto" />
           <h1 className="text-3xl md:text-2xl tracking-[12px] text-gray-600 uppercase font-light">
             INSTACUTS
           </h1>
-          <div className="border-t border-gray-300 mt-10" />
+          <div className="border-t border-gray-300 mt-8 max-w-4xl mx-auto" />
         </div>
 
-        {/* VIDEO GRID – no overlays, just direct video players */}
-        <div className="columns-1 md:columns-3 gap-8 space-y-8">
-          {videos.map((video, index) => {
-            const sizeClass = index % 3 === 0 ? "h-[300px]" : "h-[300px]";
-
-            return (
-              <div key={video._id} className="relative mb-8 break-inside-avoid">
-                {video.youtubeUrl ? (
-                  // YouTube: direct iframe player
-                  <iframe
-                    className={`w-full ${sizeClass} rounded-2xl bg-black`}
-                    src={getYouTubeEmbedUrl(video.youtubeUrl)}
-                    title={video.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                ) : (
-                  // MP4 video: direct video element with controls
-                  <video
-                    controls
-                    playsInline
-                    preload="metadata"
-                    className={`w-full ${sizeClass} rounded-2xl object-cover bg-black`}
-                    poster={video.thumbnail || `https://via.placeholder.com/800x600?text=${video.title}`}
-                  >
-                    <source src={video.videoUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                )}
+        {/* SKELETON LOADERS */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div
+                key={n}
+                className="h-[300px] rounded-2xl bg-gray-200/70 animate-pulse flex items-center justify-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-gray-300/60" />
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        ) : videos.length === 0 ? (
+          <div className="text-center py-16 bg-white/30 rounded-2xl backdrop-blur-sm max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg font-light">No films available right now.</p>
+          </div>
+        ) : (
+          /* VIDEO GRID – no overlays, just direct video players */
+          <div className="columns-1 md:columns-3 gap-8 space-y-8">
+            {videos.map((video, index) => {
+              const sizeClass = "h-[300px]";
+
+              return (
+                <div key={video._id || index} className="relative mb-8 break-inside-avoid shadow-sm rounded-2xl overflow-hidden bg-black">
+                  {video.youtubeUrl ? (
+                    // YouTube: direct iframe player
+                    <iframe
+                      className={`w-full ${sizeClass} rounded-2xl bg-black`}
+                      src={getYouTubeEmbedUrl(video.youtubeUrl)}
+                      title={video.title || "Film"}
+                      loading="lazy"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    // MP4 video: direct video element with controls
+                    <video
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className={`w-full ${sizeClass} rounded-2xl object-cover bg-black`}
+                      poster={video.thumbnail || `https://via.placeholder.com/800x600?text=${encodeURIComponent(video.title || "Film")}`}
+                    >
+                      <source src={video.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </>
   );

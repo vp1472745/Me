@@ -16,6 +16,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import compression from "compression";
 
 // Routing Handlers Integration Area
 import authRouter from "./src/router/adminRoutes/authRouter.js";
@@ -42,6 +43,9 @@ import { verifyEmailTransporter } from "./src/services/emailService.js";
 const app = express();
 app.set("trust proxy", true);
 
+// Enable gzip/brotli compression on all outgoing responses
+app.use(compression());
+
 // ==========================================
 // MIDDLEWARES PIPELINE
 // ==========================================
@@ -51,7 +55,15 @@ app.use(express.json({ limit: "500mb" }));
 app.use(express.urlencoded({ limit: "500mb", extended: true }));
 
 app.use(cookieParser());
-app.use("/uploads", express.static("uploads"));
+app.use(
+  "/uploads",
+  express.static("uploads", {
+    maxAge: "7d",
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=604800, stale-while-revalidate=86400");
+    },
+  })
+);
 
 const allowedOrigins = [
   "http://localhost:5173",

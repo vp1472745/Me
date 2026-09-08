@@ -23,6 +23,8 @@ const heroSectionSchema = new mongoose.Schema(
   }
 );
 
+heroSectionSchema.index({ createdAt: -1 });
+
 export default mongoose.model(
   "HeroSection",
   heroSectionSchema

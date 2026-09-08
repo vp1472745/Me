@@ -56,6 +56,8 @@ const flimSchema =
     },
   );
 
+flimSchema.index({ createdAt: -1 });
+
 const Video =
   mongoose.model(
     "Film",

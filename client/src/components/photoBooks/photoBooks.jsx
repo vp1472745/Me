@@ -92,19 +92,22 @@ const WeddingGallery = () => {
     <>
     <Navbar textColor="text-black/50" />
       {/* GALLERY GRID */}
-      <section className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-30 md:py-50">
+      <section className="min-h-screen px-4 sm:px-6 md:px-10 lg:px-20 py-24 md:py-32">
         <div className="max-w-7xl mx-auto">
-          {loading && (
-            <div className="text-center text-[#8a7f74] py-16">
-              Loading wedding stories...
+          {error && (
+            <div className="text-center text-red-600 py-10 bg-white/60 rounded-2xl mb-8">{error}</div>
+          )}
+
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <div key={n} className="rounded-2xl overflow-hidden shadow-sm animate-pulse bg-white p-2">
+                  <div className="w-full h-64 sm:h-80 md:h-96 rounded-2xl bg-[#e8dfd1]/60" />
+                  <div className="h-5 bg-[#e8dfd1]/70 rounded w-1/2 mx-auto mt-4 mb-2" />
+                </div>
+              ))}
             </div>
-          )}
-
-          {!loading && error && (
-            <div className="text-center text-red-600 py-16">{error}</div>
-          )}
-
-          {!loading && !error && (
+          ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10">
               {weddingStories.map((story) => (
                 <div
@@ -112,10 +115,12 @@ const WeddingGallery = () => {
                   onClick={() => openSlider(story)}
                   className="group cursor-pointer transform transition duration-500 hover:-translate-y-2"
                 >
-                  <div className="relative overflow-hidden rounded-2xl shadow-xl">
+                  <div className="relative overflow-hidden rounded-2xl shadow-xl bg-[#e8dfd1]/20">
                     <img
                       src={story.cover}
                       alt={story.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-64 sm:h-80 md:h-96 object-cover transition duration-700 group-hover:scale-105"
                     />
                     {/* Overlay on hover */}
