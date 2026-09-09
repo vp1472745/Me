@@ -37,116 +37,182 @@ body {
 /* =============================================================
    DASHBOARD DARK MODE ENHANCEMENTS (BULLETPROOF ATTRIBUTE MATCH)
    ============================================================= */
-.dark-dashboard-container.dark {
-  background-color: #0A0A0C !important;
+html.dark,
+html.dark body {
+  background-color: #09090B !important;
+  color: #F4F4F5;
 }
 
-/* Force dark main container canvas background */
-.dark-dashboard-container.dark main {
-  background-color: #0A0A0C !important;
+.dark-dashboard-container.dark,
+.dark-dashboard-container.dark main,
+html.dark .dark-dashboard-container,
+html.dark main {
+  background-color: #09090B !important;
 }
 
-/* Match any background containing #F7F9F4 */
-.dark-dashboard-container.dark [class*="bg-[#F7F9F4]"] {
-  background-color: #0A0A0C !important;
-}
-
-/* Match any background gradients originating from light beige #F7F9F4 */
-.dark-dashboard-container.dark [class*="from-[#F7F9F4]"],
-.dark-dashboard-container.dark [class*="from-bg-[#F7F9F4]"] {
+/* Match any background containing light beige gradients */
+.dark [class*="from-[#F6F8F5]"],
+.dark [class*="to-[#EEF3EC]"],
+.dark [class*="from-[#F7F9F4]"],
+.dark [class*="via-[#f0f5eb]"],
+.dark [class*="to-[#e8efe0]"],
+.dark [class*="bg-[#F6F8F5]"],
+.dark [class*="bg-[#EEF3EC]"],
+.dark [class*="bg-[#F7F9F4]"],
+.dark [class*="bg-gradient-to-b from-[#F6F8F5]"] {
   background-image: none !important;
-  background-color: #0A0A0C !important;
+  background-color: #09090B !important;
 }
 
-/* Match any background containing bg-white */
-.dark-dashboard-container.dark [class*="bg-white"] {
+/* Match any background containing bg-white, bg-white/80, etc. */
+.dark [class*="bg-white"],
+.dark [class*="bg-white/80"],
+.dark [class*="bg-white/70"],
+.dark [class*="bg-white/60"] {
   background-color: #121214 !important;
+  border-color: #1E1E22 !important;
 }
 
-/* Match bg-gray-50, bg-gray-100, etc. */
-.dark-dashboard-container.dark [class*="bg-gray-50"],
-.dark-dashboard-container.dark [class*="bg-gray-100"],
-.dark-dashboard-container.dark [class*="bg-gray-200"] {
-  background-color: #0A0A0C !important;
+/* Stat cards & subtle tone cards */
+.dark [class*="from-emerald-50"],
+.dark [class*="from-sky-50"],
+.dark [class*="from-violet-50"] {
+  background-image: none !important;
+  background-color: #161619 !important;
+  border-color: #27272A !important;
 }
 
-/* Match bg-[#EEF6EC] */
-.dark-dashboard-container.dark [class*="bg-[#EEF6EC]"] {
+/* Match bg-gray-50, bg-slate-50, bg-slate-100, etc. */
+.dark [class*="bg-slate-50"],
+.dark [class*="bg-slate-50/80"],
+.dark [class*="bg-slate-100"],
+.dark [class*="bg-gray-50"],
+.dark [class*="bg-gray-100"],
+.dark [class*="bg-gray-200"] {
+  background-color: #18181B !important;
+  border-color: #27272A !important;
+}
+
+/* Active user/card highlights */
+.dark [class*="bg-[#F4F8F1]"] {
+  background-color: #1A2519 !important;
+  border-color: #3C5732 !important;
+}
+
+.dark [class*="bg-[#EEF6EC]"],
+.dark [class*="bg-[#EBF4DD]"] {
   background-color: #1E2519 !important;
   color: #A7D18C !important;
-}
-
-/* Match bg-[#EBF4DD] */
-.dark-dashboard-container.dark [class*="bg-[#EBF4DD]"] {
-  background-color: #1E2519 !important;
 }
 
 /* Text Overrides */
-.dark-dashboard-container.dark [class*="text-[#3B4953]"],
-.dark-dashboard-container.dark [class*="text-[#2d3748]"] {
+.dark [class*="text-[#3B4953]"],
+.dark [class*="text-[#2d3748]"] {
   color: #E4E4E7 !important;
 }
 
-.dark-dashboard-container.dark [class*="text-[#5A7863]"] {
+.dark [class*="text-[#5A7863]"] {
   color: #A7D18C !important;
 }
 
-.dark-dashboard-container.dark .text-slate-800,
-.dark-dashboard-container.dark .text-slate-750,
-.dark-dashboard-container.dark .text-slate-700,
-.dark-dashboard-container.dark .text-gray-800,
-.dark-dashboard-container.dark .text-gray-750,
-.dark-dashboard-container.dark .text-gray-700,
-.dark-dashboard-container.dark .text-zinc-800,
-.dark-dashboard-container.dark .text-zinc-700 {
-  color: #E4E4E7 !important;
+.dark .text-slate-900,
+.dark .text-slate-850,
+.dark .text-slate-800,
+.dark .text-slate-750,
+.dark .text-slate-700,
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-750,
+.dark .text-gray-700,
+.dark .text-zinc-900,
+.dark .text-zinc-800,
+.dark .text-zinc-700 {
+  color: #F4F4F5 !important;
 }
 
-.dark-dashboard-container.dark .text-slate-650,
-.dark-dashboard-container.dark .text-slate-600,
-.dark-dashboard-container.dark .text-slate-500,
-.dark-dashboard-container.dark .text-gray-600,
-.dark-dashboard-container.dark .text-gray-500,
-.dark-dashboard-container.dark .text-gray-400 {
+.dark .text-slate-650,
+.dark .text-slate-600,
+.dark .text-slate-500,
+.dark .text-gray-600,
+.dark .text-gray-500,
+.dark .text-zinc-500,
+.dark .text-zinc-400 {
   color: #A1A1AA !important;
 }
 
+.dark .text-slate-400,
+.dark .text-gray-400 {
+  color: #71717A !important;
+}
+
 /* Border Overrides */
-.dark-dashboard-container.dark [class*="border-[#DDE7D8]"],
-.dark-dashboard-container.dark [class*="border-[#E8E8E8]"],
-.dark-dashboard-container.dark [class*="border-white"],
-.dark-dashboard-container.dark [class*="border-gray-150"],
-.dark-dashboard-container.dark [class*="border-gray-100"],
-.dark-dashboard-container.dark [class*="border-gray-200"],
-.dark-dashboard-container.dark [class*="border-gray-300"],
-.dark-dashboard-container.dark [class*="border-slate-100"],
-.dark-dashboard-container.dark [class*="border-slate-200"] {
-  border-color: #1F1F23 !important;
+.dark [class*="border-[#DDE7D8]"],
+.dark [class*="border-[#BFD0B7]"],
+.dark [class*="border-[#E8E8E8]"],
+.dark [class*="border-white"],
+.dark [class*="border-gray-150"],
+.dark [class*="border-gray-100"],
+.dark [class*="border-gray-200"],
+.dark [class*="border-gray-300"],
+.dark [class*="border-slate-100"],
+.dark [class*="border-slate-200"],
+.dark [class*="border-slate-300"],
+.dark [class*="border-slate-350"] {
+  border-color: #27272A !important;
 }
 
 /* Hover Overrides */
-.dark-dashboard-container.dark [class*="hover:bg-[#F7F9F4]"]:hover,
-.dark-dashboard-container.dark [class*="hover:bg-zinc-50"]:hover,
-.dark-dashboard-container.dark [class*="hover:bg-gray-100"]:hover {
-  background-color: #18181B !important;
+.dark [class*="hover:bg-[#F7F9F4]"]:hover,
+.dark [class*="hover:bg-zinc-50"]:hover,
+.dark [class*="hover:bg-slate-50"]:hover,
+.dark [class*="hover:bg-gray-50"]:hover,
+.dark [class*="hover:bg-gray-100"]:hover {
+  background-color: #1E1E22 !important;
 }
 
-.dark-dashboard-container.dark [class*="hover:bg-[#EBF4DD]"]:hover,
-.dark-dashboard-container.dark [class*="hover:bg-[#EEF6EC]"]:hover {
+.dark [class*="hover:bg-[#EBF4DD]"]:hover,
+.dark [class*="hover:bg-[#EEF6EC]"]:hover {
   background-color: #1E2519 !important;
   color: #A7D18C !important;
 }
 
-/* Inputs and Forms dark mode styling */
-.dark-dashboard-container.dark input,
-.dark-dashboard-container.dark textarea,
-.dark-dashboard-container.dark select {
+/* Badges & Chips in dark mode */
+.dark .bg-emerald-50,
+.dark .bg-emerald-100 {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+  color: #6EE7B7 !important;
+}
+.dark .bg-sky-50,
+.dark .bg-sky-100 {
+  background-color: rgba(14, 165, 233, 0.15) !important;
+  color: #7DD3FC !important;
+}
+.dark .bg-violet-50,
+.dark .bg-violet-100 {
+  background-color: rgba(139, 92, 246, 0.15) !important;
+  color: #C4B5FD !important;
+}
+.dark .bg-rose-50,
+.dark .bg-rose-100 {
+  background-color: rgba(244, 63, 94, 0.15) !important;
+  color: #FDA4AF !important;
+}
+.dark .bg-amber-50,
+.dark .bg-amber-100 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+  color: #FCD34D !important;
+}
+
+/* Inputs, Selects, and Forms dark mode styling */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
   background-color: #18181B !important;
   border-color: #27272A !important;
   color: #F4F4F5 !important;
 }
 
-.dark-dashboard-container.dark input::placeholder,
-.dark-dashboard-container.dark textarea::placeholder {
-  color: #52525B !important;
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #71717A !important;
 }
