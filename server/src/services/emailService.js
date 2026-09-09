@@ -283,9 +283,14 @@ const dispatchMail = async (mailOptions) => {
       return { success: true, messageId: fallbackInfo.messageId, port: "fallback_587" };
     } catch (fallbackError) {
       console.error(`❌ [EMAIL ERROR] Both primary and fallback SMTP failed:`, fallbackError.message);
-      if (fallbackError.message.includes("timeout") || fallbackError.message.includes("ETIMEDOUT")) {
+      if (
+        fallbackError.message.includes("timeout") ||
+        fallbackError.message.includes("ETIMEDOUT") ||
+        fallbackError.message.includes("ENETUNREACH") ||
+        fallbackError.message.includes("ECONNREFUSED")
+      ) {
         throw new Error(
-          "Render Free Tier blocks SMTP ports 25, 465 & 587 (Connection timeout). Please add RESEND_API_KEY (free at resend.com) in Render Environment tab to enable instant HTTPS port 443 email delivery."
+          "Render Free Tier blocks SMTP ports 25, 465 & 587 (ENETUNREACH/Timeout). Please add BREVO_API_KEY (free at brevo.com) or RESEND_API_KEY in your Render Environment settings for HTTPS delivery."
         );
       }
       throw new Error(`Failed to deliver OTP email: ${fallbackError.message || primaryError.message}`);
