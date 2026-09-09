@@ -211,6 +211,14 @@ const dispatchMail = async (mailOptions) => {
 
   // 2. PROVIDER 2: BREVO (SENDINBLUE) HTTPS API (Port 443 - 100% Render Free Tier Compatible)
   if (brevoApiKey) {
+    if (brevoApiKey.startsWith("xsmtpsib-")) {
+      const msg = "Invalid BREVO_API_KEY: It starts with 'xsmtpsib-' (SMTP Key). Please generate an API Key from the 'API keys & MCP' tab in Brevo (starts with 'xkeysib-').";
+      console.error("❌ " + msg);
+      if (isProduction) {
+        throw new Error(msg);
+      }
+    }
+
     try {
       const senderEmail = (process.env.BREVO_SENDER_EMAIL || user || "voteease1611@gmail.com").trim();
       const senderName = process.env.BREVO_SENDER_NAME || "The Wedding Sedding";
@@ -236,8 +244,14 @@ const dispatchMail = async (mailOptions) => {
         return { success: true, messageId: id, provider: "brevo_https" };
       }
       console.warn("⚠️ [EMAIL WARNING] Brevo HTTPS dispatch failed:", resData);
+      if (isProduction) {
+        throw new Error(`Brevo HTTPS dispatch failed: ${resData.message || JSON.stringify(resData)}`);
+      }
     } catch (brevoError) {
       console.warn("⚠️ [EMAIL WARNING] Brevo HTTPS error:", brevoError.message);
+      if (isProduction) {
+        throw brevoError;
+      }
     }
   }
 
