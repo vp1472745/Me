@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
@@ -82,6 +82,19 @@ const CorrectionImagePreview = ({ fileId, workId }) => {
   );
 };
 
+const SUBFOLDER_OPTIONS = [
+  "Wedding",
+  "Pre Wedding",
+  "Haldi",
+  "Mehendi",
+  "Reception",
+  "RAW Photos",
+  "Edited Photos",
+  "Videos",
+  "Albums",
+  "Final Delivery",
+];
+
 const ProjectManagement = () => {
   const [activeTab, setActiveTab] = useState("assignments"); // 'assignments' | 'corrections'
   const [projects, setProjects] = useState([]);
@@ -109,15 +122,35 @@ const ProjectManagement = () => {
   const [form, setForm] = useState({
     client: "",
     editor: "",
-    category: "Wedding",
+    categories: ["Wedding"],
     deliveryDate: "",
   });
+
+  const [subfolderDropdownOpen, setSubfolderDropdownOpen] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
+  const subfolderDropdownRef = useRef(null);
 
   const [editForm, setEditForm] = useState({
     estimatedDuration: "",
     expectedCompletionDate: "",
     notes: "",
   });
+
+  // Close subfolder dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        subfolderDropdownRef.current &&
+        !subfolderDropdownRef.current.contains(event.target)
+      ) {
+        setSubfolderDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -149,10 +182,60 @@ const ProjectManagement = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleToggleCategory = (cat) => {
+    setForm((prev) => {
+      const exists = prev.categories.includes(cat);
+      const updated = exists
+        ? prev.categories.filter((c) => c !== cat)
+        : [...prev.categories, cat];
+      return { ...prev, categories: updated };
+    });
+  };
+
+  const handleRemoveCategory = (cat, e) => {
+    if (e) e.stopPropagation();
+    setForm((prev) => ({
+      ...prev,
+      categories: prev.categories.filter((c) => c !== cat),
+    }));
+  };
+
+  const handleSelectAllCategories = () => {
+    setForm((prev) => ({
+      ...prev,
+      categories: [...SUBFOLDER_OPTIONS],
+    }));
+  };
+
+  const handleClearCategories = () => {
+    setForm((prev) => ({
+      ...prev,
+      categories: [],
+    }));
+  };
+
+  const handleAddCustomCategory = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = customCategory.trim();
+    if (!trimmed) return;
+    if (!form.categories.includes(trimmed)) {
+      setForm((prev) => ({
+        ...prev,
+        categories: [...prev.categories, trimmed],
+      }));
+    }
+    setCustomCategory("");
+  };
+
   const handleAssignWork = async (e) => {
     e.preventDefault();
     if (!form.client || !form.editor || !form.deliveryDate) {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    if (!form.categories || form.categories.length === 0) {
+      toast.error("Please select at least one target subfolder / category.");
       return;
     }
 
@@ -161,21 +244,23 @@ const ProjectManagement = () => {
       const payload = {
         client: form.client,
         editor: form.editor,
-        category: form.category,
+        category: form.categories[0], // for single legacy support
+        categories: form.categories,
         priority: "MEDIUM",
         deliveryDate: form.deliveryDate,
       };
 
       const res = await createWorkAssignment(payload);
       if (res.data.success) {
-        toast.success("Project assigned successfully.");
+        toast.success(res.data.message || "Project assigned successfully.");
         setForm({
           client: "",
           editor: "",
-          category: "Wedding",
+          categories: ["Wedding"],
           deliveryDate: "",
         });
         setAssignModalOpen(false);
+        setSubfolderDropdownOpen(false);
         fetchData();
       }
     } catch (error) {
@@ -686,25 +771,138 @@ const ProjectManagement = () => {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Target Subfolder</label>
-            <select
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-350 outline-none focus:ring-2 focus:ring-[#5A7863] text-sm"
+          {/* Multi-Select Target Subfolders */}
+          <div className="relative" ref={subfolderDropdownRef}>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-sm font-semibold text-slate-700">
+                Target Subfolders <span className="text-rose-500">*</span>
+              </label>
+              <div className="flex items-center gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={handleSelectAllCategories}
+                  className="text-[#5A7863] hover:text-[#465E4D] font-semibold hover:underline"
+                >
+                  Select All
+                </button>
+                <span className="text-slate-300">|</span>
+                <button
+                  type="button"
+                  onClick={handleClearCategories}
+                  className="text-rose-500 hover:text-rose-600 font-semibold hover:underline"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+
+            {/* Selected Pills Display & Dropdown Trigger */}
+            <div
+              onClick={() => setSubfolderDropdownOpen((prev) => !prev)}
+              className={`w-full min-h-[44px] p-2 rounded-xl border transition-all cursor-pointer flex flex-wrap items-center gap-1.5 bg-white ${
+                subfolderDropdownOpen
+                  ? "border-[#5A7863] ring-2 ring-[#5A7863]/20"
+                  : "border-slate-300 hover:border-slate-400"
+              }`}
             >
-              <option value="Wedding">Wedding</option>
-              <option value="Pre Wedding">Pre Wedding</option>
-              <option value="Haldi">Haldi</option>
-              <option value="Mehendi">Mehendi</option>
-              <option value="Reception">Reception</option>
-              <option value="RAW Photos">RAW Photos</option>
-              <option value="Edited Photos">Edited Photos</option>
-              <option value="Videos">Videos</option>
-              <option value="Albums">Albums</option>
-              <option value="Final Delivery">Final Delivery</option>
-            </select>
+              {form.categories && form.categories.length > 0 ? (
+                form.categories.map((cat) => (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#5A7863]/10 text-[#2C3E35] border border-[#5A7863]/25 rounded-lg text-xs font-semibold shadow-xs transition-all hover:bg-[#5A7863]/20"
+                  >
+                    <span>{cat}</span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleRemoveCategory(cat, e)}
+                      className="hover:text-rose-600 focus:outline-none rounded-full p-0.5 hover:bg-rose-50 transition-colors"
+                      title={`Remove ${cat}`}
+                    >
+                      <FaTimes className="text-[10px]" />
+                    </button>
+                  </span>
+                ))
+              ) : (
+                <span className="text-sm text-slate-400 px-2">
+                  -- Select one or more subfolders --
+                </span>
+              )}
+              <div className="ml-auto pr-1 text-slate-400 flex items-center gap-1">
+                {form.categories && form.categories.length > 0 && (
+                  <span className="text-[11px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">
+                    {form.categories.length}
+                  </span>
+                )}
+                <span className="text-[10px] text-slate-500">▼</span>
+              </div>
+            </div>
+
+            {/* Dropdown Menu */}
+            {subfolderDropdownOpen && (
+              <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 space-y-2 max-h-72 overflow-y-auto">
+                {/* Custom Subfolder Adder */}
+                <div className="flex gap-2 pb-2 border-b border-slate-100">
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleAddCustomCategory(e);
+                      }
+                    }}
+                    placeholder="Add custom subfolder (e.g. Sangeet)..."
+                    className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-300 outline-none focus:ring-1 focus:ring-[#5A7863]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddCustomCategory}
+                    className="px-3 py-1.5 bg-[#5A7863] text-white text-xs font-bold rounded-lg hover:bg-[#465E4D] transition"
+                  >
+                    + Add
+                  </button>
+                </div>
+
+                {/* Subfolders Grid / List */}
+                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                  {Array.from(new Set([...SUBFOLDER_OPTIONS, ...form.categories])).map((cat) => {
+                    const isSelected = form.categories.includes(cat);
+                    return (
+                      <div
+                        key={cat}
+                        onClick={() => handleToggleCategory(cat)}
+                        className={`flex items-center justify-between p-2 rounded-xl text-xs font-medium cursor-pointer transition select-none ${
+                          isSelected
+                            ? "bg-[#5A7863]/15 text-[#2C3E35] border border-[#5A7863]/40 font-semibold"
+                            : "hover:bg-slate-50 text-slate-700 border border-transparent"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="w-3.5 h-3.5 text-[#5A7863] rounded border-slate-300 focus:ring-[#5A7863] pointer-events-none accent-[#5A7863]"
+                          />
+                          <span className="truncate">{cat}</span>
+                        </div>
+                        {isSelected && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleRemoveCategory(cat, e)}
+                            className="text-slate-400 hover:text-rose-600 ml-1 p-0.5 rounded transition"
+                            title="Remove"
+                          >
+                            <FaTimes className="text-[10px]" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

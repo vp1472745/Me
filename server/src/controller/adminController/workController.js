@@ -6,9 +6,21 @@ import User from "../../model/authModel.js";
 // 1. Create Work Assignment (ADMIN ONLY)
 export const createWork = async (req, res) => {
   try {
-    const { client, editor, category, priority, deliveryDate } = req.body;
+    const { client, editor, category, categories, priority, deliveryDate } = req.body;
 
-    if (!client || !editor || !category || !deliveryDate) {
+    // Support both single category string or array of categories
+    let categoriesList = [];
+    if (Array.isArray(categories) && categories.length > 0) {
+      categoriesList = categories;
+    } else if (Array.isArray(category) && category.length > 0) {
+      categoriesList = category;
+    } else if (typeof category === "string" && category.trim()) {
+      categoriesList = category.includes(",")
+        ? category.split(",").map((c) => c.trim()).filter(Boolean)
+        : [category.trim()];
+    }
+
+    if (!client || !editor || categoriesList.length === 0 || !deliveryDate) {
       return res.status(400).json({ success: false, message: "Missing required fields" });
     }
 
@@ -22,36 +34,41 @@ export const createWork = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid editor selected" });
     }
 
-    const work = await Work.create({
-      client,
-      editor,
-      category,
-      priority: priority || "MEDIUM",
-      deliveryDate,
-      status: "WAITING_FOR_EDITOR",
-    });
+    const createdWorks = [];
+    for (const cat of categoriesList) {
+      const work = await Work.create({
+        client,
+        editor,
+        category: cat,
+        priority: priority || "MEDIUM",
+        deliveryDate,
+        status: "WAITING_FOR_EDITOR",
+      });
+      createdWorks.push(work);
 
-    // Create Notification for Editor
-    await Notification.create({
-      recipient: editor,
-      message: `New project '${category}' has been assigned to you. Please submit estimated duration.`,
-      type: "PROJECT_ASSIGNED",
-      link: `/dashboard/posts`,
-    });
+      // Create Notification for Editor
+      await Notification.create({
+        recipient: editor,
+        message: `New project '${cat}' has been assigned to you. Please submit estimated duration.`,
+        type: "PROJECT_ASSIGNED",
+        link: `/dashboard/posts`,
+      });
 
-    // Log History
-    await History.create({
-      workId: work._id,
-      action: "Work Assigned",
-      performedBy: req.user._id,
-      role: req.user.role,
-      remarks: `Assigned project '${category}' to client ${clientUser.name} and editor ${editorUser.name}`,
-    });
+      // Log History
+      await History.create({
+        workId: work._id,
+        action: "Work Assigned",
+        performedBy: req.user._id,
+        role: req.user.role,
+        remarks: `Assigned project '${cat}' to client ${clientUser.name} and editor ${editorUser.name}`,
+      });
+    }
 
     return res.status(201).json({
       success: true,
-      message: "Work assigned successfully.",
-      work,
+      message: `${createdWorks.length > 1 ? `${createdWorks.length} projects` : "Work"} assigned successfully.`,
+      work: createdWorks[0],
+      works: createdWorks,
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
