@@ -15,7 +15,7 @@ const isLocal =
 
 export const BASE_URL =
   import.meta.env.VITE_API_URL ||
-  (isLocal ? "http://localhost:5000/api" : "https://me-vp02.onrender.com/api");
+  (isLocal ? "http://localhost:5000/api" : "https://me-tkrs.onrender.com/api");
 
 console.log("BASE_URL =", BASE_URL);
 
