@@ -172,8 +172,8 @@ export const createHeroSection = async (data) => {
   return API.post("/hero/create", data);
 };
 
-export const getAllHeroSections = async () => {
-  return cachedGet("/hero/all");
+export const getAllHeroSections = async (params) => {
+  return cachedGet("/hero/all", { params });
 };
 
 export const getSingleHeroSection = async (id) => {

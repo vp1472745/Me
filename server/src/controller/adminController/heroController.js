@@ -23,18 +23,19 @@ const streamUploadToDrive = async (fileBuffer, mediaType, reqUser) => {
 // ==============================
 export const createHeroSection = async (req, res) => {
   try {
-
     console.log("BODY => ", req.body);
 
     const {
       mediaUrl,
       mediaType,
       public_id,
+      category = "home",
     } = req.body || {};
 
     console.log("mediaUrl => ", mediaUrl);
     console.log("mediaType => ", mediaType);
     console.log("public_id => ", public_id);
+    console.log("category => ", category);
 
     if (!mediaUrl) {
       return res.status(400).json({
@@ -47,6 +48,7 @@ export const createHeroSection = async (req, res) => {
       mediaUrl,
       mediaType,
       public_id,
+      category: category ? category.toLowerCase().trim() : "home",
     });
 
     serverCache.clearPattern("hero");
@@ -70,18 +72,36 @@ export const createHeroSection = async (req, res) => {
 // ==============================
 export const getAllHeroSections = async (req, res) => {
   try {
-    const cached = serverCache.get("hero:all");
+    const { category } = req.query;
+    const cacheKey = category ? `hero:all:${category.toLowerCase().trim()}` : "hero:all";
+    const cached = serverCache.get(cacheKey);
     if (cached) {
       res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
       return res.status(200).json(cached);
     }
 
-    const heroes = await HeroSection.find().sort({
+    const filter = {};
+    if (category) {
+      const cat = category.toLowerCase().trim();
+      if (cat === "home") {
+        filter.$or = [
+          { category: "home" },
+          { category: { $exists: false } },
+          { category: null },
+          { category: "" },
+        ];
+      } else {
+        filter.category = cat;
+      }
+    }
+
+    const heroes = await HeroSection.find(filter).sort({
       createdAt: -1,
     }).lean();
 
     const cleaned = heroes.map((h) => ({
       ...h,
+      category: h.category || "home",
       mediaUrl: getCleanMediaUrl(h.mediaUrl),
     }));
 
@@ -91,7 +111,7 @@ export const getAllHeroSections = async (req, res) => {
       data: cleaned,
     };
 
-    serverCache.set("hero:all", responsePayload, 30);
+    serverCache.set(cacheKey, responsePayload, 30);
     res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
 
     return res.status(200).json(responsePayload);
@@ -119,6 +139,7 @@ export const getSingleHeroSection = async (req, res) => {
       });
     }
 
+    hero.category = hero.category || "home";
     hero.mediaUrl = getCleanMediaUrl(hero.mediaUrl);
 
     return res.status(200).json({
@@ -152,6 +173,9 @@ export const updateHeroSection = async (req, res) => {
     let mediaUrl = hero.mediaUrl;
     let public_id = hero.public_id;
     const mediaType = req.body.mediaType || hero.mediaType;
+    if (req.body.category) {
+      hero.category = req.body.category.toLowerCase().trim();
+    }
 
     // If a brand new file is dispatched during the update transaction sequence
     if (req.file) {
@@ -169,7 +193,6 @@ export const updateHeroSection = async (req, res) => {
       mediaUrl = freshCloudAsset.secure_url;
       public_id = freshCloudAsset.public_id;
     }
-
 
     hero.mediaUrl = mediaUrl;
     hero.mediaType = mediaType;
@@ -202,9 +225,10 @@ export const deleteHeroSection = async (req, res) => {
     const hero = await HeroSection.findById(req.params.id);
 
     if (!hero) {
-      return res.status(404).json({
-        success: false,
-        message: "Hero target matrix mapping does not exist.",
+      serverCache.clearPattern("hero");
+      return res.status(200).json({
+        success: true,
+        message: "Hero target matrix mapping does not exist or was already removed.",
       });
     }
 
@@ -217,7 +241,6 @@ export const deleteHeroSection = async (req, res) => {
         // We continue execution so the database record can still be purged locally if needed
       }
     }
-
 
     await hero.deleteOne();
 

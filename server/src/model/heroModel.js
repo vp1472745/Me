@@ -13,6 +13,12 @@ const heroSectionSchema = new mongoose.Schema(
       required: true,
     },
 
+    category: {
+      type: String,
+      enum: ["home", "stories", "images", "films", "faq"],
+      default: "home",
+    },
+
     public_id: {
       type: String,
       default: "",
@@ -23,6 +29,7 @@ const heroSectionSchema = new mongoose.Schema(
   }
 );
 
+heroSectionSchema.index({ category: 1, createdAt: -1 });
 heroSectionSchema.index({ createdAt: -1 });
 
 export default mongoose.model(
