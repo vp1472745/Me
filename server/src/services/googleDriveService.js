@@ -217,13 +217,36 @@ export const uploadFile = async (accessToken, parentId, fileName, fileBuffer, mi
 /**
  * Download/Stream file content directly from Google Drive
  */
-export const getFileStream = async (accessToken, fileId) => {
+export const getFileStream = async (accessToken, fileId, rangeHeader = null) => {
+  const headers = {};
+  if (rangeHeader) {
+    headers["Range"] = rangeHeader;
+  }
+
+  // 1. Try direct public CDN stream (Fastest - bypasses Google API OAuth latency)
   try {
+    const directUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
+    const response = await axios.get(directUrl, {
+      headers,
+      responseType: "stream",
+      timeout: 10000,
+      validateStatus: (status) => (status >= 200 && status < 300) || status === 206,
+    });
+    return response;
+  } catch (directErr) {
+    console.warn(`Direct CDN stream failed for ${fileId}, falling back to OAuth API stream:`, directErr.message);
+  }
+
+  // 2. Fallback to Google Drive OAuth API stream
+  try {
+    const oauthHeaders = accessToken ? { Authorization: `Bearer ${accessToken}`, ...headers } : headers;
     const response = await axios.get(
       `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
       {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: oauthHeaders,
         responseType: "stream",
+        timeout: 15000,
+        validateStatus: (status) => (status >= 200 && status < 300) || status === 206,
       }
     );
     return response;

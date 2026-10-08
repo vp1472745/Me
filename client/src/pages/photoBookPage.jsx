@@ -1,6 +1,6 @@
 
-import Navbar from "../components/homeComponents/navbarHomeComponents";
-import PhotoBookSection from "../components/photoBooks/photoBooks";
+import Navbar from "../components/layout/Navbar";
+import PhotoBookSection from "../features/public/photo-books/PhotoBooksList";
 
 const PhotoBookPage = () => {
   return (

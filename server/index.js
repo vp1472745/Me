@@ -171,5 +171,8 @@ const server = app.listen(PORT, () => {
 });
 
 // Set server socket thresholds to 10 minutes to fully support continuous stream chunks upload (500MB files)
-server.timeout = 600000;         // 10 Minutes network timeout
+server.timeout = 600000; // 10 Minutes network timeout
 server.keepAliveTimeout = 600000; // 10 Minutes stream persistence pipeline
+
+
+

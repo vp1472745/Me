@@ -192,22 +192,65 @@ export const proxyPublicFile = async (req, res) => {
 
     // Check if it's a local/temporary ID
     if (fileId.startsWith("local-")) {
-      // Serve from RAM cache if still syncing
+      // 1. Check if the file exists on the local uploads disk
+      try {
+        const fs = await import("fs");
+        const path = await import("path");
+        const fileName = fileId.replace("local-", "");
+        const filePath = path.join(process.cwd(), "uploads", fileName);
+        if (fs.existsSync(filePath)) {
+          return res.sendFile(filePath);
+        }
+      } catch (err) {
+        console.warn("Failed to check local uploads disk path:", err.message);
+      }
+
+      // 2. Serve from RAM cache if still syncing
       if (tempMemoryCache.has(fileId)) {
         const cached = tempMemoryCache.get(fileId);
         res.setHeader("Content-Type", cached.mimeType || "application/octet-stream");
         return res.send(cached.buffer);
       }
 
-      // If missing from RAM cache, check if it has been synced to Google Drive in the background
+      // 3. If missing from RAM cache, check if it has been synced to Google Drive in the background
       const syncedFile = await TempFile.findOne({ localId: fileId });
-      if (syncedFile && syncedFile.status === "COMPLETED" && syncedFile.driveId) {
-        fileId = syncedFile.driveId; // Switch to the real Google Drive ID
-      } else if (syncedFile && syncedFile.status === "FAILED") {
-        return res.status(500).json({ success: false, message: `Background sync failed: ${syncedFile.error}` });
-      } else {
-        return res.status(404).json({ success: false, message: "File is syncing or not found" });
+      if (syncedFile) {
+        // Check if local file exists on disk under localId name or driveId name
+        try {
+          const fs = await import("fs");
+          const path = await import("path");
+          const localFileName = fileId.replace("local-", "");
+          const localPath1 = path.join(process.cwd(), "uploads", localFileName);
+          if (fs.existsSync(localPath1)) {
+            return res.sendFile(localPath1);
+          }
+          if (syncedFile.driveId) {
+            const localPath2 = path.join(process.cwd(), "uploads", syncedFile.driveId);
+            if (fs.existsSync(localPath2)) {
+              return res.sendFile(localPath2);
+            }
+          }
+        } catch (err) {
+          console.warn("Failed to check local uploads disk path:", err.message);
+        }
+
+        if (syncedFile.status === "COMPLETED" && syncedFile.driveId) {
+          fileId = syncedFile.driveId; // Switch to the real Google Drive ID
+        } else if (syncedFile.status === "FAILED") {
+          return res.status(500).json({ success: false, message: `Background sync failed: ${syncedFile.error}` });
+        } else {
+          return res.status(404).json({ success: false, message: "File is syncing or not found" });
+        }
       }
+    }
+
+    // Check local disk for driveId too if present
+    const fs = await import("fs");
+    const path = await import("path");
+    const uploadsDir = path.join(process.cwd(), "uploads");
+    const driveLocalFilePath = path.join(uploadsDir, fileId);
+    if (fs.existsSync(driveLocalFilePath)) {
+      return res.sendFile(driveLocalFilePath);
     }
 
     // Find connected Google Drive user (preferably an admin)
@@ -229,20 +272,42 @@ export const proxyPublicFile = async (req, res) => {
       return res.status(400).json({ success: false, message: "No connected Google Drive found to stream asset" });
     }
 
-    // Get stream from Google Drive
-    const driveRes = await getFileStream(accessToken, fileId);
+    // Get stream from Google Drive with Range Header support for instant video streaming
+    const rangeHeader = req.headers.range || null;
+    const driveRes = await getFileStream(accessToken, fileId, rangeHeader);
 
-    // Set headers
+    // Set headers & status
+    const status = driveRes.status || 200;
     const contentType = driveRes.headers["content-type"] || "application/octet-stream";
     const contentLength = driveRes.headers["content-length"];
+    const contentRange = driveRes.headers["content-range"];
 
+    res.status(status);
     res.setHeader("Content-Type", contentType);
+    res.setHeader("Accept-Ranges", "bytes");
     res.setHeader("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+
     if (contentLength) {
       res.setHeader("Content-Length", contentLength);
     }
+    if (contentRange) {
+      res.setHeader("Content-Range", contentRange);
+    }
 
-    // Pipe stream response
+    // Auto-cache to local disk for ultra-fast instant future video playback if full response (status 200)
+    if (status === 200) {
+      try {
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        const cacheWriter = fs.createWriteStream(driveLocalFilePath);
+        driveRes.data.pipe(cacheWriter);
+      } catch (cacheErr) {
+        console.warn("Failed to initiate local disk cache write:", cacheErr.message);
+      }
+    }
+
+    // Pipe stream response to client
     driveRes.data.pipe(res);
   } catch (error) {
     console.error("Public file proxy error:", error);

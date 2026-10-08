@@ -1,119 +1,121 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import Layout from "./components/dashboardLayoutComponents/layout";
+import Layout from "./components/layout/DashboardLayout";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import PublicRoute from "./utils/PublicRoute";
 import { ToastContainer } from "react-toastify";
-import RouteLoader from "./components/commonComponents/RouteLoader/RouteLoader";
+import RouteLoader from "./components/common/RouteLoader";
+import ScrollToTop from "./components/common/ScrollToTop";
 import "react-toastify/dist/ReactToastify.css";
 
 /* ==========================
-   PUBLIC PAGES (Lazy Loaded)
+   PUBLIC PAGES (LAZY LOADED FOR FAST INITIAL LOAD)
 ========================== */
 const Home = lazy(() => import("./pages/homePage"));
-const Film = lazy(() => import("./components/films/films"));
-const PreWeddingGallery = lazy(() => import("./components/preWedding/preWedding"));
-const Contact = lazy(() => import("./components/contact/contact"));
-const StoryManager = lazy(() => import("./components/storiesComponents/mainFile"));
-const StoryDetails = lazy(() => import("./components/storiesComponents/StoryDetails"));
-const StoriesList = lazy(() => import("./components/storiesComponents/mainFile"));
-const Registeration = lazy(() => import("./components/auth/registeration"));
-const Login = lazy(() => import("./components/auth/login"));
+const Contact = lazy(() => import("./features/public/contact/ContactForm"));
+const Film = lazy(() => import("./features/public/films/Films"));
+const PreWeddingGallery = lazy(() => import("./features/public/pre-wedding/PreWeddingGallery"));
+const StoryManager = lazy(() => import("./features/public/stories/StoryManager"));
+const StoryDetails = lazy(() => import("./features/public/stories/StoryDetails"));
+const StoriesList = lazy(() => import("./features/public/stories/StoryManager"));
 const PhotoBooks = lazy(() => import("./pages/photoBookPage"));
-const ImagesPage = lazy(() => import("./components/image/image"));
-const FAQ = lazy(() => import("./components/FAQ/faq"));
+const ImagesPage = lazy(() => import("./features/public/image-portfolio/ImagesPage"));
+const FAQ = lazy(() => import("./features/public/faq/FAQ"));
+
+/* ==========================
+   AUTH PAGES
+========================== */
+const Registeration = lazy(() => import("./features/auth/RegistrationCard"));
+const Login = lazy(() => import("./features/auth/LoginCard"));
 
 /* ==========================
    ADMIN PAGES
 ========================== */
 const AdminOverview = lazy(() =>
-  import("./components/adminDashboardComponents/AdminOverview")
+  import("./features/admin/AdminOverview")
 );
 const AdminStories = lazy(() =>
-  import("./components/adminDashboardComponents/stories/AdminOverview")
+  import("./features/admin/AdminStoriesOverview")
 );
 const AdminHero = lazy(() =>
-  import("./components/adminDashboardComponents/heroSection/AdminHero")
+  import("./features/admin/AdminHero")
 );
 const PhotoBooksAdmin = lazy(() =>
-  import("./components/adminDashboardComponents/photoBook/photoBookadminDashboard")
+  import("./features/admin/AdminPhotoBookDashboard")
 );
 const AdminFilms = lazy(() =>
-  import("./components/adminDashboardComponents/Films/AdminFilms")
+  import("./features/admin/AdminFilms")
 );
 const ImageAdminDashboard = lazy(() =>
-  import("./components/adminDashboardComponents/image/imageAdminDashboard")
+  import("./features/admin/AdminImageDashboard")
 );
 const AdminPreWedding = lazy(() =>
-  import("./components/adminDashboardComponents/preWedding/preWedding")
+  import("./features/admin/AdminPreWedding")
 );
 const AdminCreateUsers = lazy(() =>
-  import("./components/adminDashboardComponents/CreateUsers/CreateUsers")
+  import("./features/admin/CreateUsers")
 );
 const AdminUsers = lazy(() =>
-  import("./components/adminDashboardComponents/AdminUsers")
+  import("./features/admin/AdminUsers")
 );
 
 /* ==========================
    EDITOR PAGES
 ========================== */
 const EditorOverview = lazy(() =>
-  import("./components/editorDashboardComponents/EditorOverview")
+  import("./features/editor/EditorOverview")
 );
 const EditorPosts = lazy(() =>
-  import("./components/editorDashboardComponents/EditorPosts")
+  import("./features/editor/EditorPosts")
 );
 const EditorSettings = lazy(() =>
-  import("./components/editorDashboardComponents/EditorSettings")
+  import("./features/editor/EditorSettings")
 );
 
 /* ==========================
    USER DASHBOARD PAGES
 ========================== */
 const UserOverview = lazy(() =>
-  import("./components/userDashboardComponents/UserOverview")
+  import("./features/user/UserOverview")
 );
 const MyProjects = lazy(() =>
-  import("./components/userDashboardComponents/MyProjects")
+  import("./features/user/MyProjects")
 );
 const UserGallery = lazy(() =>
-  import("./components/userDashboardComponents/UserGallery")
+  import("./features/user/UserGallery")
 );
 const UserCorrections = lazy(() =>
-  import("./components/userDashboardComponents/UserCorrections")
+  import("./features/user/UserCorrections")
 );
 const UserNotifications = lazy(() =>
-  import("./components/userDashboardComponents/UserNotifications")
+  import("./features/user/UserNotifications")
 );
 const UserTimeline = lazy(() =>
-  import("./components/userDashboardComponents/UserTimeline")
+  import("./features/user/UserTimeline")
 );
 const UserProfile = lazy(() =>
-  import("./components/userDashboardComponents/UserProfile")
+  import("./features/user/UserProfile")
 );
 
 /* ==========================
    FAMILY ACCESS PAGES
 ========================== */
 const FamilyAccess = lazy(() =>
-  import("./components/adminDashboardComponents/CreateUsers/FamilyAccess")
+  import("./features/admin/FamilyAccess")
 );
 const AdminFamilyRequests = lazy(() =>
-  import("./components/adminDashboardComponents/CreateUsers/AdminFamilyRequests")
+  import("./features/admin/AdminFamilyRequests")
 );
-
-
 
 // assign work
 const AssignWork = lazy(() =>
-  import("./components/adminDashboardComponents/projectManagement/ProjectManagement")
+  import("./features/admin/ProjectManagement")
 );
-
 
 /* ==========================
    LOGIN PAGE
 ========================== */
-const AdminLogin = lazy(() => import("./components/Login"));
+const AdminLogin = lazy(() => import("./features/auth/AdminLoginCard"));
   
 function App() {
   const userStr = localStorage.getItem("user");
@@ -127,6 +129,7 @@ function App() {
 
   return (
     <Suspense fallback={<RouteLoader />}>
+      <ScrollToTop />
       <Routes>
         {/* ==========================
             PUBLIC ROUTES

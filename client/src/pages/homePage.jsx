@@ -1,6 +1,6 @@
 
-import Navbar from "../components/homeComponents/navbarHomeComponents";
-import HeroSection from "../components/homeComponents/heroHomeComponents";
+import Navbar from "../components/layout/Navbar";
+import HeroSection from "../features/public/home/HeroSlider";
 
 const HomePage = () => {
   return (

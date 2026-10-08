@@ -3,16 +3,23 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-body {
-  background-color: #f3eee6;
+html {
+  scroll-behavior: smooth;
 }
 
-/* Hide scrollbar globally for public pages */
-* {
+body {
+  background-color: #f3eee6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar globally for public pages while preserving smooth mouse & touch scrolling */
+html, body {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-*::-webkit-scrollbar {
+html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none;
 }
 

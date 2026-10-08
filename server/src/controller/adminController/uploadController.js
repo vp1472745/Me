@@ -46,8 +46,30 @@ const uploadPublicAssetBackground = async (originalName, mimeType, folderName, u
       accessToken = await getAccessTokenFromRefreshToken(envRefreshToken);
     }
 
+    // Always save local disk copy to uploads/ folder for instant sub-millisecond local streaming
+    try {
+      const fs = await import("fs");
+      const path = await import("path");
+      const uploadsDir = path.join(process.cwd(), "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const fileName = localId.replace("local-", "");
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, buffer);
+      console.log(`Local disk cache saved for ${localId} -> ${filePath}`);
+    } catch (err) {
+      console.warn("Failed to write local disk cache:", err.message);
+    }
+
     if (!accessToken) {
-      throw new Error("Failed to refresh Google Drive access token");
+      console.log("⚠️ No Google Drive connected. Writing public asset to local uploads folder.");
+      await TempFile.findOneAndUpdate(
+        { localId },
+        { status: "COMPLETED" }
+      );
+      tempMemoryCache.delete(localId);
+      return;
     }
 
     // 1. Find or create root folder "Studio Public Assets"
@@ -93,10 +115,45 @@ const uploadDeliverableBackground = async (originalName, mimeType, subFolder, cl
     const buffer = cachedItem.buffer;
     const User = (await import("../../model/authModel.js")).default;
     const Work = (await import("../../model/workModel.js")).default;
-
     const clientUser = await User.findById(clientId);
     if (!clientUser || !clientUser.googleDrive?.connected) {
-      throw new Error("Client's Google Drive is not connected");
+      console.log("⚠️ Client's Google Drive is not connected. Saving deliverable to local uploads folder.");
+      const fs = await import("fs");
+      const path = await import("path");
+      const uploadsDir = path.join(process.cwd(), "uploads");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const fileName = localId.replace("local-", "");
+      const filePath = path.join(uploadsDir, fileName);
+      fs.writeFileSync(filePath, buffer);
+
+      // Update TempFile tracking
+      await TempFile.findOneAndUpdate(
+        { localId },
+        { status: "COMPLETED" }
+      );
+
+      // Delete from RAM cache immediately to free memory!
+      tempMemoryCache.delete(localId);
+
+      // Log History
+      await History.create({
+        workId,
+        action: "Upload Completed",
+        remarks: `Local fallback sync completed for file '${originalName}'`,
+      });
+
+      // Notify Client User
+      await Notification.create({
+        recipient: clientId,
+        message: `A new file '${originalName}' has been successfully uploaded to local storage.`,
+        type: "UPLOAD_COMPLETED",
+        link: `/dashboard/gallery`,
+      });
+
+      console.log(`Local fallback deliverable upload completed for ${localId} -> Local Disk: ${filePath}`);
+      return;
     }
 
     // Refresh client's Google Drive access token

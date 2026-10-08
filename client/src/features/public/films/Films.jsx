@@ -1,0 +1,108 @@
+import React, { useEffect, useState } from "react";
+import { getAllVideos } from "../../../config/api";
+import Navbar from "../../../components/layout/Navbar";
+import FilmsHeroSection from "./FilmsHeroSection";
+
+function InstaCuts() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Helper: YouTube embed URL (for direct iframe)
+  const getYouTubeEmbedUrl = (url) => {
+    if (!url) return null;
+    if (url.includes("/embed/")) return url;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
+    if (match && match[1]) {
+      return `https://www.youtube.com/embed/${match[1]}?autoplay=1&rel=0`;
+    }
+    return url;
+  };
+
+  const fetchVideos = async () => {
+    try {
+      setLoading(true);
+      const res = await getAllVideos();
+      setVideos(Array.isArray(res?.data?.videos) ? res.data.videos : []);
+    } catch (error) {
+      console.log(error);
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  return (
+    <>
+      <Navbar textColor="text-black/50" />
+      <FilmsHeroSection />
+      <div className="min-h-screen px-5 md:px-16 py-10">
+        {/* HEADER */}
+        <div className="text-center mb-16">
+          <div className="border-t border-gray-300 mb-8 max-w-4xl mx-auto" />
+          <h1 className="text-3xl md:text-2xl tracking-[12px] text-gray-600 uppercase font-light">
+            INSTACUTS
+          </h1>
+          <div className="border-t border-gray-300 mt-8 max-w-4xl mx-auto" />
+        </div>
+
+        {/* SKELETON LOADERS */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <div
+                key={n}
+                className="h-[300px] rounded-2xl bg-gray-200/70 animate-pulse flex items-center justify-center"
+              >
+                <div className="w-12 h-12 rounded-full bg-gray-300/60" />
+              </div>
+            ))}
+          </div>
+        ) : videos.length === 0 ? (
+          <div className="text-center py-16 bg-white/30 rounded-2xl backdrop-blur-sm max-w-2xl mx-auto">
+            <p className="text-gray-600 text-lg font-light">Cinematic reels coming soon.</p>
+          </div>
+        ) : (
+          /* VIDEO GRID */
+          <div className="columns-1 md:columns-3 gap-8 space-y-8">
+            {videos.map((video, index) => {
+              const sizeClass = "h-[300px]";
+
+              return (
+                <div key={video._id || index} className="relative mb-8 break-inside-avoid shadow-sm rounded-2xl overflow-hidden bg-black">
+                  {video.youtubeUrl ? (
+                    <iframe
+                      className={`w-full ${sizeClass} rounded-2xl bg-black`}
+                      src={getYouTubeEmbedUrl(video.youtubeUrl)}
+                      title={video.title || "Film"}
+                      loading="lazy"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className={`w-full ${sizeClass} rounded-2xl object-cover bg-black`}
+                      poster={video.thumbnail || `https://via.placeholder.com/800x600?text=${encodeURIComponent(video.title || "Film")}`}
+                    >
+                      <source src={video.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default InstaCuts;
