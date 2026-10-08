@@ -11,13 +11,28 @@ import WhatWeBelive from "../../../assets/whatWeBelieve/firstImage.jpg";
 import WhatWeDo from "../../../assets/whatWeDo/firstImage.jpg";
 
 // API Endpoint Connection
-import { getAllHeroSections } from "../../../config/api";
+import { getAllHeroSections, getCachedData } from "../../../config/api";
 import { getCleanMediaUrl } from "../../../utils/cleanUrl";
 import HeroNotFound from "../../../components/feedback/HeroNotFound";
 
+const getInitialHomeHeroes = () => {
+  const cached = getCachedData("/hero/all", { category: "home" });
+  const rawHeroes = cached?.data?.data || cached?.data || [];
+  if (Array.isArray(rawHeroes) && rawHeroes.length > 0) {
+    const cleaned = rawHeroes.map((hero) => ({
+      ...hero,
+      mediaUrl: getCleanMediaUrl(hero.mediaUrl),
+    }));
+    cleaned.sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
+    return cleaned;
+  }
+  return [];
+};
+
 const HeroSection = () => {
-  const [heroes, setHeroes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const initialHeroes = getInitialHomeHeroes();
+  const [heroes, setHeroes] = useState(initialHeroes);
+  const [loading, setLoading] = useState(initialHeroes.length === 0);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
@@ -48,11 +63,11 @@ const HeroSection = () => {
   // Fetch live background tracking from core API matrix
   const fetchHeroSection = async () => {
     try {
-      setLoading(true);
+      if (heroes.length === 0) setLoading(true);
       const res = await getAllHeroSections({ category: "home" });
-      const rawHeroes = res?.data?.data || [];
+      const rawHeroes = res?.data?.data || res?.data || [];
 
-      if (rawHeroes.length > 0) {
+      if (Array.isArray(rawHeroes) && rawHeroes.length > 0) {
         const cleaned = rawHeroes.map((hero) => ({
           ...hero,
           mediaUrl: getCleanMediaUrl(hero.mediaUrl),
@@ -60,12 +75,9 @@ const HeroSection = () => {
         // Sort by sliderOrder
         cleaned.sort((a, b) => (a.sliderOrder || 0) - (b.sliderOrder || 0));
         setHeroes(cleaned);
-      } else {
-        setHeroes([]);
       }
     } catch (error) {
       console.log("Error fetching hero section content pipeline:", error);
-      setHeroes([]);
     } finally {
       setLoading(false);
     }

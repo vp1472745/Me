@@ -223,40 +223,56 @@ export const getFileStream = async (accessToken, fileId, rangeHeader = null) => 
     headers["Range"] = rangeHeader;
   }
 
-  // 1. Try direct public CDN stream (Fastest - bypasses Google API OAuth latency)
+  // 1. Always prioritize OAuth API stream if accessToken is available for reliable binary media streaming
+  if (accessToken) {
+    try {
+      const oauthHeaders = { Authorization: `Bearer ${accessToken}`, ...headers };
+      const response = await axios.get(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        {
+          headers: oauthHeaders,
+          responseType: "stream",
+          timeout: 20000,
+          validateStatus: (status) => (status >= 200 && status < 300) || status === 206,
+        }
+      );
+
+      const contentType = response.headers["content-type"] || "";
+      if (!contentType.includes("text/html")) {
+        return response;
+      }
+      if (response.data && typeof response.data.destroy === "function") {
+        response.data.destroy();
+      }
+    } catch (oauthErr) {
+      console.warn(`OAuth API stream failed for ${fileId}, trying public download fallback:`, oauthErr.message);
+    }
+  }
+
+  // 2. Direct public download fallback (for non-authenticated or public files)
   try {
     const directUrl = `https://drive.usercontent.google.com/download?id=${fileId}&export=download`;
     const response = await axios.get(directUrl, {
       headers,
       responseType: "stream",
-      timeout: 10000,
+      timeout: 15000,
       validateStatus: (status) => (status >= 200 && status < 300) || status === 206,
     });
-    return response;
+
+    const contentType = response.headers["content-type"] || "";
+    if (!contentType.includes("text/html")) {
+      return response;
+    }
+
+    // Destroy HTML stream if Google Drive returned virus warning page
+    if (response.data && typeof response.data.destroy === "function") {
+      response.data.destroy();
+    }
   } catch (directErr) {
-    console.warn(`Direct CDN stream failed for ${fileId}, falling back to OAuth API stream:`, directErr.message);
+    console.warn(`Direct download stream failed for ${fileId}:`, directErr.message);
   }
 
-  // 2. Fallback to Google Drive OAuth API stream
-  try {
-    const oauthHeaders = accessToken ? { Authorization: `Bearer ${accessToken}`, ...headers } : headers;
-    const response = await axios.get(
-      `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-      {
-        headers: oauthHeaders,
-        responseType: "stream",
-        timeout: 15000,
-        validateStatus: (status) => (status >= 200 && status < 300) || status === 206,
-      }
-    );
-    return response;
-  } catch (error) {
-    if (error.response && error.response.data && typeof error.response.data.destroy === "function") {
-      error.response.data.destroy(); // Safely destroy the error stream to prevent process crashes
-    }
-    console.error("Error downloading file from Drive:", error.message);
-    throw new Error("Failed to retrieve file content from Google Drive");
-  }
+  throw new Error("Failed to retrieve file content from Google Drive");
 };
 
 /**

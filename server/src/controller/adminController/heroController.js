@@ -76,7 +76,7 @@ export const getAllHeroSections = async (req, res) => {
     const cacheKey = category ? `hero:all:${category.toLowerCase().trim()}` : "hero:all";
     const cached = serverCache.get(cacheKey);
     if (cached) {
-      res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+      res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=86400");
       return res.status(200).json(cached);
     }
 
@@ -95,9 +95,10 @@ export const getAllHeroSections = async (req, res) => {
       }
     }
 
-    const heroes = await HeroSection.find(filter).sort({
-      createdAt: -1,
-    }).lean();
+    const heroes = await HeroSection.find(filter)
+      .select("mediaUrl mediaType category public_id sliderOrder createdAt")
+      .sort({ createdAt: -1 })
+      .lean();
 
     const cleaned = heroes.map((h) => ({
       ...h,
@@ -111,8 +112,8 @@ export const getAllHeroSections = async (req, res) => {
       data: cleaned,
     };
 
-    serverCache.set(cacheKey, responsePayload, 30);
-    res.setHeader("Cache-Control", "public, max-age=30, stale-while-revalidate=60");
+    serverCache.set(cacheKey, responsePayload, 300);
+    res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=86400");
 
     return res.status(200).json(responsePayload);
 

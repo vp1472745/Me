@@ -1,12 +1,26 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Volume2, VolumeX } from "lucide-react";
-import { getAllHeroSections } from "../../../config/api";
+import { getAllHeroSections, getCachedData } from "../../../config/api";
 import { getCleanMediaUrl } from "../../../utils/cleanUrl";
 import HeroNotFound from "../../../components/feedback/HeroNotFound";
 
+const getInitialHeroData = () => {
+  const cached = getCachedData("/hero/all", { category: "faq" });
+  const list = cached?.data?.data || cached?.data || [];
+  if (Array.isArray(list) && list.length > 0) {
+    const item = list[0];
+    return {
+      ...item,
+      mediaUrl: getCleanMediaUrl(item.mediaUrl),
+    };
+  }
+  return null;
+};
+
 const HeroSection = () => {
-  const [heroData, setHeroData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialHero = getInitialHeroData();
+  const [heroData, setHeroData] = useState(initialHero);
+  const [loading, setLoading] = useState(!initialHero);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
 
@@ -26,27 +40,35 @@ const HeroSection = () => {
   useEffect(() => {
     const fetchFAQHero = async () => {
       try {
-        setLoading(true);
+        if (!heroData) setLoading(true);
         const res = await getAllHeroSections({ category: "faq" });
-        const list = res?.data?.data || [];
-        if (list.length > 0) {
+        const list = res?.data?.data || res?.data || [];
+        if (Array.isArray(list) && list.length > 0) {
           const item = list[0];
           setHeroData({
             ...item,
             mediaUrl: getCleanMediaUrl(item.mediaUrl),
           });
-        } else {
+        } else if (!heroData) {
           setHeroData(null);
         }
       } catch (error) {
         console.error("Error fetching FAQ hero:", error);
-        setHeroData(null);
       } finally {
         setLoading(false);
       }
     };
     fetchFAQHero();
   }, []);
+
+  const [isVideoReady, setIsVideoReady] = useState(false);
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [heroData, isMuted]);
 
   if (!loading && !heroData) {
     return (
@@ -60,16 +82,14 @@ const HeroSection = () => {
 
   if (loading && !heroData) {
     return (
-      <div className="w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] bg-black flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-2 border-[#5A7863] border-t-transparent animate-spin" />
-      </div>
+      <div className="w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] bg-gradient-to-r from-zinc-900 via-neutral-900 to-black animate-pulse flex items-center justify-center" />
     );
   }
 
   const isVideo = heroData.mediaType === "video";
 
   return (
-    <section className="relative w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-900 via-stone-900 to-black">
       {/* Background Media */}
       <div className="absolute inset-0 w-full h-full">
         {isVideo ? (
@@ -81,7 +101,11 @@ const HeroSection = () => {
             muted={isMuted}
             playsInline
             preload="auto"
-            className="w-full h-full object-cover object-center pointer-events-none"
+            onLoadedData={() => setIsVideoReady(true)}
+            onCanPlay={() => setIsVideoReady(true)}
+            className={`w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ease-in-out ${
+              isVideoReady ? "opacity-100" : "opacity-0"
+            }`}
           >
             <source src={heroData.mediaUrl} type="video/mp4" />
             Your browser does not support the video tag.
@@ -90,11 +114,14 @@ const HeroSection = () => {
           <img
             src={heroData.mediaUrl}
             alt="FAQ Hero Banner"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-full object-cover object-center"
           />
         )}
         {/* Dark overlay with luxury gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50 pointer-events-none" />
       </div>
 
       {/* Sound Mute / Unmute Toggle Button */}

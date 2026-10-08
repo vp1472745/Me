@@ -1,30 +1,43 @@
 import React, { useEffect, useState } from "react";
-import { getAllHeroSections } from "../../config/api";
+import { getAllHeroSections, getCachedData } from "../../config/api";
 import { getCleanMediaUrl } from "../../utils/cleanUrl";
 import HeroNotFound from "../commonComponents/HeroNotFound";
 
+const getInitialHeroData = () => {
+  const cached = getCachedData("/hero/all", { category: "faq" });
+  const list = cached?.data?.data || cached?.data || [];
+  if (Array.isArray(list) && list.length > 0) {
+    const item = list[0];
+    return {
+      ...item,
+      mediaUrl: getCleanMediaUrl(item.mediaUrl),
+    };
+  }
+  return null;
+};
+
 const HeroSection = () => {
-  const [heroData, setHeroData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const initialHero = getInitialHeroData();
+  const [heroData, setHeroData] = useState(initialHero);
+  const [loading, setLoading] = useState(!initialHero);
 
   useEffect(() => {
     const fetchFAQHero = async () => {
       try {
-        setLoading(true);
+        if (!heroData) setLoading(true);
         const res = await getAllHeroSections({ category: "faq" });
-        const list = res?.data?.data || [];
-        if (list.length > 0) {
+        const list = res?.data?.data || res?.data || [];
+        if (Array.isArray(list) && list.length > 0) {
           const item = list[0];
           setHeroData({
             ...item,
             mediaUrl: getCleanMediaUrl(item.mediaUrl),
           });
-        } else {
+        } else if (!heroData) {
           setHeroData(null);
         }
       } catch (error) {
         console.error("Error fetching FAQ hero:", error);
-        setHeroData(null);
       } finally {
         setLoading(false);
       }

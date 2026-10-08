@@ -124,42 +124,111 @@ export const updateEditorPermissions = async (data) => {
 };
 
 // ==========================
-// In-Memory Client Cache for Instant Navigation
+// Persistent Client & LocalStorage Cache for Instant Load (0ms Delay)
 // ==========================
 const clientCache = new Map();
-const CACHE_TTL_MS = 3 * 60 * 1000; // 3 minutes fresh cache
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes fresh cache
+
+const getLSKey = (cacheKey) => `api_cache_${cacheKey}`;
+
+export const getCachedData = (url, params = {}) => {
+  const cacheKey = url + JSON.stringify(params || {});
+  const now = Date.now();
+
+  // 1. Check in-memory cache
+  const inMem = clientCache.get(cacheKey);
+  if (inMem) return inMem.data;
+
+  // 2. Check localStorage cache
+  try {
+    const raw = localStorage.getItem(getLSKey(cacheKey));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (now - parsed.timestamp < CACHE_TTL_MS * 2) { // Allow stale data up to 20 mins for instant UI display
+        clientCache.set(cacheKey, { timestamp: parsed.timestamp, data: parsed.data });
+        return parsed.data;
+      }
+    }
+  } catch (e) {
+    // Ignore storage parse errors
+  }
+  return null;
+};
 
 export const clearClientCache = (pattern) => {
   if (!pattern) {
     clientCache.clear();
+    try {
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("api_cache_")) localStorage.removeItem(key);
+      });
+    } catch (e) {}
     return;
   }
+
   for (const key of clientCache.keys()) {
     if (key.includes(pattern)) {
       clientCache.delete(key);
     }
   }
+
+  try {
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("api_cache_") && key.includes(pattern)) {
+        localStorage.removeItem(key);
+      }
+    });
+  } catch (e) {}
 };
 
 export const cachedGet = async (url, config = {}) => {
   const cacheKey = url + JSON.stringify(config.params || {});
   const now = Date.now();
-  const cached = clientCache.get(cacheKey);
 
+  // Return from in-memory cache if available and fresh
+  const cached = clientCache.get(cacheKey);
   if (cached && now - cached.timestamp < CACHE_TTL_MS) {
-    // Background stale-while-revalidate if cache is older than 20 seconds
-    if (now - cached.timestamp > 20000) {
+    if (now - cached.timestamp > 15000) {
+      // Background revalidate if older than 15s
       API.get(url, config)
         .then((res) => {
           clientCache.set(cacheKey, { timestamp: Date.now(), data: res });
+          try {
+            localStorage.setItem(getLSKey(cacheKey), JSON.stringify({ timestamp: Date.now(), data: res }));
+          } catch (e) {}
         })
         .catch(() => {});
     }
     return cached.data;
   }
 
+  // Check localStorage if memory missed
+  try {
+    const raw = localStorage.getItem(getLSKey(cacheKey));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      clientCache.set(cacheKey, { timestamp: parsed.timestamp, data: parsed.data });
+      
+      // Trigger silent background update
+      API.get(url, config)
+        .then((res) => {
+          clientCache.set(cacheKey, { timestamp: Date.now(), data: res });
+          try {
+            localStorage.setItem(getLSKey(cacheKey), JSON.stringify({ timestamp: Date.now(), data: res }));
+          } catch (e) {}
+        })
+        .catch(() => {});
+
+      return parsed.data;
+    }
+  } catch (e) {}
+
+  // Fetch from network
   const res = await API.get(url, config);
   clientCache.set(cacheKey, { timestamp: Date.now(), data: res });
+  try {
+    localStorage.setItem(getLSKey(cacheKey), JSON.stringify({ timestamp: Date.now(), data: res }));
+  } catch (e) {}
   return res;
 };
 
