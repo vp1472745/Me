@@ -16,6 +16,8 @@ import {
 } from "../../services/googleDriveService.js";
 
 
+const activeDownloads = new Set();
+
 // 1. Connect drive - return authUrl
 export const connectDrive = async (req, res) => {
   try {
@@ -294,17 +296,38 @@ export const proxyPublicFile = async (req, res) => {
       res.setHeader("Content-Range", contentRange);
     }
 
-    // Auto-cache to local disk for ultra-fast instant future video playback if full response (status 200)
-    if (status === 200) {
-      try {
-        if (!fs.existsSync(uploadsDir)) {
-          fs.mkdirSync(uploadsDir, { recursive: true });
+    // Auto-cache to local disk for ultra-fast instant future video playback
+    if (!fs.existsSync(driveLocalFilePath) && !activeDownloads.has(fileId) && accessToken) {
+      activeDownloads.add(fileId);
+      (async () => {
+        try {
+          if (!fs.existsSync(uploadsDir)) {
+            fs.mkdirSync(uploadsDir, { recursive: true });
+          }
+          const fullRes = await getFileStream(accessToken, fileId, null);
+          if (fullRes && fullRes.data) {
+            const tempPath = driveLocalFilePath + ".download";
+            const writer = fs.createWriteStream(tempPath);
+            fullRes.data.pipe(writer);
+            writer.on("finish", () => {
+              try {
+                if (fs.existsSync(tempPath)) {
+                  fs.renameSync(tempPath, driveLocalFilePath);
+                }
+              } catch (e) {}
+              activeDownloads.delete(fileId);
+            });
+            writer.on("error", () => {
+              try { if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath); } catch (e) {}
+              activeDownloads.delete(fileId);
+            });
+          } else {
+            activeDownloads.delete(fileId);
+          }
+        } catch (e) {
+          activeDownloads.delete(fileId);
         }
-        const cacheWriter = fs.createWriteStream(driveLocalFilePath);
-        driveRes.data.pipe(cacheWriter);
-      } catch (cacheErr) {
-        console.warn("Failed to initiate local disk cache write:", cacheErr.message);
-      }
+      })();
     }
 
     // Pipe stream response to client

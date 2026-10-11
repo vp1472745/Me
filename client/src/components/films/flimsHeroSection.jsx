@@ -20,6 +20,7 @@ const HeroSection = () => {
   const initialHero = getInitialHeroData();
   const [heroData, setHeroData] = useState(initialHero);
   const [loading, setLoading] = useState(!initialHero);
+  const videoRef = React.useRef(null);
 
   useEffect(() => {
     const fetchFilmHero = async () => {
@@ -45,6 +46,33 @@ const HeroSection = () => {
     fetchFilmHero();
   }, []);
 
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+
+    const playVideo = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+      }
+    };
+
+    playVideo();
+    video.addEventListener("loadeddata", playVideo, { once: true });
+    video.addEventListener("canplay", playVideo, { once: true });
+
+    return () => {
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
+    };
+  }, [heroData?.mediaUrl]);
+
   if (!loading && !heroData) {
     return (
       <HeroNotFound
@@ -57,26 +85,25 @@ const HeroSection = () => {
 
   if (loading && !heroData) {
     return (
-      <div className="w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] bg-black flex items-center justify-center">
-        <div className="w-12 h-12 rounded-full border-2 border-[#5A7863] border-t-transparent animate-spin" />
-      </div>
+      <div className="w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] bg-gradient-to-r from-zinc-900 via-neutral-900 to-black animate-pulse flex items-center justify-center" />
     );
   }
 
   const isVideo = heroData.mediaType === "video";
 
   return (
-    <section className="relative w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] flex items-center justify-center overflow-hidden bg-black">
+    <section className="relative w-full h-[55vh] sm:h-[65vh] md:h-[75vh] lg:h-[695px] min-h-[360px] flex items-center justify-center overflow-hidden bg-gradient-to-br from-zinc-900 via-stone-900 to-black">
       {/* Background Media */}
       <div className="absolute inset-0 w-full h-full">
         {isVideo ? (
           <video
+            ref={videoRef}
             key={heroData.mediaUrl}
             autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
+            preload="auto"
             className="w-full h-full object-cover object-center pointer-events-none"
           >
             <source src={heroData.mediaUrl} type="video/mp4" />
@@ -86,11 +113,14 @@ const HeroSection = () => {
           <img
             src={heroData.mediaUrl}
             alt="Films Hero Banner"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
             className="w-full h-full object-cover object-center"
           />
         )}
         {/* Dark overlay with luxury gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50 pointer-events-none" />
       </div>
 
       {/* Scroll indicator */}

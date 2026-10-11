@@ -88,12 +88,30 @@ const HeroSection = () => {
   }, []);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-      if (!isMuted) {
-        videoRef.current.play().catch(() => {});
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = isMuted;
+    video.defaultMuted = isMuted;
+
+    const playVideo = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          video.muted = true;
+          video.play().catch(() => {});
+        });
       }
-    }
+    };
+
+    playVideo();
+    video.addEventListener("loadeddata", playVideo, { once: true });
+    video.addEventListener("canplay", playVideo, { once: true });
+
+    return () => {
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
+    };
   }, [currentIndex, isMuted]);
 
   const handlePrev = () => {
@@ -142,7 +160,7 @@ const HeroSection = () => {
                   <video
                     ref={isActive ? videoRef : null}
                     autoPlay
-                    muted={isMuted}
+                    muted
                     loop
                     playsInline
                     preload="auto"

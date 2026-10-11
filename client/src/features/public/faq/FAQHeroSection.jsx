@@ -61,14 +61,33 @@ const HeroSection = () => {
     fetchFAQHero();
   }, []);
 
-  const [isVideoReady, setIsVideoReady] = useState(false);
-
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = isMuted;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [heroData, isMuted]);
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Enforce DOM properties for 100% autoplay compliance across all browsers & mobile
+    video.muted = isMuted;
+    video.defaultMuted = isMuted;
+
+    const playVideo = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          video.muted = true;
+          video.play().catch(() => {});
+        });
+      }
+    };
+
+    playVideo();
+    video.addEventListener("loadeddata", playVideo, { once: true });
+    video.addEventListener("canplay", playVideo, { once: true });
+
+    return () => {
+      video.removeEventListener("loadeddata", playVideo);
+      video.removeEventListener("canplay", playVideo);
+    };
+  }, [heroData?.mediaUrl, isMuted]);
 
   if (!loading && !heroData) {
     return (
@@ -98,14 +117,10 @@ const HeroSection = () => {
             key={heroData.mediaUrl}
             autoPlay
             loop
-            muted={isMuted}
+            muted
             playsInline
             preload="auto"
-            onLoadedData={() => setIsVideoReady(true)}
-            onCanPlay={() => setIsVideoReady(true)}
-            className={`w-full h-full object-cover object-center pointer-events-none transition-opacity duration-700 ease-in-out ${
-              isVideoReady ? "opacity-100" : "opacity-0"
-            }`}
+            className="w-full h-full object-cover object-center pointer-events-none"
           >
             <source src={heroData.mediaUrl} type="video/mp4" />
             Your browser does not support the video tag.
