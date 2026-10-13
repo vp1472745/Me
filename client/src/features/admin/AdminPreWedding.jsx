@@ -322,55 +322,50 @@ const PreWedding = () => {
   // RENDER
   // ======================================================
   return (
-    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,
-          style: { background: "#2d3748", color: "#fff", borderRadius: "12px", padding: "16px" },
-          success: { style: { background: "#1a7d4a" } },
-          error: { style: { background: "#b91c1c" } },
+          style: { background: "#1e293b", color: "#fff", borderRadius: "10px", padding: "12px", fontSize: "13px" },
+          success: { style: { background: "#059669" } },
+          error: { style: { background: "#dc2626" } },
         }}
       />
 
-      {/* ===== TABS ===== */}
-      <div className="flex-shrink-0 px-4 mt-4">
-        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("create")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] flex items-center gap-2 ${activeTab === "create"
-                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-                }`}
-            >
-              <Plus size={14} />
-              Create Story
-            </button>
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 flex items-center gap-2 ${activeTab === "all"
-                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-                }`}
-            >
-              <ImageIcon size={14} />
-              All Stories
-            </button>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        <button
+          onClick={() => setActiveTab("create")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "create"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <Plus size={13} />
+          Create Story
+        </button>
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "all"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <ImageIcon size={13} />
+          All Stories ({stories.length})
+        </button>
       </div>
 
-      {/* ===== CONTENT ===== */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
-        <div className="max-w-7xl mx-auto mt-6">
-          {/* ---- CREATE TAB ---- */}
-          {activeTab === "create" && (
-            <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
-              <form onSubmit={handleCreateStory} className="space-y-6">
+      {/* ---- CREATE TAB ---- */}
+      {activeTab === "create" && (
+        <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-2xs">
+              <form onSubmit={handleCreateStory} className="space-y-4">
                 {/* Title */}
                 <div>
-                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                  <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     Story Title
                   </label>
                   <input
@@ -378,33 +373,33 @@ const PreWedding = () => {
                     placeholder="e.g., Eternal Love at Sunset"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 sm:p-3 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm"
                     required
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                  <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     Description
                   </label>
                   <textarea
-                    rows="4"
+                    rows="3"
                     placeholder="Share the beautiful journey..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm resize-none"
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 sm:p-3 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm resize-none"
                   />
                 </div>
 
                 {/* Cover & Gallery row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Cover Image */}
                   <div>
-                    <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                    <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                       Cover Image
                     </label>
-                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-6 text-center transition group min-h-[140px]">
+                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 sm:p-5 text-center transition group min-h-[120px]">
                       <input
                         type="file"
                         accept="image/*"
@@ -412,31 +407,31 @@ const PreWedding = () => {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         required={!coverImage}
                       />
-                      <div className="flex flex-col items-center pointer-events-none space-y-2">
-                        <div className="w-10 h-10 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863]">
-                          <Plus size={16} />
+                      <div className="flex flex-col items-center pointer-events-none space-y-1.5">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <Plus size={14} />
                         </div>
-                        <p className="text-xs font-bold text-[#3B4953]">
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
                           {coverImage ? "Change Cover Frame" : "Assign Banner Frame"}
                         </p>
                       </div>
                     </div>
                     {coverImage && (
                       <div className="flex items-center justify-between mt-2">
-                        <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md inline-block truncate max-w-[70%] shadow-xs">
+                        <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-md inline-block truncate max-w-[70%] border border-blue-200 dark:border-blue-900">
                           ✓ Banner: {coverImage.name}
                           {uploadProgress.cover !== undefined && uploadProgress.cover < 100 && (
-                            <span className="ml-2 text-xs">({Math.round(uploadProgress.cover)}%)</span>
+                            <span className="ml-1 text-xs">({Math.round(uploadProgress.cover)}%)</span>
                           )}
                         </p>
                         {!uploading && (
                           <button
                             type="button"
                             onClick={removeCoverImage}
-                            className="p-1 text-red-500  rounded-full transition-colors"
+                            className="p-1 text-red-500 hover:text-red-700 rounded-full transition-colors"
                             title="Remove cover image"
                           >
-                            <X size={16} />
+                            <X size={14} />
                           </button>
                         )}
                       </div>
@@ -445,10 +440,10 @@ const PreWedding = () => {
 
                   {/* Gallery Images */}
                   <div>
-                    <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                    <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                       Gallery Bundles (Multiple)
                     </label>
-                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-[#90AB8B]/40 hover:border-[#5A7863] bg-[#F7F9F4] rounded-xl p-6 text-center transition group min-h-[140px]">
+                    <div className="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-500 bg-slate-50 dark:bg-slate-900/40 rounded-xl p-4 sm:p-5 text-center transition group min-h-[120px]">
                       <input
                         type="file"
                         accept="image/*"
@@ -456,15 +451,15 @@ const PreWedding = () => {
                         onChange={handleGalleryImagesChange}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
-                      <div className="flex flex-col items-center pointer-events-none space-y-2">
-                        <div className="w-10 h-10 rounded-full bg-white border border-[#DDE7D8] flex items-center justify-center text-[#5A7863]">
-                          <ImageIcon size={16} />
+                      <div className="flex flex-col items-center pointer-events-none space-y-1.5">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                          <ImageIcon size={14} />
                         </div>
-                        <p className="text-xs font-bold text-[#3B4953]">Select Bundle Matrix</p>
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Select Images Bundle</p>
                       </div>
                     </div>
                     {galleryImages.length > 0 && (
-                      <p className="text-[11px] font-bold text-[#5A7863] bg-[#EBF4DD] px-3 py-1 rounded-md mt-2 inline-block shadow-xs">
+                      <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 px-2.5 py-1 rounded-md mt-2 inline-block border border-blue-200 dark:border-blue-900">
                         ✓ {galleryImages.length} Matrix Frame(s) Staged
                       </p>
                     )}
@@ -473,14 +468,14 @@ const PreWedding = () => {
 
                 {/* Local Previews with Progress Overlays & Remove Icons */}
                 {galleryImages.length > 0 && (
-                  <div className="p-4 bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl">
-                    <p className="text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]/60 mb-2">Matrix Stream Preview</p>
-                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2.5">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Matrix Stream Preview</p>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                       {galleryImages.map((img, idx) => {
                         const progress = uploadProgress[`gallery-${idx}`] ?? 0;
                         const isUploading = uploading && progress > 0 && progress < 100;
                         return (
-                          <div key={idx} className="relative aspect-square rounded-md overflow-hidden bg-white border border-[#DDE7D8] group">
+                          <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 group">
                             <img
                               src={URL.createObjectURL(img)}
                               alt="preview"
@@ -491,21 +486,21 @@ const PreWedding = () => {
                               <button
                                 type="button"
                                 onClick={() => removeGalleryImage(idx)}
-                                className="absolute top-1 right-1 p-1 bg-red-500/60 rounded-full text-white "
+                                className="absolute top-1 right-1 p-0.5 bg-red-500 rounded-full text-white"
                                 title="Remove image"
                               >
-                                <X size={14} />
+                                <X size={12} />
                               </button>
                             )}
                             {/* Progress overlay during upload */}
                             {isUploading && (
-                              <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                                 <div className="w-full h-full relative">
                                   <div
-                                    className="absolute bottom-0 left-0 h-1 bg-[#5A7863] transition-all duration-300"
+                                    className="absolute bottom-0 left-0 h-1 bg-blue-500 transition-all duration-300"
                                     style={{ width: `${progress}%` }}
                                   />
-                                  <span className="absolute inset-0 flex items-center justify-center text-white text-xs font-bold">
+                                  <span className="absolute inset-0 flex items-center justify-center text-white text-[10px] font-bold">
                                     {Math.round(progress)}%
                                   </span>
                                 </div>
@@ -513,7 +508,7 @@ const PreWedding = () => {
                             )}
                             {/* Done badge – only if upload completed and not uploading anymore */}
                             {progress === 100 && !uploading && (
-                              <div className="absolute top-1 right-1 bg-green-500/80 text-white text-[8px] px-1.5 py-0.5 rounded-full">
+                              <div className="absolute top-1 right-1 bg-emerald-500 text-white text-[8px] px-1 py-0.2 rounded-full font-bold">
                                 ✓
                               </div>
                             )}
@@ -525,11 +520,11 @@ const PreWedding = () => {
                 )}
 
                 {/* Submit */}
-                <div className="pt-4 border-t border-[#DDE7D8]">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-700/80 flex items-center gap-3">
                   <button
                     type="submit"
                     disabled={uploading}
-                    className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2.5 rounded-lg uppercase tracking-wider text-xs font-bold transition-all duration-200 shadow-xs hover:shadow disabled:opacity-50"
                   >
                     <Upload size={12} />
                     {uploading
@@ -537,7 +532,7 @@ const PreWedding = () => {
                       : "Publish Wedding Story"}
                   </button>
                   {uploading && (
-                    <span className="ml-4 text-xs text-[#5A7863] font-medium">
+                    <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold">
                       {getOverallProgress()}% complete
                     </span>
                   )}
@@ -550,58 +545,58 @@ const PreWedding = () => {
           {activeTab === "all" && (
             <>
               {loading ? (
-                <div className="flex justify-center items-center h-64 bg-white rounded-2xl border border-[#DDE7D8]">
-                  <div className="w-9 h-9 border-2 border-[#5A7863] border-t-transparent rounded-full animate-spin" />
+                <div className="flex justify-center items-center h-48 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700">
+                  <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : stories.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
-                    <Heart size={22} className="text-[#90AB8B]" />
+                <div className="text-center py-16 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 px-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-50 dark:bg-blue-950/50 rounded-full mb-3 border border-blue-200 dark:border-blue-900">
+                    <Heart size={18} className="text-blue-600 dark:text-blue-400" />
                   </div>
-                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No stories found</p>
-                  <p className="text-[#3B4953]/60 text-sm">Deploy your first pre‑wedding story now.</p>
+                  <p className="text-slate-800 dark:text-slate-200 text-base font-bold mb-1">No stories found</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Create your first pre‑wedding story using the create tab.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {stories.map((story) => (
                     <div
                       key={story._id}
-                      className="group bg-white rounded-xl overflow-hidden border border-[#DDE7D8] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
+                      className="group bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
                     >
                       {/* Cover */}
-                      <div className="relative h-52 bg-[#F7F9F4] overflow-hidden">
+                      <div className="relative h-44 sm:h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
                         <img
                           src={story.coverImage}
                           alt={story.title}
-                          className="w-full h-full object-cover transition duration-500 group-hover:scale-102"
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
-                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] flex items-center gap-1.5 text-[10px] font-bold text-[#3B4953]">
-                          <ImageIcon size={10} className="text-[#5A7863]" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                        <div className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-xs px-2 py-0.5 rounded border border-white/10 flex items-center gap-1 text-[10px] font-bold text-white">
+                          <ImageIcon size={10} className="text-blue-400" />
                           <span>{story.galleryImages?.length || 0} Frames</span>
                         </div>
-                        <div className="absolute bottom-3 left-4 right-4">
-                          <h2 className="text-base font-bold text-white tracking-wide line-clamp-1">
+                        <div className="absolute bottom-2.5 left-3 right-3">
+                          <h2 className="text-sm font-bold text-white tracking-wide line-clamp-1">
                             {story.title}
                           </h2>
                         </div>
                       </div>
 
                       {/* Content */}
-                      <div className="p-4 flex-1 flex flex-col justify-between space-y-4">
-                        <p className="text-[#3B4953]/70 text-xs tracking-wide leading-relaxed line-clamp-2 min-h-[36px]">
+                      <div className="p-3.5 flex-1 flex flex-col justify-between space-y-3">
+                        <p className="text-slate-600 dark:text-slate-300 text-xs tracking-wide leading-relaxed line-clamp-2 min-h-[32px]">
                           {story.description || "No narrative summary provided."}
                         </p>
-                        <div className="flex gap-2.5 pt-1 border-t border-[#DDE7D8]/60">
+                        <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/80">
                           <button
                             onClick={() => openModal(story)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2.5 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 py-1.5 sm:py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200"
                           >
                             <Eye size={12} /> Inspect
                           </button>
                           <button
                             onClick={() => handleDeleteClick(story)}
-                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
+                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:hover:bg-red-900/50 dark:text-red-400 border border-red-200 dark:border-red-800/60 p-2 rounded-lg transition-all duration-200"
                             title="Delete Story"
                           >
                             <Trash2 size={12} />
@@ -614,68 +609,67 @@ const PreWedding = () => {
               )}
             </>
           )}
-        </div>
-      </div>
 
       {/* ===== LIGHTBOX MODAL ===== */}
       {selectedStory && (
-        <div className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden">
+        <div className="fixed inset-0 z-[999] bg-slate-950/90 backdrop-blur-xs overflow-hidden">
           <button
             onClick={closeModal}
-            className="absolute top-6 right-6 z-50 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
+            className="absolute top-4 right-4 z-50 text-white/80 hover:text-white bg-black/60 hover:bg-black/80 p-2 rounded-full transition"
             aria-label="Close Lightbox"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
 
-          <div className="absolute top-6 left-6 z-40 text-white max-w-[calc(100%-120px)]">
-            <h1 className="text-lg font-bold uppercase tracking-[2px] line-clamp-1">{selectedStory.title}</h1>
-            <p className="text-xs text-white/60 tracking-wide font-light mt-0.5 line-clamp-1">{selectedStory.description}</p>
+          <div className="absolute top-4 left-4 z-40 text-white max-w-[calc(100%-100px)]">
+            <h1 className="text-base font-bold uppercase tracking-wider line-clamp-1">{selectedStory.title}</h1>
+            <p className="text-xs text-slate-300 font-light mt-0.5 line-clamp-1">{selectedStory.description}</p>
           </div>
 
-          <div className="h-[82vh] flex items-center justify-center relative px-12 mt-[8vh]">
+          <div className="h-[80vh] flex items-center justify-center relative px-8 mt-[8vh]">
             {selectedStory?.galleryImages?.length > 1 && (
               <button
                 onClick={prevImage}
-                className="absolute left-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+                className="absolute left-3 z-40 w-9 h-9 bg-black/60 backdrop-blur-xs rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-black/80 transition"
               >
-                <ChevronLeft size={18} />
+                <ChevronLeft size={16} />
               </button>
             )}
 
             <img
               src={selectedStory.galleryImages?.[currentImageIndex] || selectedStory.coverImage}
               alt={selectedStory.title}
-              className="max-w-full max-h-full object-contain rounded shadow-2xl border border-white/5"
+              className="max-w-full max-h-full object-contain rounded-lg shadow-2xl border border-white/5"
             />
 
             {selectedStory?.galleryImages?.length > 1 && (
               <button
                 onClick={nextImage}
-                className="absolute right-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+                className="absolute right-3 z-40 w-9 h-9 bg-black/60 backdrop-blur-xs rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-black/80 transition"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             )}
           </div>
 
           {selectedStory?.galleryImages?.length > 0 && (
-            <div className="absolute bottom-0 inset-x-0 bg-black/20 border-t border-white/5 py-4 backdrop-blur-xs flex flex-col items-center space-y-2">
-              <div className="flex gap-2 px-6 overflow-x-auto max-w-4xl no-scrollbar">
+            <div className="absolute bottom-0 inset-x-0 bg-black/40 border-t border-white/10 py-3 backdrop-blur-xs flex flex-col items-center space-y-2">
+              <div className="flex gap-2 px-4 overflow-x-auto max-w-3xl no-scrollbar">
                 {selectedStory.galleryImages.map((img, idx) => (
                   <img
                     key={idx}
                     src={img}
                     alt="thumbnail"
                     onClick={() => setCurrentImageIndex(idx)}
-                    className={`w-16 h-12 md:w-20 md:h-14 object-cover rounded-md cursor-pointer transition-all duration-200 flex-shrink-0 ${currentImageIndex === idx
-                      ? "ring-2 ring-[#90AB8B] scale-102 opacity-100"
-                      : "opacity-40 hover:opacity-80"
-                      }`}
+                    className={`w-14 h-10 object-cover rounded cursor-pointer transition-all duration-200 flex-shrink-0 ${
+                      currentImageIndex === idx
+                        ? "ring-2 ring-blue-500 scale-105 opacity-100"
+                        : "opacity-40 hover:opacity-80"
+                    }`}
                   />
                 ))}
               </div>
-              <div className="text-white/80 font-bold text-[10px] tracking-[2px] bg-white/10 border border-white/10 px-3 py-1 rounded-full">
+              <div className="text-white/90 font-bold text-[10px] tracking-wider bg-black/40 border border-white/10 px-2.5 py-0.5 rounded-full">
                 {currentImageIndex + 1} / {selectedStory.galleryImages.length}
               </div>
             </div>

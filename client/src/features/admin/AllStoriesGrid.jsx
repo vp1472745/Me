@@ -103,15 +103,15 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {stories.map((story) => (
           <div
             key={story._id}
             onClick={() => handleCardClick(story)}
-            className="group relative bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer hover:-translate-y-1 border border-[#DDE7D8]"
+            className="group relative bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 cursor-pointer hover:-translate-y-0.5 border border-slate-200 dark:border-slate-700/80"
           >
             {/* Cover Image */}
-            <div className="relative h-56 bg-[#F7F9F4] overflow-hidden">
+            <div className="relative h-44 sm:h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
               <img
                 src={
                   story.coverImage ||
@@ -125,79 +125,79 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
               />
 
               {/* Media Badges (always visible) */}
-              <div className="absolute top-3 left-3 flex gap-1.5 z-10">
+              <div className="absolute top-2.5 left-2.5 flex gap-1 z-10">
                 {story.galleryImages?.length > 0 && (
-                  <span className="flex items-center gap-1 bg-black/60 text-white text-[11px] px-2 py-1 rounded-md backdrop-blur-sm">
-                    <ImageIcon size={12} /> {story.galleryImages.length}
+                  <span className="flex items-center gap-1 bg-slate-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/10">
+                    <ImageIcon size={11} /> {story.galleryImages.length}
                   </span>
                 )}
                 {story.galleryVideos?.length > 0 && (
-                  <span className="flex items-center gap-1 bg-black/60 text-white text-[11px] px-2 py-1 rounded-md backdrop-blur-sm">
-                    <Video size={12} /> {story.galleryVideos.length}
+                  <span className="flex items-center gap-1 bg-slate-900/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded backdrop-blur-xs border border-white/10">
+                    <Video size={11} /> {story.galleryVideos.length}
                   </span>
                 )}
                 {story.audio && (
-                  <span className="flex items-center bg-black/60 text-white p-1 rounded-md backdrop-blur-sm">
-                    <Music size={12} />
+                  <span className="flex items-center bg-slate-900/80 text-white p-1 rounded backdrop-blur-xs border border-white/10">
+                    <Music size={11} />
                   </span>
                 )}
               </div>
 
               {/* ===== ACTION BUTTONS – ALWAYS VISIBLE ===== */}
-              <div className="absolute top-3 right-3 flex gap-2 z-10 opacity-100 pointer-events-auto">
+              <div className="absolute top-2.5 right-2.5 flex gap-1.5 z-10 opacity-100 pointer-events-auto">
                 {/* View Button */}
                 <button
                   type="button"
                   onClick={(e) => handleViewClick(e, story)}
-                  className="p-2 bg-white/80 backdrop-blur-sm text-[#5A7863] rounded-xl shadow-md hover:bg-white hover:text-[#3B4953] transition-colors"
+                  className="p-1.5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-blue-600 dark:text-blue-400 rounded-lg shadow-xs hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
                   aria-label="View story"
                 >
-                  <Eye size={16} />
+                  <Eye size={14} />
                 </button>
 
                 {/* Edit Button */}
                 <button
                   type="button"
                   onClick={(e) => handleEditClick(e, story)}
-                  className="p-2 bg-white/80 backdrop-blur-sm text-[#5A7863] rounded-xl shadow-md hover:bg-white hover:text-[#3B4953] transition-colors"
+                  className="p-1.5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-blue-600 dark:text-blue-400 rounded-lg shadow-xs hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
                   aria-label="Edit story"
                 >
-                  <Pencil size={16} />
+                  <Pencil size={14} />
                 </button>
 
                 {/* Delete Button */}
                 <button
                   type="button"
                   onClick={(e) => handleDeleteClick(e, story._id, story.title)}
-                  className="p-2 bg-white/80 backdrop-blur-sm text-red-600 rounded-xl shadow-md hover:bg-white transition-colors"
+                  className="p-1.5 bg-white/90 dark:bg-slate-800/90 backdrop-blur-xs text-red-600 dark:text-red-400 rounded-lg shadow-xs hover:bg-red-50 dark:hover:bg-slate-700 transition-colors"
                   aria-label="Delete story"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               </div>
 
               {/* Subtle dark overlay on hover for depth */}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
             </div>
 
             {/* Story Info */}
-            <div className="p-5 space-y-3">
+            <div className="p-3.5 space-y-2 bg-white dark:bg-slate-800/90">
               <div>
-                <h4 className="font-bold text-[#3B4953] text-lg leading-snug truncate group-hover:text-[#5A7863] transition-colors">
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-sm leading-snug truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   {story.title}
                 </h4>
-                <p className="text-xs font-semibold text-[#5A7863] uppercase tracking-wider mt-0.5 truncate">
+                <p className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider mt-0.5 truncate">
                   {story.couple}
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-[#F0F4EC] flex flex-col gap-1.5 text-xs text-[#61717C]">
-                <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-[#90AB8B]" />
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-700/80 flex flex-col gap-1 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <Calendar size={13} className="text-blue-500" />
                   <span>{formatDate(story.date)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={14} className="text-[#90AB8B]" />
+                <div className="flex items-center gap-1.5">
+                  <MapPin size={13} className="text-blue-500" />
                   <span className="truncate">{story.location}</span>
                 </div>
               </div>
@@ -233,10 +233,10 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
         showCloseButton
       >
         {selectedStoryForView && (
-          <div className="space-y-6">
+          <div className="space-y-4 text-slate-800 dark:text-slate-100">
             {/* Cover Image */}
             {selectedStoryForView.coverImage && (
-              <div className="w-full h-64 rounded-xl overflow-hidden border border-[#DDE7D8]">
+              <div className="w-full h-52 sm:h-60 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img
                   src={selectedStoryForView.coverImage}
                   alt="Cover"
@@ -246,41 +246,41 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
             )}
 
             {/* Couple & Date / Location */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                   Couple
                 </label>
-                <p className="text-[#3B4953] font-medium">{selectedStoryForView.couple}</p>
+                <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm">{selectedStoryForView.couple}</p>
               </div>
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                   Date
                 </label>
-                <p className="text-[#3B4953]">{formatDate(selectedStoryForView.date)}</p>
+                <p className="text-slate-700 dark:text-slate-300 text-sm">{formatDate(selectedStoryForView.date)}</p>
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                   Location
                 </label>
-                <p className="text-[#3B4953]">{selectedStoryForView.location}</p>
+                <p className="text-slate-700 dark:text-slate-300 text-sm">{selectedStoryForView.location}</p>
               </div>
             </div>
 
             {/* Description */}
             {selectedStoryForView.description && (
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-0.5">
                   Description
                 </label>
-                <p className="text-[#3B4953] whitespace-pre-wrap">{selectedStoryForView.description}</p>
+                <p className="text-slate-700 dark:text-slate-300 whitespace-pre-wrap text-xs sm:text-sm">{selectedStoryForView.description}</p>
               </div>
             )}
 
             {/* Audio */}
             {selectedStoryForView.audio && (
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
                   Audio
                 </label>
                 <audio controls className="w-full rounded-lg">
@@ -293,12 +293,12 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
             {/* Gallery Images */}
             {selectedStoryForView.galleryImages?.length > 0 && (
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                   Gallery Images ({selectedStoryForView.galleryImages.length})
                 </label>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {selectedStoryForView.galleryImages.map((url, idx) => (
-                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-[#DDE7D8]">
+                    <div key={idx} className="relative aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                       <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                     </div>
                   ))}
@@ -309,15 +309,15 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
             {/* Gallery Videos */}
             {selectedStoryForView.galleryVideos?.length > 0 && (
               <div>
-                <label className="block text-xs font-medium text-[#3B4953]/70 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
                   Gallery Videos ({selectedStoryForView.galleryVideos.length})
                 </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {selectedStoryForView.galleryVideos.map((url, idx) => (
                     <video
                       key={idx}
                       controls
-                      className="w-full rounded-lg border border-[#DDE7D8]"
+                      className="w-full rounded-lg border border-slate-200 dark:border-slate-700"
                     >
                       <source src={url} type="video/mp4" />
                       Your browser does not support the video element.
@@ -328,11 +328,11 @@ const StoriesList = ({ stories, onDeleteStory, onStoryUpdated }) => {
             )}
 
             {/* Close button */}
-            <div className="flex justify-end pt-4 border-t border-[#DDE7D8]">
+            <div className="flex justify-end pt-3 border-t border-slate-100 dark:border-slate-700/80">
               <button
                 type="button"
                 onClick={handleViewClose}
-                className="px-6 py-2 rounded-xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition"
+                className="px-5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-blue-700 transition"
               >
                 Close
               </button>

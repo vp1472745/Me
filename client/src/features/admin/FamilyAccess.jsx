@@ -53,63 +53,64 @@ const FamilyAccess = () => {
       REJECTED: 'bg-red-100 text-red-800',
     };
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-gray-100'}`}>
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
         {status}
       </span>
     );
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#F7F9F4] min-h-screen">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       <ToastContainer />
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-[#3B4953] flex items-center gap-2 mb-6">
-          <FaUserPlus className="text-[#5A7863]" /> Family Access
+      <div className="border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <FaUserPlus className="text-blue-600 dark:text-blue-400" /> Family Access
         </h1>
+      </div>
 
-        {/* Request Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#DDE7D8] p-6 mb-8">
-          <h2 className="text-lg font-semibold text-[#3B4953] mb-4">Request Access for Family Member</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Request Form */}
+      <div className="bg-white dark:bg-[#111827] rounded-xl shadow-2xs border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">Request Access for Family Member</h2>
+          <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-[#3B4953] mb-1">Member Name</label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Member Name</label>
               <input
                 type="text"
                 name="memberName"
                 value={form.memberName}
                 onChange={handleChange}
                 placeholder="e.g. Vineet's Brother"
-                className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] focus:ring-2 focus:ring-[#5A7863] outline-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#3B4953] mb-1">Relation</label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Relation</label>
               <input
                 type="text"
                 name="relation"
                 value={form.relation}
                 onChange={handleChange}
                 placeholder="e.g. Brother"
-                className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] focus:ring-2 focus:ring-[#5A7863] outline-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#3B4953] mb-1">Reason (Optional)</label>
+              <label className="block text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Reason (Optional)</label>
               <textarea
                 name="reason"
                 value={form.reason}
                 onChange={handleChange}
                 placeholder="Why do they need access?"
                 rows="2"
-                className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] focus:ring-2 focus:ring-[#5A7863] outline-none resize-none"
+                className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
               />
             </div>
             <button
               type="submit"
               disabled={submitting}
-              className="px-6 py-2.5 bg-[#5A7863] text-white rounded-xl font-semibold hover:bg-[#4A6853] transition disabled:opacity-50"
+              className="px-5 py-2 bg-blue-600 text-white rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition disabled:opacity-50"
             >
               {submitting ? 'Sending...' : 'Send Request'}
             </button>
@@ -117,18 +118,18 @@ const FamilyAccess = () => {
         </div>
 
         {/* My Requests */}
-        <div className="bg-white rounded-2xl shadow-sm border border-[#DDE7D8] p-6">
-          <h2 className="text-lg font-semibold text-[#3B4953] mb-4">My Requests</h2>
+        <div className="bg-white dark:bg-[#111827] rounded-xl shadow-2xs border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-3">My Requests</h2>
           {requests.length === 0 ? (
-            <p className="text-[#90AB8B] text-center py-6">No requests yet.</p>
+            <p className="text-slate-400 text-center py-4 text-xs">No requests yet.</p>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {requests.map((req, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 bg-[#F7F9F4] rounded-xl border border-[#DDE7D8]">
+                <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-900/60 rounded-lg border border-slate-200 dark:border-slate-700">
                   <div>
-                    <p className="font-medium text-[#3B4953]">{req.memberName}</p>
-                    <p className="text-sm text-[#90AB8B]">{req.relation} {req.reason && `• ${req.reason}`}</p>
-                    <p className="text-xs text-[#90AB8B]">{new Date(req.createdAt).toLocaleDateString()}</p>
+                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{req.memberName}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{req.relation} {req.reason && `• ${req.reason}`}</p>
+                    <p className="text-[10px] text-slate-400">{new Date(req.createdAt).toLocaleDateString()}</p>
                   </div>
                   <div>{getStatusBadge(req.status)}</div>
                 </div>
@@ -136,7 +137,6 @@ const FamilyAccess = () => {
             </div>
           )}
         </div>
-      </div>
     </div>
   );
 };

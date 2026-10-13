@@ -150,15 +150,15 @@ function Layout({ roleType }) {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <div className={`${theme} dark-dashboard-container flex h-screen overflow-hidden bg-[#F7F9F4] dark:bg-[#09090B] text-zinc-800 dark:text-zinc-100 transition-colors duration-200`}>
+    <div className={`${theme} dark-dashboard-container flex h-screen overflow-hidden bg-slate-50 dark:bg-[#0B0F19] text-slate-800 dark:text-slate-100 transition-colors duration-200 text-xs sm:text-sm`}>
       
       {/* Desktop Sidebar */}
       <aside
         className={`
           hidden lg:flex flex-col h-screen fixed left-0 top-0 z-40
-          bg-white dark:bg-[#121214] border-r border-[#DDE7D8] dark:border-[#1E1E22]
-          transition-all duration-300 ease-in-out shadow-sm
-          ${isSidebarOpen ? "w-64" : "w-20"}
+          bg-white dark:bg-[#0F172A] border-r border-slate-200/80 dark:border-slate-800
+          transition-all duration-300 ease-in-out shadow-xs
+          ${isSidebarOpen ? "w-56" : "w-16"}
         `}
       >
         <SidebarContent
@@ -181,7 +181,7 @@ function Layout({ roleType }) {
         {/* Backdrop overlay */}
         <div
           className={`
-            fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300
+            fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity duration-300
             ${isMobileOpen ? "opacity-100" : "opacity-0"}
           `}
           onClick={() => setIsMobileOpen(false)}
@@ -190,8 +190,8 @@ function Layout({ roleType }) {
         {/* Sidebar container */}
         <aside
           className={`
-            fixed left-0 top-0 h-screen w-64 bg-white dark:bg-[#121214] 
-            border-r border-[#DDE7D8] dark:border-[#1E1E22] shadow-2xl
+            fixed left-0 top-0 h-screen w-56 bg-white dark:bg-[#0F172A] 
+            border-r border-slate-200/80 dark:border-slate-800 shadow-2xl
             transition-transform duration-300 ease-in-out flex flex-col
             ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
           `}
@@ -212,32 +212,32 @@ function Layout({ roleType }) {
       <div
         className={`
           flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300
-          ${isSidebarOpen ? "lg:pl-64" : "lg:pl-20"}
+          ${isSidebarOpen ? "lg:pl-56" : "lg:pl-16"}
         `}
       >
         {/* Topbar Header */}
-        <header className="sticky top-0 z-30 flex-shrink-0 bg-white/80 dark:bg-[#121214]/80 backdrop-blur-md border-b border-[#DDE7D8] dark:border-[#1E1E22] transition-colors duration-200">
-          <div className="flex items-center justify-between px-6 py-4">
+        <header className="sticky top-0 z-30 flex-shrink-0 bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-2.5">
             
             {/* Left Section: Sidebar toggle & breadcrumbs */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={toggleSidebar}
-                className="p-2 rounded-xl text-zinc-500 hover:text-[#5A7863] dark:hover:text-[#A7D18C] hover:bg-zinc-100 dark:hover:bg-zinc-800/60 transition"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition"
                 aria-label="Toggle menu"
               >
-                <Menu size={20} />
+                <Menu size={18} />
               </button>
 
               {/* Breadcrumbs */}
-              <nav className="hidden sm:flex items-center gap-2 text-xs font-semibold text-zinc-400 dark:text-zinc-500">
+              <nav className="hidden sm:flex items-center gap-1.5 text-[11px] font-medium text-slate-400 dark:text-slate-500">
                 {breadcrumbs.map((bc, idx) => (
-                  <div key={bc.to} className="flex items-center gap-2">
-                    {idx > 0 && <span>/</span>}
+                  <div key={bc.to} className="flex items-center gap-1.5">
+                    {idx > 0 && <span className="text-slate-300 dark:text-slate-600">/</span>}
                     {bc.isLast ? (
-                      <span className="text-zinc-700 dark:text-zinc-200">{bc.label}</span>
+                      <span className="text-blue-700 dark:text-blue-300 font-semibold">{bc.label}</span>
                     ) : (
-                      <Link to={bc.to} className="hover:text-zinc-600 dark:hover:text-zinc-400">
+                      <Link to={bc.to} className="hover:text-slate-700 dark:hover:text-slate-300 transition">
                         {bc.label}
                       </Link>
                     )}
@@ -247,38 +247,38 @@ function Layout({ roleType }) {
             </div>
 
             {/* Right Section: Theme switch, notifications & user badge */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               {/* Project Timer Alert Button */}
               <ProjectTimer />
 
               {/* Theme Toggle Button */}
               <button
                 onClick={() => setTheme((prev) => (prev === "dark" ? "light" : "dark"))}
-                className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#18181B]/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 transition"
+                className="p-1.5 sm:p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
                 title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
               >
-                {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+                {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
               </button>
 
               {/* Mock Notification Bell */}
               <div className="relative">
                 <button
-                  className="p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-[#18181B]/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 text-zinc-500 dark:text-zinc-400 transition"
+                  className="p-1.5 sm:p-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition"
                   onClick={() => navigate(roleType === "ADMIN" ? "/dashboard/admin-all-users" : "/dashboard/notifications")}
                 >
-                  <Bell size={16} />
-                  <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white dark:border-[#121214]" />
+                  <Bell size={15} />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full border-2 border-white dark:border-[#0F172A]" />
                 </button>
               </div>
 
               {/* User Avatar Badge */}
-              <div className="flex items-center gap-2.5 pl-2 border-l border-zinc-200 dark:border-zinc-800/80">
-                <div className="w-8 h-8 rounded-full bg-[#EBF4DD] dark:bg-[#20271E] text-[#5A7863] dark:text-[#A7D18C] flex items-center justify-center font-bold text-xs shadow-sm">
+              <div className="flex items-center gap-2 pl-2 border-l border-slate-200 dark:border-slate-800">
+                <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950/80 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/60 flex items-center justify-center font-bold text-xs shadow-xs">
                   {user.name ? user.name.charAt(0).toUpperCase() : "A"}
                 </div>
-                <div className="hidden md:block text-left">
-                  <div className="text-xs font-bold truncate max-w-[100px] text-zinc-800 dark:text-zinc-200">{user.name || "User"}</div>
-                  <div className="text-[10px] text-zinc-400 uppercase font-semibold tracking-wider">{roleType}</div>
+                <div className="hidden md:block text-left leading-tight">
+                  <div className="text-xs font-bold truncate max-w-[95px] text-slate-800 dark:text-slate-200">{user.name || "User"}</div>
+                  <div className="text-[9px] text-blue-600 dark:text-blue-400 uppercase font-bold tracking-wider">{roleType}</div>
                 </div>
               </div>
             </div>
@@ -286,7 +286,7 @@ function Layout({ roleType }) {
         </header>
 
         {/* Dynamic page contents wrapper */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 bg-[#F7F9F4]/40 dark:bg-[#09090B]">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-5 bg-slate-50/70 dark:bg-[#0B0F19]">
           <Outlet />
         </main>
       </div>
@@ -306,36 +306,38 @@ function SidebarContent({
   onLinkClick,
   isMobile = false,
 }) {
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-
   return (
     <div className="flex flex-col h-full">
       {/* Brand logo container */}
-      <div className="flex items-center justify-between px-5 py-5 border-b border-[#DDE7D8] dark:border-[#1E1E22]">
+      <div className="flex items-center justify-between px-3.5 py-3.5 border-b border-slate-200/80 dark:border-slate-800">
         {isSidebarOpen ? (
           <div className="flex items-center gap-2">
-            <Camera className="w-5 h-5 text-[#5A7863] dark:text-[#A7D18C]" />
-            <span className="text-[12px] font-extrabold tracking-widest text-zinc-800 dark:text-zinc-100 uppercase">
-              SHUTTER<span className="text-[#5A7863] dark:text-[#A7D18C]">STUDIO</span>
+            <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-xs">
+              <Camera className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-[11px] font-black tracking-widest text-slate-800 dark:text-slate-100 uppercase">
+              SHUTTER<span className="text-blue-600 dark:text-blue-400">STUDIO</span>
             </span>
           </div>
         ) : (
-          <Camera className="w-5 h-5 text-[#5A7863] dark:text-[#A7D18C] mx-auto" />
+          <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center shadow-xs mx-auto">
+            <Camera className="w-3.5 h-3.5" />
+          </div>
         )}
 
         {/* Collapse icon (Desktop only) */}
         {!isMobile && (
           <button
             onClick={toggleSidebar}
-            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition"
+            className="p-1 rounded-md text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
           >
-            {isSidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {isSidebarOpen ? <ChevronLeft size={15} /> : <ChevronRight size={15} />}
           </button>
         )}
       </div>
 
       {/* Navigation menu items */}
-      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
+      <nav className="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.to);
@@ -346,20 +348,20 @@ function SidebarContent({
               to={item.to}
               onClick={onLinkClick}
               className={`
-                flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group
-                ${!isSidebarOpen && "justify-center"}
+                flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-150 group text-xs
+                ${!isSidebarOpen && "justify-center px-1"}
                 ${
                   active
-                    ? "bg-[#EBF4DD] dark:bg-[#1E2519] text-[#5A7863] dark:text-[#A7D18C] font-extrabold shadow-sm border-l-4 border-[#5A7863] dark:border-[#A7D18C]"
-                    : "text-zinc-500 dark:text-zinc-400 hover:text-[#5A7863] dark:hover:text-[#A7D18C] hover:bg-[#EBF4DD]/30 dark:hover:bg-[#1E2519]/25 font-semibold text-sm"
+                    ? "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold border-l-[3px] border-blue-600 dark:border-blue-400 shadow-2xs"
+                    : "text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50/50 dark:hover:bg-blue-950/30 font-medium"
                 }
               `}
               title={!isSidebarOpen ? item.label : ""}
             >
               <Icon
                 className={`
-                  w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-110
-                  ${active ? "text-[#5A7863] dark:text-[#A7D18C]" : "text-zinc-400 dark:text-zinc-500 group-hover:text-[#5A7863] dark:group-hover:text-[#A7D18C]"}
+                  w-3.5 h-3.5 flex-shrink-0 transition-transform duration-150 group-hover:scale-105
+                  ${active ? "text-blue-600 dark:text-blue-400" : "text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400"}
                 `}
               />
               {isSidebarOpen && <span className="truncate">{item.label}</span>}
@@ -369,18 +371,18 @@ function SidebarContent({
       </nav>
 
       {/* Sidebar Footer (Logout action) */}
-      <div className="p-3 border-t border-[#DDE7D8] dark:border-[#1E1E22]">
+      <div className="p-2 border-t border-slate-200/80 dark:border-slate-800">
         <button
           onClick={handleLogout}
           className={`
-            flex items-center gap-3 w-full px-3 py-3 rounded-xl
-            text-zinc-500 dark:text-zinc-400 hover:text-rose-600 dark:hover:text-rose-400 
-            hover:bg-rose-50 dark:hover:bg-rose-950/20 transition duration-150 font-bold text-sm
-            ${!isSidebarOpen && "justify-center"}
+            flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg
+            text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 
+            hover:bg-rose-50 dark:hover:bg-rose-950/20 transition duration-150 font-semibold text-xs
+            ${!isSidebarOpen && "justify-center px-1"}
           `}
           title={!isSidebarOpen ? "Logout" : ""}
         >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
+          <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
           {isSidebarOpen && <span>Logout</span>}
         </button>
       </div>

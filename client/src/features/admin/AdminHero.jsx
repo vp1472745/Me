@@ -78,11 +78,11 @@ export const HERO_CATEGORIES = [
 
 // ─── Skeleton Card ──────────────────────────────────────────────
 const SkeletonCard = () => (
-  <div className="bg-white rounded-xl border border-[#DDE7D8] p-3 flex flex-col gap-3 shadow-sm animate-pulse">
-    <div className="h-48 bg-[#F7F9F4] rounded-lg" />
+  <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-3 flex flex-col gap-3 shadow-2xs animate-pulse">
+    <div className="h-44 bg-slate-100 dark:bg-slate-800 rounded-lg" />
     <div className="flex gap-2">
-      <div className="flex-1 h-10 bg-[#F7F9F4] rounded-lg" />
-      <div className="w-10 h-10 bg-[#F7F9F4] rounded-lg" />
+      <div className="flex-1 h-9 bg-slate-100 dark:bg-slate-800 rounded-lg" />
+      <div className="w-9 h-9 bg-slate-100 dark:bg-slate-800 rounded-lg" />
     </div>
   </div>
 );
@@ -268,11 +268,11 @@ const HeroManager = () => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
-        autoClose={4000}
+        autoClose={3500}
         hideProgressBar={false}
         newestOnTop
         closeOnClick
@@ -285,46 +285,39 @@ const HeroManager = () => {
         progressClassName="custom-progress"
       />
 
-      {/* ===== FIXED HEADER (Tabs) ===== */}
-      <div className="sticky top-0 z-20 bg-[#F7F9F4] px-3 sm:px-4 pt-3 sm:pt-4 pb-0">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap gap-1 bg-white rounded-t-xl overflow-hidden shadow-sm border border-[#DDE7D8]">
-            {["create", "all"].map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 min-w-[100px] sm:min-w-[120px] px-3 sm:px-4 py-3 sm:py-4 text-[10px] sm:text-xs font-bold uppercase tracking-[2px] transition-all flex items-center justify-center gap-2 ${
-                  activeTab === tab
-                    ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-[#5A7863]"
-                    : "text-[#3B4953]/70 hover:bg-[#F7F9F4]"
-                }`}
-              >
-                {tab === "create" ? <Plus size={14} /> : <ImageIcon size={14} />}
-                {tab === "create" ? "+ Upload Hero Banner" : `All Media (${heroes.length})`}
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* ===== TABS ===== */}
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        {["create", "all"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+              activeTab === tab
+                ? "bg-blue-600 text-white shadow-2xs"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            {tab === "create" ? <Plus size={13} /> : <ImageIcon size={13} />}
+            {tab === "create" ? "+ Upload Hero Banner" : `All Media (${heroes.length})`}
+          </button>
+        ))}
       </div>
 
-      {/* ===== SCROLLABLE CONTENT ===== */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-10">
-        <div className="max-w-7xl mx-auto">
-          {activeTab === "create" ? (
+      {activeTab === "create" ? (
             // ─── UPLOAD FORM ──────────────────────────────
-            <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-8 shadow-sm space-y-6">
+            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-3.5 sm:p-5 shadow-2xs space-y-4">
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-[#2A382C] flex items-center gap-2">
-                  <Sparkles size={18} className="text-[#5A7863]" />
+                <h2 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                  <Sparkles size={16} className="text-blue-600 dark:text-blue-400" />
                   Select Page Category
                 </h2>
-                <p className="text-xs text-[#3B4953]/70 mt-1">
+                <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   Choose which website page or section this Hero Banner should appear on.
                 </p>
               </div>
 
               {/* Category Selector Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-2.5">
                 {HERO_CATEGORIES.map((cat) => {
                   const Icon = cat.icon;
                   const isSelected = category === cat.id;
@@ -333,31 +326,31 @@ const HeroManager = () => {
                       key={cat.id}
                       type="button"
                       onClick={() => setCategory(cat.id)}
-                      className={`p-3.5 rounded-xl border-2 text-left transition-all duration-200 flex flex-col justify-between relative overflow-hidden group ${
+                      className={`p-2.5 sm:p-3 rounded-lg border text-left transition-all duration-150 flex flex-col justify-between relative overflow-hidden group ${
                         isSelected
-                          ? "border-[#5A7863] bg-[#EBF4DD]/60 shadow-sm"
-                          : "border-[#DDE7D8] bg-[#F7F9F4]/40 hover:border-[#5A7863]/40 hover:bg-white"
+                          ? "border-blue-600 bg-blue-50/70 text-blue-950 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200 shadow-2xs ring-1 ring-blue-500/20"
+                          : "border-slate-200/80 bg-slate-50/50 hover:border-blue-300 hover:bg-white dark:border-slate-800 dark:bg-slate-900/30 dark:hover:border-slate-700 dark:hover:bg-slate-800/50"
                       }`}
                     >
                       {isSelected && (
-                        <div className="absolute top-2 right-2 text-[#5A7863]">
-                          <CheckCircle2 size={16} />
+                        <div className="absolute top-2 right-2 text-blue-600 dark:text-blue-400">
+                          <CheckCircle2 size={15} />
                         </div>
                       )}
                       <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center mb-2.5 transition-colors ${
+                        className={`w-7 h-7 sm:w-8 sm:h-8 rounded-md flex items-center justify-center mb-2 transition-colors ${
                           isSelected
-                            ? "bg-[#5A7863] text-white"
-                            : "bg-white text-[#5A7863] border border-[#DDE7D8]"
+                            ? "bg-blue-600 text-white shadow-2xs"
+                            : "bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 border border-slate-200/80 dark:border-slate-700"
                         }`}
                       >
-                        <Icon size={18} />
+                        <Icon size={15} />
                       </div>
                       <div>
-                        <div className="text-xs sm:text-sm font-bold text-[#2A382C]">
+                        <div className="text-xs font-bold text-slate-800 dark:text-slate-200">
                           {cat.label}
                         </div>
-                        <div className="text-[10px] text-[#3B4953]/60 leading-tight mt-0.5 line-clamp-2">
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 line-clamp-1">
                           {cat.desc}
                         </div>
                       </div>
@@ -367,8 +360,8 @@ const HeroManager = () => {
               </div>
 
               {/* Form Upload */}
-              <form onSubmit={handleCreate} className="space-y-5 sm:space-y-6 pt-2">
-                <div className="relative border-2 border-dashed border-[#90AB8B]/40 rounded-xl p-6 sm:p-10 flex flex-col items-center text-center transition-colors hover:border-[#5A7863]/60 bg-[#F7F9F4]/30">
+              <form onSubmit={handleCreate} className="space-y-4 pt-1">
+                <div className="relative border-2 border-dashed border-blue-200 dark:border-blue-900/50 rounded-xl p-4 sm:p-6 flex flex-col items-center text-center transition-colors hover:border-blue-400 dark:hover:border-blue-700 bg-blue-50/20 dark:bg-blue-950/10">
                   <input
                     type="file"
                     accept="image/*,video/*"
@@ -380,30 +373,30 @@ const HeroManager = () => {
                       {fileType === "video" ? (
                         <video
                           src={previewUrl}
-                          className="rounded-lg w-full max-h-64 object-cover shadow-sm"
+                          className="rounded-lg w-full max-h-56 object-cover shadow-2xs"
                           controls
                         />
                       ) : (
                         <img
                           src={previewUrl}
-                          className="rounded-lg w-full max-h-64 object-contain shadow-sm"
+                          className="rounded-lg w-full max-h-56 object-contain shadow-2xs"
                           alt="Preview"
                         />
                       )}
-                      <p className="mt-2 text-xs text-[#3B4953]/70 font-medium">
+                      <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
                         {selectedFile?.name} ({Math.round(selectedFile?.size / 1024)} KB)
                       </p>
                     </div>
                   ) : (
-                    <div className="py-8 sm:py-12 text-[#3B4953]/60">
-                      <Upload size={40} className="mx-auto mb-3 text-[#5A7863] opacity-80" />
-                      <p className="text-sm font-bold text-[#2A382C]">
+                    <div className="py-5 sm:py-7 text-slate-500 dark:text-slate-400">
+                      <Upload size={28} className="mx-auto mb-2 text-blue-600 dark:text-blue-400 opacity-90" />
+                      <p className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200">
                         Tap or click to select media for{" "}
-                        <span className="text-[#5A7863]">
+                        <span className="text-blue-600 dark:text-blue-400">
                           {HERO_CATEGORIES.find((c) => c.id === category)?.label}
                         </span>
                       </p>
-                      <p className="text-xs mt-1">Supports high-res Images & 4K Videos</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Supports high-res Images & 4K Videos</p>
                     </div>
                   )}
                 </div>
@@ -411,9 +404,9 @@ const HeroManager = () => {
                 <button
                   type="submit"
                   disabled={uploading || !selectedFile}
-                  className="w-full bg-[#5A7863] text-white py-4 sm:py-4.5 rounded-xl font-bold uppercase tracking-[2px] text-xs disabled:opacity-50 transition hover:bg-[#4A6853] active:scale-[0.98] shadow-sm flex items-center justify-center gap-2"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 sm:py-3 rounded-lg font-bold uppercase tracking-wider text-xs disabled:opacity-50 transition active:scale-[0.99] shadow-xs flex items-center justify-center gap-2"
                 >
-                  <Upload size={16} />
+                  <Upload size={14} />
                   {uploading
                     ? `Uploading to Google Drive ${uploadProgress}%...`
                     : `Publish to ${HERO_CATEGORIES.find((c) => c.id === category)?.label} Hero`}
@@ -422,15 +415,15 @@ const HeroManager = () => {
             </div>
           ) : (
             // ─── MEDIA GRID ──────────────────────────────
-            <div className="space-y-5">
+            <div className="space-y-4">
               {/* Category Filter Pills */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 <button
                   onClick={() => setSelectedFilterCategory("all")}
-                  className={`px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
                     selectedFilterCategory === "all"
-                      ? "bg-[#5A7863] text-white shadow-sm"
-                      : "bg-white text-[#3B4953]/80 border border-[#DDE7D8] hover:bg-[#F7F9F4]"
+                      ? "bg-blue-600 text-white shadow-2xs"
+                      : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                   }`}
                 >
                   <Layers size={13} />
@@ -447,10 +440,10 @@ const HeroManager = () => {
                     <button
                       key={cat.id}
                       onClick={() => setSelectedFilterCategory(cat.id)}
-                      className={`px-3.5 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 ${
                         isActive
-                          ? "bg-[#5A7863] text-white shadow-sm"
-                          : "bg-white text-[#3B4953]/80 border border-[#DDE7D8] hover:bg-[#F7F9F4]"
+                          ? "bg-blue-600 text-white shadow-2xs"
+                          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
                       }`}
                     >
                       <Icon size={13} />
@@ -462,22 +455,22 @@ const HeroManager = () => {
 
               {loading ? (
                 // Skeleton loading
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <SkeletonCard key={i} />
                   ))}
                 </div>
               ) : filteredHeroes.length === 0 ? (
                 // Empty state
-                <div className="bg-white rounded-2xl border border-[#DDE7D8] text-center py-16 sm:py-24 text-[#3B4953]/50 p-6">
-                  <ImageIcon size={56} className="mx-auto mb-4 opacity-30 text-[#5A7863]" />
-                  <p className="text-base font-semibold text-[#2A382C]">
+                <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 text-center py-12 sm:py-16 text-slate-400 p-5 shadow-2xs">
+                  <ImageIcon size={44} className="mx-auto mb-3 opacity-30 text-blue-600 dark:text-blue-400" />
+                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                     No hero banners found for{" "}
                     {selectedFilterCategory === "all"
                       ? "any category"
                       : HERO_CATEGORIES.find((c) => c.id === selectedFilterCategory)?.label}.
                   </p>
-                  <p className="text-xs sm:text-sm mt-1 text-[#3B4953]/70">
+                  <p className="text-xs mt-1 text-slate-500 dark:text-slate-400">
                     Switch to the "Upload" tab to add a hero banner for this section.
                   </p>
                   <button
@@ -487,23 +480,23 @@ const HeroManager = () => {
                       }
                       setActiveTab("create");
                     }}
-                    className="mt-5 inline-flex items-center gap-2 bg-[#5A7863] text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#4A6853] transition"
+                    className="mt-4 inline-flex items-center gap-1.5 bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-blue-700 transition shadow-xs"
                   >
-                    <Plus size={14} /> Upload Banner
+                    <Plus size={13} /> Upload Banner
                   </button>
                 </div>
               ) : (
                 // Media cards
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {filteredHeroes.map((hero) => {
                     const catMeta = getCategoryMeta(hero.category);
                     const CatIcon = catMeta.icon;
                     return (
                       <div
                         key={hero._id}
-                        className="bg-white rounded-xl border border-[#DDE7D8] p-3 flex flex-col gap-3 shadow-sm hover:shadow-md transition duration-200"
+                        className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-2.5 sm:p-3 flex flex-col gap-2.5 shadow-2xs hover:shadow-xs transition duration-150"
                       >
-                        <div className="relative h-48 bg-[#111] rounded-lg overflow-hidden group">
+                        <div className="relative h-40 bg-slate-900 rounded-lg overflow-hidden group">
                           {hero.mediaType === "video" ? (
                             <video
                               src={`${hero.mediaUrl}#t=0.001`}
@@ -523,9 +516,9 @@ const HeroManager = () => {
                           )}
 
                           {/* Category Badge overlay */}
-                          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5">
+                          <div className="absolute top-2 left-2 flex items-center gap-1.5">
                             <span
-                              className={`px-2.5 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-wider border shadow-sm flex items-center gap-1 ${catMeta.color}`}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider border shadow-2xs flex items-center gap-1 ${catMeta.color}`}
                             >
                               <CatIcon size={11} />
                               {catMeta.badge}
@@ -533,8 +526,8 @@ const HeroManager = () => {
                           </div>
 
                           {/* Media Type Badge overlay */}
-                          <div className="absolute top-2.5 right-2.5">
-                            <span className="bg-black/70 backdrop-blur-md text-white text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1">
+                          <div className="absolute top-2 right-2">
+                            <span className="bg-black/70 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
                               {hero.mediaType === "video" ? (
                                 <>
                                   <Video size={10} /> VIDEO
@@ -549,11 +542,11 @@ const HeroManager = () => {
                         </div>
 
                         <div className="flex items-center justify-between px-1">
-                          <span className="text-[11px] font-bold text-[#5A7863] flex items-center gap-1">
+                          <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1">
                             <CatIcon size={12} />
                             {catMeta.label}
                           </span>
-                          <span className="text-[10px] text-[#3B4953]/50">
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">
                             {new Date(hero.createdAt).toLocaleDateString()}
                           </span>
                         </div>
@@ -564,18 +557,18 @@ const HeroManager = () => {
                               setSelectedHero(hero);
                               setLightboxOpen(true);
                             }}
-                            className="flex-1 bg-[#F7F9F4] text-[#5A7863] py-2.5 rounded-lg text-xs font-bold uppercase hover:bg-[#EBF4DD] transition flex items-center justify-center gap-1.5 border border-[#DDE7D8]"
+                            className="flex-1 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 py-1.5 rounded-md text-xs font-bold uppercase hover:bg-blue-100 dark:hover:bg-blue-900/40 transition flex items-center justify-center gap-1.5 border border-blue-200/60 dark:border-blue-900/60"
                           >
-                            <Eye size={14} /> Preview
+                            <Eye size={13} /> Preview
                           </button>
                           <button
                             onClick={() => {
                               setHeroToDelete(hero);
                               setDeleteModalOpen(true);
                             }}
-                            className="px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition flex items-center justify-center border border-red-100"
+                            className="px-3 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 rounded-md hover:bg-rose-100 dark:hover:bg-rose-900/40 transition flex items-center justify-center border border-rose-200/60 dark:border-rose-900/60"
                           >
-                            <Trash2 size={16} />
+                            <Trash2 size={14} />
                           </button>
                         </div>
                       </div>
@@ -585,8 +578,6 @@ const HeroManager = () => {
               )}
             </div>
           )}
-        </div>
-      </div>
 
       {/* ===== LIGHTBOX ===== */}
       {lightboxOpen && selectedHero && (

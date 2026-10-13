@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { toast } from "react-toastify";
 import {
   getAdminUsers,
@@ -19,6 +19,10 @@ import {
   FaUsers,
   FaUserShield,
   FaClock,
+  FaSearch,
+  FaCloud,
+  FaUnlink,
+  FaPaperPlane,
 } from "react-icons/fa";
 
 function AdminUsers() {
@@ -26,6 +30,7 @@ function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null); // stores userId being approved/rejected
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
     setLoading(true);
@@ -59,7 +64,6 @@ function AdminUsers() {
   };
 
   useEffect(() => {
-    // Parse Google Drive OAuth callback results from URL query parameters
     const queryParams = new URLSearchParams(window.location.search);
     const googleStatus = queryParams.get("google");
     if (googleStatus) {
@@ -73,21 +77,31 @@ function AdminUsers() {
           { autoClose: 10000 }
         );
       }
-      // Clean query parameters from URL without reloading page
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
+    setSearchQuery(""); // Reset search on tab change
   }, [activeTab]);
+
+  const filteredUsers = useMemo(() => {
+    if (!searchQuery.trim()) return users;
+    const query = searchQuery.toLowerCase();
+    return users.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(query) ||
+        item.email?.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   const handleApprove = async (userId) => {
     setActionLoading(userId);
     try {
       const response = await approveUserRequest(userId);
       toast.success(response.data.message || "User approved successfully");
-      fetchData(); // reload
+      fetchData();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to approve user");
@@ -101,7 +115,7 @@ function AdminUsers() {
     try {
       const response = await rejectUserRequest(userId);
       toast.success(response.data.message || "User rejected successfully");
-      fetchData(); // reload
+      fetchData();
     } catch (error) {
       console.error(error);
       toast.error(error.response?.data?.message || "Failed to reject user");
@@ -152,202 +166,206 @@ function AdminUsers() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DDE7D8] pb-5">
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-[#3B4953]">
-            User Directory & Access Control
-          </h2>
-          <p className="text-sm text-[#3B4953]/60 mt-1">
-            Manage application user accounts, configure editor roles, and approve pending signup requests.
-          </p>
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
+      {/* Control Bar: Tabs & Advanced Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        {/* Modern Tabs */}
+        <div className="flex items-center gap-1.5">
+          <button
+            onClick={() => setActiveTab("users")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+              activeTab === "users"
+                ? "bg-blue-600 text-white shadow-2xs"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <FaUsers size={13} />
+            Users
+          </button>
+          <button
+            onClick={() => setActiveTab("editors")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+              activeTab === "editors"
+                ? "bg-blue-600 text-white shadow-2xs"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <FaUserShield size={13} />
+            Editors
+          </button>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 relative ${
+              activeTab === "pending"
+                ? "bg-blue-600 text-white shadow-2xs"
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            }`}
+          >
+            <FaClock size={13} />
+            Pending
+          </button>
         </div>
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="self-start md:self-auto px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#5A7863] bg-white border border-[#DDE7D8] rounded-xl hover:bg-[#EEF6EC]/30 transition disabled:opacity-50 flex items-center gap-2"
-        >
-          {loading ? <FaSpinner className="animate-spin" /> : "Refresh Directory"}
-        </button>
-      </div>
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-[#DDE7D8] pb-px">
-        <button
-          onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 ${
-            activeTab === "users"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
-          }`}
-        >
-          <FaUsers size={16} />
-          Users
-        </button>
-        <button
-          onClick={() => setActiveTab("editors")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 ${
-            activeTab === "editors"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
-          }`}
-        >
-          <FaUserShield size={16} />
-          Editors
-        </button>
-        <button
-          onClick={() => setActiveTab("pending")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 relative ${
-            activeTab === "pending"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
-          }`}
-        >
-          <FaClock size={16} />
-          Pending Approvals
-        </button>
+        {/* Search Bar */}
+        <div className="relative w-full sm:w-64">
+          <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
+          <input
+            type="text"
+            placeholder="Search by name or email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition shadow-2xs text-slate-800 dark:text-slate-100"
+          />
+        </div>
       </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-3xl border border-[#DDE7D8] shadow-sm overflow-hidden min-h-[300px]">
+      <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden min-h-[300px]">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <FaSpinner className="text-[#5A7863] animate-spin text-3xl" />
-            <p className="text-sm text-[#3B4953]/60">Fetching directory listing...</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-2.5">
+            <FaSpinner className="text-blue-600 animate-spin text-2xl" />
+            <p className="text-xs font-medium text-slate-500">Loading directory records...</p>
           </div>
-        ) : users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-            <div className="w-16 h-16 bg-[#F7F9F4] text-[#5A7863]/60 rounded-full flex items-center justify-center mb-4">
-              <FaUser size={24} />
+        ) : filteredUsers.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+            <div className="w-11 h-11 bg-slate-50 dark:bg-slate-800 text-slate-400 rounded-xl flex items-center justify-center mb-2 shadow-inner">
+              <FaUser size={18} />
             </div>
-            <h3 className="text-lg font-bold text-[#3B4953]">No users found</h3>
-            <p className="text-sm text-[#3B4953]/60 max-w-sm mt-1">
-              There are no accounts in this list. Any newly registered users requiring approval will show up here.
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No records found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mt-0.5">
+              {searchQuery ? "No users match your search filter." : "There are no accounts currently in this view."}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F7F9F4] border-b border-[#DDE7D8]">
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">User Details</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Role</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Drive Connection</th>
-                  {(activeTab === "pending" || activeTab === "users" || activeTab === "editors") && (
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60 text-right">Actions</th>
-                  )}
+                <tr className="bg-slate-50/70 dark:bg-slate-800/50 border-b border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-[11px] font-bold uppercase tracking-wider">
+                  <th className="px-4 py-2.5">User Details</th>
+                  <th className="px-4 py-2.5">Role</th>
+                  <th className="px-4 py-2.5">Status</th>
+                  <th className="px-4 py-2.5">Drive Integration</th>
+                  <th className="px-4 py-2.5 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#DDE7D8]">
-                {users.map((item) => (
-                  <tr key={item._id} className="hover:bg-[#F7F9F4]/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#EBF4DD] text-[#5A7863] flex items-center justify-center font-bold text-sm">
-                          {item.name.charAt(0).toUpperCase()}
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredUsers.map((item) => (
+                  <tr key={item._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                    {/* User Info */}
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                          {item.name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-[#3B4953]">{item.name}</div>
-                          <div className="text-xs text-[#3B4953]/60 flex items-center gap-1 mt-0.5">
-                            <FaEnvelope size={10} />
+                          <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{item.name}</div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <FaEnvelope size={9} />
                             {item.email}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full uppercase ${
+
+                    {/* Role Badge */}
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
                         item.role === "ADMIN"
-                          ? "bg-purple-50 text-purple-700 border border-purple-100"
+                          ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/60 dark:border-purple-900/40"
                           : item.role === "EDITOR"
-                          ? "bg-blue-50 text-blue-700 border border-blue-100"
-                          : "bg-slate-50 text-slate-700 border border-slate-100"
+                          ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700"
                       }`}>
                         {item.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full uppercase ${
+
+                    {/* Status Badge */}
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-md uppercase tracking-wider ${
                         item.status === "APPROVED"
-                          ? "bg-green-50 text-green-700 border border-green-100"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-900/40"
                           : item.status === "PENDING"
-                          ? "bg-amber-50 text-amber-700 border border-amber-100"
-                          : "bg-rose-50 text-rose-700 border border-rose-100"
+                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60 dark:border-amber-900/40"
+                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40"
                       }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${
+                          item.status === "APPROVED" ? "bg-emerald-500" : item.status === "PENDING" ? "bg-amber-500" : "bg-rose-500"
+                        }`} />
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full ${
+
+                    {/* Drive Status */}
+                    <td className="px-4 py-2.5">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-md ${
                         item.googleDrive?.connected
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                          : "bg-gray-50 text-gray-500 border border-gray-100"
+                          ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60 dark:border-blue-900/40"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200/60 dark:border-slate-700"
                       }`}>
+                        <FaCloud size={10} />
                         {item.googleDrive?.connected ? "Connected" : "Disconnected"}
                       </span>
                     </td>
-                    {activeTab === "pending" && (
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleApprove(item._id)}
-                            disabled={actionLoading !== null}
-                            className="p-2 bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 rounded-lg transition disabled:opacity-50"
-                            title="Approve Account"
-                          >
-                            {actionLoading === item._id ? (
-                              <FaSpinner className="animate-spin text-sm" />
-                            ) : (
-                              <FaCheck size={14} />
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleReject(item._id)}
-                            disabled={actionLoading !== null}
-                            className="p-2 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-lg transition disabled:opacity-50"
-                            title="Reject Account"
-                          >
-                            {actionLoading === item._id ? (
-                              <FaSpinner className="animate-spin text-sm" />
-                            ) : (
-                              <FaTimes size={14} />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                    {(activeTab === "users" || activeTab === "editors") && (
-                      <td className="px-6 py-4 text-right">
-                        {item.googleDrive?.connected ? (
-                          <button
-                            onClick={() => handleDisconnectDrive(item._id)}
-                            className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-xl text-xs font-semibold transition"
-                          >
-                            Disconnect Drive
-                          </button>
-                        ) : (
-                          <div className="flex justify-end gap-2">
+
+                    {/* Actions */}
+                    <td className="px-4 py-2.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {activeTab === "pending" ? (
+                          <>
                             <button
-                              onClick={() => handleConnectDrive(item._id)}
-                              className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 rounded-xl text-xs font-semibold transition"
+                              onClick={() => handleApprove(item._id)}
+                              disabled={actionLoading !== null}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold shadow-2xs transition disabled:opacity-50"
+                              title="Approve Account"
                             >
-                              Connect Drive
+                              {actionLoading === item._id ? <FaSpinner className="animate-spin text-xs" /> : <FaCheck size={10} />}
+                              Approve
                             </button>
-                            {item.role === "USER" && (
+                            <button
+                              onClick={() => handleReject(item._id)}
+                              disabled={actionLoading !== null}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-rose-50 hover:text-rose-700 rounded-md text-xs font-semibold transition disabled:opacity-50"
+                              title="Reject Account"
+                            >
+                              {actionLoading === item._id ? <FaSpinner className="animate-spin text-xs" /> : <FaTimes size={10} />}
+                              Reject
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            {item.googleDrive?.connected ? (
                               <button
-                                onClick={() => handleSendEmail(item._id)}
-                                disabled={actionLoading === item._id}
-                                className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 rounded-xl text-xs font-semibold transition disabled:opacity-50"
+                                onClick={() => handleDisconnectDrive(item._id)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200/60 hover:bg-rose-100 rounded-md text-xs font-semibold transition"
                               >
-                                {actionLoading === item._id ? "Sending..." : "Send Link"}
+                                <FaUnlink size={10} /> Disconnect
                               </button>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => handleConnectDrive(item._id)}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-semibold shadow-2xs transition"
+                                >
+                                  <FaCloud size={10} /> Connect
+                                </button>
+                                {item.role === "USER" && (
+                                  <button
+                                    onClick={() => handleSendEmail(item._id)}
+                                    disabled={actionLoading === item._id}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 rounded-md text-xs font-medium transition disabled:opacity-50"
+                                    title="Send Connection Link via Email"
+                                  >
+                                    <FaPaperPlane size={9} />
+                                    {actionLoading === item._id ? "Sending..." : "Email Link"}
+                                  </button>
+                                )}
+                              </div>
                             )}
-                          </div>
+                          </>
                         )}
-                      </td>
-                    )}
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

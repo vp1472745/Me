@@ -134,55 +134,50 @@ function AdminFilms() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       <Toaster
         position="top-right"
         toastOptions={{
           duration: 4000,
-          style: { background: "#2d3748", color: "#fff", borderRadius: "12px", padding: "16px" },
-          success: { style: { background: "#1a7d4a" } },
-          error: { style: { background: "#b91c1c" } },
+          style: { background: "#1e293b", color: "#fff", borderRadius: "10px", padding: "12px", fontSize: "13px" },
+          success: { style: { background: "#059669" } },
+          error: { style: { background: "#dc2626" } },
         }}
       />
 
-      {/* Structural Navigation Tabs Module */}
-      <div className="flex-shrink-0 px-4 mt-4">
-        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("create")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${
-                activeTab === "create"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
-            >
-              Create Video
-            </button>
-            <button
-              onClick={() => setActiveTab("all")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${
-                activeTab === "all"
-                  ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                  : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-              }`}
-            >
-              All Videos
-            </button>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        <button
+          onClick={() => setActiveTab("create")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "create"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <FaPlus size={11} />
+          Create Video
+        </button>
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "all"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          <FaVideo size={11} />
+          All Videos ({videos.length})
+        </button>
       </div>
 
-      {/* Dynamic Content Stream Area */}
-      <div className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6">
-        <div className="max-w-7xl mx-auto mt-6">
-          {/* CREATE TAB */}
-          {activeTab === "create" && (
-            <div className="bg-white rounded-2xl border border-[#DDE7D8] p-5 sm:p-6 md:p-8 shadow-sm">
-              <form onSubmit={handleSubmit} className="space-y-6">
+      {/* CREATE TAB */}
+      {activeTab === "create" && (
+        <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-2xs">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Category Input Selection Box */}
                 <div>
-                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                  <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     Video Category / Tag
                   </label>
                   <input
@@ -190,38 +185,38 @@ function AdminFilms() {
                     placeholder="e.g., Wedding Teaser, Highlights, Cinematic Film"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 sm:p-3 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm"
                   />
                 </div>
 
                 {/* YouTube Link Destination Entry Field */}
                 <div>
-                  <label className="block mb-2 uppercase tracking-[2px] text-[11px] font-bold text-[#3B4953]/80">
+                  <label className="block mb-1.5 uppercase tracking-wider text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     YouTube Video URL
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-red-600">
-                      <FaYoutube size={16} />
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-red-600">
+                      <FaYoutube size={15} />
                     </div>
                     <input
                       type="url"
                       placeholder="https://www.youtube.com/watch?v=..."
                       value={youtubeUrl}
                       onChange={(e) => setYoutubeUrl(e.target.value)}
-                      className="w-full bg-[#F7F9F4] border border-[#DDE7D8] text-[#3B4953] rounded-xl p-4 pl-11 placeholder-[#3B4953]/40 focus:outline-none focus:border-[#5A7863] transition text-sm"
+                      className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-lg p-2.5 sm:p-3 pl-10 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm"
                       required
                     />
                   </div>
                 </div>
 
                 {/* Processing Controls System Commit Trigger */}
-                <div className="pt-4 border-t border-[#DDE7D8]">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-700/80 flex items-center gap-3">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2.5 rounded-lg uppercase tracking-wider text-xs font-bold transition-all duration-200 shadow-sm hover:shadow disabled:opacity-50"
                   >
-                    <FaPlus size={11} />
+                    <FaPlus size={10} />
                     {loading ? "Adding Track..." : "Add Video Resource"}
                   </button>
                 </div>
@@ -233,15 +228,15 @@ function AdminFilms() {
           {activeTab === "all" && (
             <>
               {videos.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
-                    <FaVideo size={22} className="text-[#90AB8B]" />
+                <div className="text-center py-16 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700/80 px-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-50 dark:bg-blue-950/50 rounded-full mb-3 border border-blue-200 dark:border-blue-900">
+                    <FaVideo size={18} className="text-blue-600 dark:text-blue-400" />
                   </div>
-                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No stream assets found</p>
-                  <p className="text-[#3B4953]/60 text-sm">Deploy standalone cloud-linked stream objects here.</p>
+                  <p className="text-slate-800 dark:text-slate-200 text-base font-bold mb-1">No video assets found</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Add your first YouTube video link using the create tab above.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {videos.map((video) => {
                     const embedUrl = getEmbedUrl(video.youtubeUrl);
                     const videoId = embedUrl.includes("/embed/") ? embedUrl.split("/embed/")[1] : "";
@@ -249,12 +244,12 @@ function AdminFilms() {
                     return (
                       <div
                         key={video._id}
-                        className="group bg-white rounded-xl overflow-hidden border border-[#DDE7D8] shadow-sm hover:shadow-md transition-all duration-300 flex flex-col"
+                        className="group bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col"
                       >
                         {/* Dynamic Stream Image Thumbnail Layout */}
                         {video.youtubeUrl && videoId && (
                           <div
-                            className="relative overflow-hidden h-52 bg-black cursor-pointer"
+                            className="relative overflow-hidden h-44 sm:h-48 bg-black cursor-pointer"
                             onClick={() => setSelectedVideo(video)}
                           >
                             <img
@@ -268,33 +263,33 @@ function AdminFilms() {
                             />
                             {/* Floating Overlay Meta Elements */}
                             {video.category && (
-                              <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] text-[10px] font-bold uppercase tracking-[1px] text-[#3B4953]">
+                              <div className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-xs px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white border border-white/10">
                                 {video.category}
                               </div>
                             )}
                             {/* Play HUD Centered Target Icon */}
-                            <div className="absolute inset-0 flex items-center justify-center bg-[#3B4953]/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#5A7863] shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
-                                <FaPlay size={14} className="ml-0.5" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform duration-300">
+                                <FaPlay size={12} className="ml-0.5" />
                               </div>
                             </div>
                           </div>
                         )}
 
                         {/* Video Item Action Control Center Footer */}
-                        <div className="p-4 bg-white border-t border-[#DDE7D8] flex gap-2.5 mt-auto">
+                        <div className="p-3 bg-white dark:bg-slate-800/90 border-t border-slate-100 dark:border-slate-700/80 flex items-center gap-2 mt-auto">
                           <button
                             onClick={() => setSelectedVideo(video)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2.5 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 py-1.5 sm:py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200"
                           >
-                            <FaPlay size={10} /> Stream
+                            <FaPlay size={9} /> Play
                           </button>
                           <button
                             onClick={() => handleDeleteClick(video)}
-                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2.5 rounded-lg transition-all duration-200"
-                            title="Erase Stream Resource"
+                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:hover:bg-red-900/50 dark:text-red-400 border border-red-200 dark:border-red-800/60 p-2 rounded-lg transition-all duration-200"
+                            title="Delete Video"
                           >
-                            <FaTrash size={12} />
+                            <FaTrash size={11} />
                           </button>
                         </div>
                       </div>
@@ -304,28 +299,26 @@ function AdminFilms() {
               )}
             </>
           )}
-        </div>
-      </div>
 
       {/* ==========================
           FULLSCREEN VIDEO MODAL (YouTube embed)
       ========================== */}
       {selectedVideo && selectedVideo.youtubeUrl && (
         <div
-          className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md flex items-center justify-center p-4"
+          className="fixed inset-0 z-[999] bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5"
           onClick={() => setSelectedVideo(null)}
         >
           <div
-            className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden shadow-2xl border border-[#DDE7D8]"
+            className="relative w-full max-w-3xl bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-700"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Dismiss Modal Floating Control */}
             <button
               onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 z-50 text-white/70 hover:text-white bg-black/40 hover:bg-black/60 p-2.5 rounded-full transition shadow-md"
+              className="absolute top-3 right-3 z-50 text-white/80 hover:text-white bg-black/60 hover:bg-black/80 p-2 rounded-full transition shadow-md"
               aria-label="Close Playback"
             >
-              <FaTimes size={14} />
+              <FaTimes size={13} />
             </button>
 
             {/* Embed Stream Window Aspect Frame */}
@@ -342,12 +335,12 @@ function AdminFilms() {
 
             {/* Meta Segment Display Footnote */}
             {(selectedVideo.title || selectedVideo.category) && (
-              <div className="p-5 text-center bg-[#F7F9F4] border-t border-[#DDE7D8]">
+              <div className="p-3.5 text-center bg-slate-50 dark:bg-slate-900/80 border-t border-slate-200 dark:border-slate-700">
                 {selectedVideo.title && (
-                  <h3 className="text-lg font-bold text-[#3B4953] tracking-wide">{selectedVideo.title}</h3>
+                  <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide">{selectedVideo.title}</h3>
                 )}
                 {selectedVideo.category && (
-                  <p className="text-[#5A7863] text-xs font-semibold uppercase tracking-[1.5px] mt-1">
+                  <p className="text-blue-600 dark:text-blue-400 text-xs font-semibold uppercase tracking-wider mt-0.5">
                     {selectedVideo.category}
                   </p>
                 )}

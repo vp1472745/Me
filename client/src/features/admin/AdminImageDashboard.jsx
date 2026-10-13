@@ -257,98 +257,66 @@ const GalleryUpload = () => {
         Object.values(uploadProgress).every((p) => p === 100);
 
     return (
-        <div className="flex flex-col h-full w-full bg-gradient-to-br from-[#F7F9F4] via-[#f0f5eb] to-[#e8efe0] text-[#2d3748] font-sans overflow-hidden">
+        <div className="animate-fade-in text-xs sm:text-sm space-y-4">
             <Toaster
                 position="top-right"
                 toastOptions={{
                     duration: 4000,
                     className: "custom-toast",
                     style: {
-                        background: "#2d3748",
+                        background: "#1e293b",
                         color: "#fff",
-                        borderRadius: "12px",
-                        padding: "16px",
+                        borderRadius: "10px",
+                        padding: "12px",
+                        fontSize: "13px",
                     },
                     success: {
                         style: {
-                            background: "#1a7d4a",
+                            background: "#059669",
                         },
                     },
                     error: {
                         style: {
-                            background: "#b91c1c",
+                            background: "#dc2626",
                         },
                     },
                 }}
             />
 
-            {/* ===== FIXED HEADER ===== */}
-            <div className="sticky top-0 z-20 bg-gradient-to-br from-[#F7F9F4] via-[#f0f5eb] to-[#e8efe0] border-b border-[#DDE7D8]/50 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-                    {/* Title & New Upload Button */}
-                    {/* <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <div>
-                            <h1 className="text-3xl font-bold bg-gradient-to-r from-[#3B4953] to-[#5A7863] bg-clip-text text-transparent">
-                                Media Gallery
-                            </h1>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Upload, manage, and organize your media collections
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => setActiveTab("create")}
-                            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow-md ${activeTab === "create"
-                                    ? "bg-[#5A7863] text-white hover:bg-[#4a6a53]"
-                                    : "bg-white text-[#3B4953] border border-gray-200 hover:border-[#5A7863]"
-                                }`}
-                        >
-                            <FaPlus className="text-sm" />
-                            New Upload
-                        </button>
-                    </div> */}
-
-                    {/* Tabs */}
-                    <div className="flex gap-1 bg-white/70 backdrop-blur-sm p-1.5 rounded-2xl border border-white/50 shadow-sm w-full sm:w-auto">
-                        <button
-                            onClick={() => setActiveTab("create")}
-                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "create"
-                                ? "bg-[#5A7863] text-white shadow-md"
-                                : "text-[#3B4953] hover:bg-gray-100"
-                                }`}
-                        >
-                            <FaUpload className="text-xs" />
-                            Upload
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("all")}
-                            className={`flex items-center gap-2 px-6 py-3 text-sm font-semibold rounded-xl transition-all duration-200 ${activeTab === "all"
-                                ? "bg-[#5A7863] text-white shadow-md"
-                                : "text-[#3B4953] hover:bg-gray-100"
-                                }`}
-                        >
-                            <FaTh className="text-xs" />
-                            All Galleries
-                            <span className="ml-1 px-2 py-0.5 text-xs bg-white/20 rounded-full">
-                                {galleries.length}
-                            </span>
-                        </button>
-                    </div>
-                </div>
+            {/* Tabs */}
+            <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+                <button
+                    onClick={() => setActiveTab("create")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${activeTab === "create"
+                        ? "bg-blue-600 text-white shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        }`}
+                >
+                    <FaUpload size={12} />
+                    Upload Images
+                </button>
+                <button
+                    onClick={() => setActiveTab("all")}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${activeTab === "all"
+                        ? "bg-blue-600 text-white shadow-2xs"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        }`}
+                >
+                    <FaTh size={12} />
+                    All Galleries ({galleries.length})
+                </button>
             </div>
 
-            {/* ===== SCROLLABLE CONTENT ===== */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full">
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl border border-white/50 shadow-xl shadow-black/5 p-6 sm:p-8 min-h-[500px]">
+            <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs p-4 sm:p-5">
                         {activeTab === "create" ? (
                             <div>
                                 <form onSubmit={handleSubmit}>
                                     {/* Drop Zone */}
                                     <div
-                                        className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 transition-all duration-300 ${isDragging
-                                            ? "border-[#5A7863] bg-[#5A7863]/5 scale-[1.01]"
-                                            : "border-gray-300 hover:border-[#5A7863]/50"
-                                            } ${files.length > 0 ? "bg-gray-50/50" : "bg-white"}`}
+                                        className={`relative border-2 border-dashed rounded-xl p-6 sm:p-8 transition-all duration-200 ${isDragging
+                                            ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 scale-[1.005]"
+                                            : "border-slate-300 dark:border-slate-700 hover:border-blue-400"
+                                            } ${files.length > 0 ? "bg-slate-50/50 dark:bg-slate-900/40" : "bg-white dark:bg-slate-800"}`}
                                         onDrop={handleDrop}
                                         onDragOver={handleDragOver}
                                         onDragLeave={handleDragLeave}
@@ -363,66 +331,60 @@ const GalleryUpload = () => {
                                         />
 
                                         {files.length === 0 ? (
-                                            <div className="text-center py-8">
-                                                <div className="w-20 h-20 mx-auto bg-[#5A7863]/10 rounded-2xl flex items-center justify-center mb-4">
-                                                    <FaImages className="text-3xl text-[#5A7863]" />
+                                            <div className="text-center py-6">
+                                                <div className="w-14 h-14 mx-auto bg-blue-50 dark:bg-blue-950/50 rounded-xl flex items-center justify-center mb-3 border border-blue-200 dark:border-blue-900">
+                                                    <FaImages className="text-2xl text-blue-600 dark:text-blue-400" />
                                                 </div>
-                                                <h3 className="text-lg font-semibold text-[#3B4953]">
+                                                <h3 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">
                                                     Drop your images here
                                                 </h3>
-                                                <p className="text-sm text-gray-400 mt-1">
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                                                     or click to browse files
                                                 </p>
-                                                <p className="text-xs text-gray-300 mt-3">
-                                                    Supports JPG, PNG, WEBP & more
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-2">
-                                                    ⚡ Large images will be automatically compressed
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-2">
-                                                    Single files up to {MAX_IMAGE_SIZE_LABEL} are supported.
+                                                <p className="text-[11px] text-slate-400 mt-2 font-medium">
+                                                    Supports JPG, PNG, WEBP & more • Single files up to {MAX_IMAGE_SIZE_LABEL}
                                                 </p>
                                             </div>
                                         ) : (
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <span className="text-sm font-medium text-[#3B4953]">
+                                            <div className="space-y-3">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                                                         {files.length} file{files.length > 1 ? "s" : ""} selected
                                                     </span>
                                                     <button
                                                         type="button"
                                                         onClick={clearAllFiles}
-                                                        className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 font-medium transition-colors"
+                                                        className="flex items-center gap-1 text-xs text-red-600 hover:text-red-700 font-semibold transition-colors"
                                                     >
-                                                        <FaTrash size={12} />
+                                                        <FaTrash size={10} />
                                                         Clear All
                                                     </button>
                                                 </div>
 
                                                 {Object.values(uploadProgress).length > 0 && (
-                                                    <div className="mb-4">
-                                                        <div className="flex justify-between text-sm mb-1">
-                                                            <span className="text-gray-600">Overall Progress</span>
-                                                            <span className="font-semibold text-[#5A7863]">
+                                                    <div className="mb-3">
+                                                        <div className="flex justify-between text-xs mb-1">
+                                                            <span className="text-slate-500">Overall Progress</span>
+                                                            <span className="font-bold text-blue-600 dark:text-blue-400">
                                                                 {Math.round(totalProgress)}%
                                                             </span>
                                                         </div>
-                                                        <div className="w-full h-2.5 bg-gray-200 rounded-full overflow-hidden">
+                                                        <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                             <div
-                                                                className={`h-full transition-all duration-300 rounded-full ${isAllUploaded ? "bg-green-500" : "bg-[#5A7863]"
+                                                                className={`h-full transition-all duration-300 rounded-full ${isAllUploaded ? "bg-emerald-500" : "bg-blue-600"
                                                                     }`}
                                                                 style={{ width: `${totalProgress}%` }}
                                                             />
                                                         </div>
                                                         {isAllUploaded && (
-                                                            <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                                                            <p className="text-[11px] text-emerald-600 mt-1 flex items-center gap-1 font-semibold">
                                                                 <FaCheckCircle /> All files uploaded!
                                                             </p>
                                                         )}
                                                     </div>
                                                 )}
 
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-64 overflow-y-auto pr-1">
                                                     {files.map((file, index) => {
                                                         const progress = uploadProgress[index] || 0;
                                                         const isDone = progress === 100;
@@ -430,29 +392,29 @@ const GalleryUpload = () => {
                                                         return (
                                                             <div
                                                                 key={index}
-                                                                className="relative group flex items-center gap-3 bg-white p-3 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                                                                className="relative group flex items-center gap-2.5 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs hover:shadow-xs transition"
                                                             >
                                                                 {!loading && progress === 0 && (
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => removeFile(index)}
-                                                                        className="absolute top-2 right-2 z-10 w-5 h-5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors shadow-sm"
+                                                                        className="absolute top-1.5 right-1.5 z-10 w-4.5 h-4.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition shadow-2xs"
                                                                         title="Remove file"
                                                                     >
-                                                                        <FaTimes size={10} />
+                                                                        <FaTimes size={8} />
                                                                     </button>
                                                                 )}
                                                                 {isUploading && (
-                                                                    <div className="absolute top-2 right-2 z-10">
-                                                                        <FaSpinner className="text-[#5A7863] animate-spin text-sm" />
+                                                                    <div className="absolute top-1.5 right-1.5 z-10">
+                                                                        <FaSpinner className="text-blue-600 animate-spin text-xs" />
                                                                     </div>
                                                                 )}
                                                                 {isDone && (
-                                                                    <div className="absolute top-2 right-2 z-10">
-                                                                        <FaCheckCircle className="text-green-500 text-sm" />
+                                                                    <div className="absolute top-1.5 right-1.5 z-10">
+                                                                        <FaCheckCircle className="text-emerald-500 text-xs" />
                                                                     </div>
                                                                 )}
-                                                                <div className="w-12 h-12 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
+                                                                <div className="w-10 h-10 rounded-md bg-slate-100 dark:bg-slate-900 flex-shrink-0 overflow-hidden">
                                                                     {previews[index] ? (
                                                                         <img
                                                                             src={previews[index]}
@@ -460,27 +422,27 @@ const GalleryUpload = () => {
                                                                             className="w-full h-full object-cover"
                                                                         />
                                                                     ) : (
-                                                                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                                        <div className="w-full h-full flex items-center justify-center text-slate-400">
                                                                             <FaFileImage />
                                                                         </div>
                                                                     )}
                                                                 </div>
-                                                                <div className="flex-1 min-w-0 pr-6">
-                                                                    <p className="text-xs font-medium text-gray-700 truncate">
+                                                                <div className="flex-1 min-w-0 pr-5">
+                                                                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate">
                                                                         {file.name}
                                                                     </p>
-                                                                    <p className="text-[10px] text-gray-400">
+                                                                    <p className="text-[10px] text-slate-400">
                                                                         {getFileSize(file.size)}
                                                                     </p>
                                                                     {progress > 0 && (
-                                                                        <div className="mt-1 flex items-center gap-2">
-                                                                            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                                        <div className="mt-0.5 flex items-center gap-1.5">
+                                                                            <div className="flex-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                                                                 <div
                                                                                     className={`h-full transition-all duration-300 rounded-full ${getProgressColor(progress)}`}
                                                                                     style={{ width: `${progress}%` }}
                                                                                 />
                                                                             </div>
-                                                                            <span className="text-[10px] font-medium text-gray-500 min-w-[32px] text-right">
+                                                                            <span className="text-[9px] font-bold text-slate-500 min-w-[28px] text-right">
                                                                                 {Math.round(progress)}%
                                                                             </span>
                                                                         </div>
@@ -494,34 +456,34 @@ const GalleryUpload = () => {
                                         )}
                                     </div>
 
-                                    <div className="mt-6 flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
                                         <button
                                             type="submit"
                                             disabled={loading || files.length === 0}
-                                            className={`w-full sm:w-auto px-8 py-3 rounded-xl font-semibold text-white transition-all duration-200 flex items-center justify-center gap-3 ${loading || files.length === 0
-                                                ? "bg-gray-300 cursor-not-allowed"
-                                                : "bg-[#5A7863] hover:bg-[#4a6a53] shadow-lg hover:shadow-xl"
+                                            className={`w-full sm:w-auto px-6 py-2.5 rounded-lg font-bold text-xs uppercase tracking-wider text-white transition-all duration-200 flex items-center justify-center gap-2 ${loading || files.length === 0
+                                                ? "bg-slate-300 dark:bg-slate-700 cursor-not-allowed"
+                                                : "bg-blue-600 hover:bg-blue-700 shadow-xs hover:shadow"
                                                 }`}
                                         >
                                             {loading ? (
                                                 <>
-                                                    <FaSpinner className="animate-spin" />
+                                                    <FaSpinner className="animate-spin text-xs" />
                                                     Uploading... {Math.round(totalProgress)}%
                                                 </>
                                             ) : (
                                                 <>
-                                                    <FaUpload />
+                                                    <FaUpload className="text-xs" />
                                                     Upload {files.length} File{files.length > 1 ? "s" : ""}
                                                 </>
                                             )}
                                         </button>
                                         {loading && (
-                                            <span className="text-sm text-gray-500">
+                                            <span className="text-xs text-slate-500">
                                                 Please wait, this may take a moment...
                                             </span>
                                         )}
                                         {files.length > 0 && !loading && (
-                                            <span className="text-sm text-gray-400">
+                                            <span className="text-xs text-slate-400 font-medium">
                                                 {getFileSize(files.reduce((acc, f) => acc + f.size, 0))} total
                                             </span>
                                         )}
@@ -531,31 +493,31 @@ const GalleryUpload = () => {
                         ) : (
                             <div>
                                 {galleries.length === 0 ? (
-                                    <div className="text-center py-16">
-                                        <div className="w-24 h-24 mx-auto bg-gray-100 rounded-3xl flex items-center justify-center mb-4">
-                                            <FaImages className="text-4xl text-gray-300" />
+                                    <div className="text-center py-14">
+                                        <div className="w-16 h-16 mx-auto bg-blue-50 dark:bg-blue-950/50 rounded-2xl flex items-center justify-center mb-3 border border-blue-200 dark:border-blue-900">
+                                            <FaImages className="text-2xl text-blue-600 dark:text-blue-400" />
                                         </div>
-                                        <h3 className="text-lg font-semibold text-[#3B4953]">
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
                                             No galleries yet
                                         </h3>
-                                        <p className="text-sm text-gray-400 mt-1">
+                                        <p className="text-xs text-slate-400 mt-1">
                                             Upload your first media collection to get started
                                         </p>
                                         <button
                                             onClick={() => setActiveTab("create")}
-                                            className="mt-4 px-6 py-2 bg-[#5A7863] text-white rounded-xl hover:bg-[#4a6a53] transition-colors"
+                                            className="mt-3 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold uppercase tracking-wider rounded-lg hover:bg-blue-700 transition"
                                         >
                                             Upload now
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                         {galleries.map((g) => (
                                             <div
                                                 key={g._id}
-                                                className="group bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                                                className="group bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700/80 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
                                             >
-                                                <div className="relative h-52 bg-gray-100 overflow-hidden">
+                                                <div className="relative h-44 sm:h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
                                                     {g.images && g.images.length > 0 ? (
                                                         <img
                                                             src={g.images[0]}
@@ -564,23 +526,23 @@ const GalleryUpload = () => {
                                                             loading="lazy"
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                                            <FaImages size={40} />
+                                                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                                            <FaImages size={32} />
                                                         </div>
                                                     )}
-                                                    <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5">
-                                                        <FaImages size={10} />
+                                                    <div className="absolute top-2.5 right-2.5 bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 border border-white/10">
+                                                        <FaImages size={9} />
                                                         {g.images?.length || 0}
                                                     </div>
-                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+                                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors duration-300" />
                                                 </div>
-                                                <div className="p-4">
+                                                <div className="p-3">
                                                     <div className="flex items-center justify-between">
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-sm font-medium text-[#3B4953] truncate">
+                                                            <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
                                                                 {g.title || "Media Collection"}
                                                             </p>
-                                                            <p className="text-xs text-gray-400">
+                                                            <p className="text-[10px] text-slate-400 mt-0.5">
                                                                 {g.createdAt
                                                                     ? new Date(g.createdAt).toLocaleDateString("en-US", {
                                                                         month: "short",
@@ -593,17 +555,17 @@ const GalleryUpload = () => {
                                                         <div className="flex gap-1 ml-2">
                                                             <button
                                                                 onClick={() => openViewModal(g)}
-                                                                className="p-2 rounded-lg text-gray-500 hover:text-[#5A7863] hover:bg-[#5A7863]/10 transition-all"
+                                                                className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-700 transition"
                                                                 title="View gallery"
                                                             >
-                                                                <FaEye size={14} />
+                                                                <FaEye size={13} />
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDeleteClick(g)}
-                                                                className="p-2 rounded-lg text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all"
+                                                                className="p-1.5 rounded-lg text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-slate-700 transition"
                                                                 title="Delete gallery"
                                                             >
-                                                                <FaTrash size={14} />
+                                                                <FaTrash size={12} />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -615,8 +577,6 @@ const GalleryUpload = () => {
                             </div>
                         )}
                     </div>
-                </div>
-            </div>
 
             {/* Lightbox */}
             {viewModalOpen && selectedGallery && (

@@ -418,21 +418,20 @@ const CreateUsers = () => {
   return (
     <>
       <ToastContainer position="top-right" />
-      <div className="min-h-screen bg-gradient-to-b from-[#F6F8F5] to-[#EEF3EC] p-4 md:p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
-          {/* Header */}
-          <div className="rounded-3xl border border-white/70 bg-white/80 backdrop-blur-sm shadow-sm p-5 md:p-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="animate-fade-in text-xs sm:text-sm space-y-4">
+        {/* Header */}
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xs p-3.5 sm:p-4">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div>
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-[#5A7863] text-white flex items-center justify-center shadow-md">
-                    <FaUser />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+                    <FaUser size={14} />
                   </div>
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-slate-800">
-                      User Management
+                    <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
+                      User Management & Roles
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                       Manage photo studio roles, permissions, and create verified accounts with Email OTP.
                     </p>
                   </div>
@@ -444,14 +443,14 @@ const CreateUsers = () => {
                   setModalStep("form");
                   setCreateModalOpen(true);
                 }}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl bg-[#5A7863] text-white font-medium shadow-md hover:bg-[#4A6853] transition"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold shadow-2xs hover:bg-blue-700 transition"
               >
-                <FaUserPlus />
+                <FaUserPlus size={13} />
                 Create New User
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 mt-3.5">
               <StatCard
                 label="Total Studio Users"
                 value={users.length}
@@ -473,44 +472,44 @@ const CreateUsers = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
             {/* Left Panel */}
             <div className="lg:col-span-4">
-              <div className="rounded-3xl border border-white/70 bg-white shadow-sm overflow-hidden">
-                <div className="p-5 border-b border-slate-100">
+              <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xs overflow-hidden">
+                <div className="p-3.5 border-b border-slate-100 dark:border-slate-800">
                   <SectionTitle
                     title="Studio Users"
                     subtitle="Search directory by name, role, or email"
                     right={
-                      <span className="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-600">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                         {filteredUsers.length} found
                       </span>
                     }
                   />
 
-                  <div className="relative">
-                    <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <div className="relative mt-2">
+                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                     <input
                       ref={searchInputRef}
                       type="text"
-                      placeholder="Search by name, email, or role..."
+                      placeholder="Search name, email, role..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full h-12 pl-11 pr-12 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition text-sm"
+                      className="w-full h-8 pl-8 pr-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-xs"
                     />
                     {searchTerm && (
                       <button
                         onClick={clearSearch}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition flex items-center justify-center"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full text-slate-400 hover:text-slate-700 transition flex items-center justify-center"
                       >
-                        <FaTimes size={13} />
+                        <FaTimes size={10} />
                       </button>
                     )}
                   </div>
 
-                  <div className="mt-3 flex items-center gap-2 text-xs text-slate-500">
-                    <FaFilter />
-                    Filter active: live database synchronized
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
+                    <FaFilter size={9} />
+                    Live directory synchronized
                   </div>
                 </div>
 
@@ -539,49 +538,49 @@ const CreateUsers = () => {
                       </p>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1.5">
                       {filteredUsers.map((user) => {
                         const active = selectedUser?._id === user._id;
                         return (
                           <button
                             key={user._id}
                             onClick={() => handleSelectUser(user)}
-                            className={`w-full text-left p-3 rounded-2xl border transition-all duration-200 flex items-center gap-3 ${
+                            className={`w-full text-left p-2.5 rounded-xl border transition-all duration-200 flex items-center gap-2.5 ${
                               active
-                                ? "bg-[#F4F8F1] border-[#BFD0B7] shadow-sm"
-                                : "bg-white border-slate-100 hover:border-slate-200 hover:bg-slate-50"
+                                ? "bg-blue-50/70 dark:bg-blue-950/40 border-blue-300 dark:border-blue-800 shadow-2xs"
+                                : "bg-white dark:bg-[#111827] border-slate-100 dark:border-slate-800 hover:border-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50"
                             }`}
                           >
                             <div
-                              className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white font-semibold shadow-sm ${
-                                active ? "bg-[#5A7863]" : "bg-slate-700"
+                              className={`w-9 h-9 rounded-lg flex items-center justify-center text-white text-xs font-semibold shadow-2xs ${
+                                active ? "bg-blue-600" : "bg-slate-700"
                               }`}
                             >
                               {user.name?.charAt(0).toUpperCase() || "U"}
                             </div>
 
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-3">
-                                <p className="font-semibold text-slate-800 truncate">
+                              <div className="flex items-center justify-between gap-2">
+                                <p className="font-semibold text-slate-800 dark:text-slate-100 truncate text-xs">
                                   {user.name}
                                 </p>
                                 {active && (
-                                  <FaCheck className="text-[#5A7863] shrink-0 text-sm" />
+                                  <FaCheck className="text-blue-600 dark:text-blue-400 shrink-0 text-xs" />
                                 )}
                               </div>
-                              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                              <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                 <span
-                                  className={`text-[10px] px-2.5 py-0.5 rounded-full font-semibold uppercase tracking-wide ${getRoleBadgeClass(
+                                  className={`text-[9px] px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide ${getRoleBadgeClass(
                                     user.role
                                   )}`}
                                 >
                                   {user.role}
                                 </span>
-                                <span className="text-[11px] text-slate-500">
-                                  {user.permissions?.length || 0} permissions
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                                  {user.permissions?.length || 0} perms
                                 </span>
                                 {user.email && (
-                                  <span className="text-[11px] text-slate-400 truncate max-w-[120px]">
+                                  <span className="text-[10px] text-slate-400 truncate max-w-[110px]">
                                     {user.email}
                                   </span>
                                 )}
@@ -599,22 +598,22 @@ const CreateUsers = () => {
             {/* Right Panel */}
             <div className="lg:col-span-8">
               {selectedUser ? (
-                <div className="rounded-3xl border border-white/70 bg-white shadow-sm p-5 md:p-6 animate-fadeIn">
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 pb-5 border-b border-slate-100">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 rounded-2xl bg-[#5A7863] text-white flex items-center justify-center text-2xl font-bold shadow-md">
+                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xs p-4 sm:p-5 animate-fadeIn">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-xl font-bold shadow-2xs">
                         {selectedUser.name?.charAt(0).toUpperCase() || "U"}
                       </div>
                       <div>
-                        <h2 className="text-xl md:text-2xl font-bold text-slate-800">
+                        <h2 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100">
                           {selectedUser.name}
                         </h2>
                         {selectedUser.email && (
-                          <p className="text-sm text-slate-600 flex items-center gap-1.5 mt-0.5">
-                            <FaEnvelope size={12} className="text-[#5A7863]" /> {selectedUser.email}
+                          <p className="text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
+                            <FaEnvelope size={11} className="text-blue-600 dark:text-blue-400" /> {selectedUser.email}
                           </p>
                         )}
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-[11px] text-slate-400 mt-0.5">
                           Account ID: <span className="font-mono">{selectedUser._id}</span>
                         </p>
                       </div>
@@ -622,17 +621,17 @@ const CreateUsers = () => {
 
                     <div className="flex items-center gap-2">
                       <span
-                        className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${getRoleRingClass(
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${getRoleRingClass(
                           selectedUser.role
                         )}`}
                       >
                         {selectedUser.role}
                       </span>
                       {selectedUser.status && (
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase ${
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                           selectedUser.status === "APPROVED"
-                            ? "bg-emerald-50 text-emerald-700"
-                            : "bg-amber-50 text-amber-700"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+                            : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400"
                         }`}>
                           {selectedUser.status}
                         </span>
@@ -641,8 +640,8 @@ const CreateUsers = () => {
                   </div>
 
                   {/* Role Selector */}
-                  <div className="mt-6">
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  <div className="mt-4">
+                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1.5">
                       Assigned Role
                     </label>
                     <select
@@ -652,7 +651,7 @@ const CreateUsers = () => {
                         setEditRole(role);
                         setEditPermissions(PERMISSIONS[role] || []);
                       }}
-                      className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 font-medium outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                      className="w-full h-9.5 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
                     >
                       <option value="ADMIN">Administrator (Full System Access)</option>
                       <option value="EDITOR">Editor (Photography & Story Management)</option>
@@ -661,56 +660,56 @@ const CreateUsers = () => {
                   </div>
 
                   {/* Permissions Selection */}
-                  <div className="mt-6">
-                    <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="mt-4">
+                    <div className="flex items-center justify-between gap-3 mb-2.5">
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-700">
+                        <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-200">
                           Role Permissions
                         </h3>
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           Toggle module permissions granted to this user
                         </p>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <button
                           type="button"
                           onClick={() =>
                             setEditPermissions(PERMISSIONS[editRole] || [])
                           }
-                          className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition"
+                          className="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold hover:bg-emerald-100 transition"
                         >
                           Select All
                         </button>
                         <button
                           type="button"
                           onClick={() => setEditPermissions([])}
-                          className="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 text-xs font-semibold hover:bg-rose-100 transition"
+                          className="px-2.5 py-1 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-300 text-[11px] font-semibold hover:bg-rose-100 transition"
                         >
                           Clear All
                         </button>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-3xl bg-slate-50 border border-slate-200 max-h-72 overflow-y-auto custom-scroll">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 max-h-64 overflow-y-auto custom-scroll">
                       {(PERMISSIONS[editRole] || []).map((perm) => {
                         const checked = editPermissions.includes(perm);
                         return (
                           <label
                             key={perm}
-                            className={`flex items-center gap-3 p-3 rounded-2xl border cursor-pointer transition ${
+                            className={`flex items-center gap-2.5 p-2 rounded-lg border cursor-pointer transition ${
                               checked
-                                ? "bg-white border-[#BFD0B7] shadow-sm"
-                                : "bg-white/60 border-transparent hover:border-slate-200 hover:bg-white"
+                                ? "bg-white dark:bg-slate-800 border-blue-300 dark:border-blue-700 shadow-2xs"
+                                : "bg-white/60 dark:bg-slate-800/40 border-transparent hover:border-slate-200 hover:bg-white"
                             }`}
                           >
                             <input
                               type="checkbox"
                               checked={checked}
                               onChange={() => togglePermission(perm)}
-                              className="w-4 h-4 accent-[#5A7863] cursor-pointer"
+                              className="w-3.5 h-3.5 accent-blue-600 cursor-pointer"
                             />
-                            <span className="flex items-center gap-2 text-sm text-slate-700 font-medium">
-                              <span className="text-[#5A7863]">
+                            <span className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-200 font-medium">
+                              <span className="text-blue-600 dark:text-blue-400 text-xs">
                                 {PERMISSION_ICONS[perm]}
                               </span>
                               {PERMISSION_LABELS[perm] || perm}
@@ -720,9 +719,9 @@ const CreateUsers = () => {
                       })}
                     </div>
 
-                    <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
+                    <div className="flex items-center justify-between mt-2.5 text-[11px] text-slate-500 dark:text-slate-400">
                       <span>{editPermissions.length} permissions configured</span>
-                      <span className="font-semibold text-[#5A7863]">
+                      <span className="font-semibold text-blue-600 dark:text-blue-400">
                         {PERMISSIONS[editRole]?.length
                           ? `${Math.round(
                               (editPermissions.length /
@@ -737,30 +736,30 @@ const CreateUsers = () => {
                   <button
                     onClick={handleSavePermissions}
                     disabled={saving}
-                    className="mt-6 w-full h-12 rounded-2xl bg-[#5A7863] text-white font-semibold shadow-md hover:bg-[#4A6853] transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="mt-5 w-full h-10 rounded-xl bg-blue-600 text-white font-semibold shadow-2xs hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm"
                   >
                     {saving ? (
                       <>
-                        <FaSpinner className="animate-spin" />
+                        <FaSpinner className="animate-spin text-xs" />
                         Saving Permissions...
                       </>
                     ) : (
                       <>
-                        <FaSave />
+                        <FaSave size={13} />
                         Save Permissions & Role
                       </>
                     )}
                   </button>
                 </div>
               ) : (
-                <div className="rounded-3xl border border-white/70 bg-white shadow-sm p-12 text-center">
-                  <div className="w-20 h-20 mx-auto rounded-3xl bg-slate-50 flex items-center justify-center mb-4">
-                    <FaUserCircle className="text-5xl text-slate-300" />
+                <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827] shadow-2xs p-8 text-center">
+                  <div className="w-16 h-16 mx-auto rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-3">
+                    <FaUserCircle className="text-4xl text-slate-300 dark:text-slate-600" />
                   </div>
-                  <h3 className="text-xl font-semibold text-slate-800">
+                  <h3 className="text-base font-semibold text-slate-800 dark:text-slate-200">
                     No User Selected
                   </h3>
-                  <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-sm mx-auto">
                     Select a user from the left directory to view details, assign roles, and configure studio permissions.
                   </p>
                 </div>
@@ -768,7 +767,6 @@ const CreateUsers = () => {
             </div>
           </div>
         </div>
-      </div>
 
       {/* ====================================================== */}
       {/* 2-STEP CREATE USER MODAL WITH EMAIL OTP VERIFICATION   */}
@@ -784,13 +782,13 @@ const CreateUsers = () => {
         size="md"
       >
         {modalStep === "form" ? (
-          <form onSubmit={handleSendOtp} className="space-y-4">
+          <form onSubmit={handleSendOtp} className="space-y-3.5 text-xs sm:text-sm">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                 Full Name <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <FaUser className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                 <input
                   type="text"
                   value={newUser.username}
@@ -798,18 +796,18 @@ const CreateUsers = () => {
                     setNewUser({ ...newUser, username: e.target.value })
                   }
                   placeholder="e.g. John Doe"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                  className="w-full h-9.5 pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-xs sm:text-sm transition"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                 Email Address <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <FaEnvelope className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs" />
                 <input
                   type="email"
                   value={newUser.email}
@@ -817,17 +815,17 @@ const CreateUsers = () => {
                     setNewUser({ ...newUser, email: e.target.value })
                   }
                   placeholder="e.g. john@example.com"
-                  className="w-full h-12 pl-11 pr-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                  className="w-full h-9.5 pl-9 pr-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-xs sm:text-sm transition"
                   required
                 />
               </div>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-[11px] text-slate-400 mt-1">
                 A 6-digit verification code will be dispatched to this email from <strong>The Wedding Sedding</strong>.
               </p>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">
                 Account Role <span className="text-rose-500">*</span>
               </label>
               <select
@@ -839,7 +837,7 @@ const CreateUsers = () => {
                     permissions: PERMISSIONS[e.target.value] || [],
                   })
                 }
-                className="w-full h-12 px-4 rounded-2xl border border-slate-200 bg-slate-50/80 text-slate-700 font-medium outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/10 transition"
+                className="w-full h-9.5 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-medium outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
               >
                 <option value="ADMIN">Administrator (Full Dashboard Access)</option>
                 <option value="EDITOR">Editor (Studio Content & Assignments)</option>
@@ -847,36 +845,36 @@ const CreateUsers = () => {
               </select>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-emerald-50/60 border border-emerald-100 text-xs text-emerald-800 space-y-1">
+            <div className="p-3 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 text-xs text-blue-900 dark:text-blue-300 space-y-1">
               <p className="font-semibold flex items-center gap-1.5">
                 <span>📸</span> The Wedding Sedding Account Provisioning:
               </p>
-              <p className="text-emerald-700">
+              <p className="text-blue-800 dark:text-blue-200 text-[11px]">
                 After verifying OTP, the account will be created and an official email containing their <strong>User ID</strong> and <strong>temporary password</strong> will be automatically sent.
               </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex items-center justify-end gap-2.5 pt-1.5">
               <button
                 type="button"
                 onClick={handleModalClose}
-                className="px-5 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium text-sm"
+                className="px-4 h-9 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium text-xs"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={sendingOtp}
-                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2 text-sm shadow-sm"
+                className="px-4.5 h-9 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-1.5 text-xs shadow-2xs"
               >
                 {sendingOtp ? (
                   <>
-                    <FaSpinner className="animate-spin" />
+                    <FaSpinner className="animate-spin text-xs" />
                     Sending OTP...
                   </>
                 ) : (
                   <>
-                    <FaEnvelope />
+                    <FaEnvelope size={12} />
                     Send Verification OTP
                   </>
                 )}
@@ -885,21 +883,21 @@ const CreateUsers = () => {
           </form>
         ) : (
           /* STEP 2: OTP ENTRY */
-          <form onSubmit={handleVerifyAndCreateUser} className="space-y-4">
-            <div className="text-center py-2">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-[#5A7863] flex items-center justify-center text-2xl mb-3 shadow-inner">
+          <form onSubmit={handleVerifyAndCreateUser} className="space-y-3.5 text-xs sm:text-sm">
+            <div className="text-center py-1">
+              <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-xl mb-2.5 shadow-2xs">
                 <FaKey />
               </div>
-              <h4 className="text-base font-bold text-slate-800">
+              <h4 className="text-sm font-bold text-slate-800 dark:text-slate-100">
                 Enter Verification OTP
               </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                We sent a 6-digit code to <strong className="text-slate-700">{newUser.email}</strong> from <strong>The Wedding Sedding</strong>.
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                We sent a 6-digit code to <strong className="text-slate-700 dark:text-slate-200">{newUser.email}</strong> from <strong>The Wedding Sedding</strong>.
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5 text-center">
+              <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1 text-center">
                 6-Digit OTP Code
               </label>
               <input
@@ -911,13 +909,13 @@ const CreateUsers = () => {
                   setEnteredOtp(val);
                 }}
                 placeholder="• • • • • •"
-                className="w-full h-14 px-4 rounded-2xl border border-slate-300 bg-slate-50 text-slate-800 text-center text-2xl tracking-[12px] font-mono outline-none focus:bg-white focus:border-[#5A7863] focus:ring-4 focus:ring-[#5A7863]/15 transition font-bold"
+                className="w-full h-11 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 text-center text-xl tracking-[10px] font-mono outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition font-bold"
                 autoFocus
                 required
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+            <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-0.5">
               <span>OTP valid for 5 minutes</span>
               {otpCountdown > 0 ? (
                 <span className="text-slate-400">Resend in {otpCountdown}s</span>
@@ -926,35 +924,35 @@ const CreateUsers = () => {
                   type="button"
                   onClick={handleResendOtp}
                   disabled={sendingOtp}
-                  className="text-[#5A7863] font-semibold hover:underline flex items-center gap-1"
+                  className="text-blue-600 dark:text-blue-400 font-semibold hover:underline flex items-center gap-1"
                 >
-                  <FaRedo size={10} /> Resend OTP
+                  <FaRedo size={9} /> Resend OTP
                 </button>
               )}
             </div>
 
-            <div className="flex items-center justify-between gap-3 pt-3">
+            <div className="flex items-center justify-between gap-2.5 pt-2">
               <button
                 type="button"
                 onClick={() => setModalStep("form")}
-                className="px-4 h-11 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition font-medium text-sm flex items-center gap-2"
+                className="px-3.5 h-9 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition font-medium text-xs flex items-center gap-1.5"
               >
-                <FaArrowLeft size={12} />
+                <FaArrowLeft size={11} />
                 Edit Details
               </button>
               <button
                 type="submit"
                 disabled={creating || enteredOtp.length !== 6}
-                className="px-6 h-11 rounded-2xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 flex items-center gap-2 text-sm shadow-md"
+                className="px-4.5 h-9 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-1.5 text-xs shadow-2xs"
               >
                 {creating ? (
                   <>
-                    <FaSpinner className="animate-spin" />
+                    <FaSpinner className="animate-spin text-xs" />
                     Verifying & Creating...
                   </>
                 ) : (
                   <>
-                    <FaCheckCircle />
+                    <FaCheckCircle size={12} />
                     Verify & Create {newUser.role}
                   </>
                 )}

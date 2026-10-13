@@ -67,73 +67,74 @@ const AdminFamilyRequests = () => {
       REJECTED: 'bg-red-100 text-red-800',
     };
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${styles[status] || 'bg-gray-100'}`}>
+      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${styles[status] || 'bg-slate-100 text-slate-700'}`}>
         {status}
       </span>
     );
   };
 
   return (
-    <div className="p-4 md:p-6 bg-[#F7F9F4] min-h-screen">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       <ToastContainer />
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl font-bold text-[#3B4953] flex items-center gap-2 mb-6">
-          <FaUserPlus className="text-[#5A7863]" /> Family Access Requests
+      <div className="border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <FaUserPlus className="text-blue-600 dark:text-blue-400" /> Family Access Requests
         </h1>
+      </div>
 
         {loading ? (
-          <div className="text-center py-10">Loading...</div>
+          <div className="text-center py-10 text-xs text-slate-500">Loading...</div>
         ) : requests.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-[#DDE7D8] p-8 text-center">
-            <p className="text-[#90AB8B]">No requests yet.</p>
+          <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700 p-8 text-center">
+            <p className="text-slate-400 text-xs">No family requests found.</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm border border-[#DDE7D8] overflow-hidden">
+          <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xs border border-slate-200 dark:border-slate-700/80 overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-[#F7F9F4] border-b border-[#DDE7D8]">
+              <table className="w-full text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="px-4 py-3 text-left font-semibold text-[#3B4953]">User</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[#3B4953]">Member</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[#3B4953]">Relation</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[#3B4953]">Status</th>
-                    <th className="px-4 py-3 text-left font-semibold text-[#3B4953]">Actions</th>
+                    <th className="px-3.5 py-2.5 text-left font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">User</th>
+                    <th className="px-3.5 py-2.5 text-left font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Member</th>
+                    <th className="px-3.5 py-2.5 text-left font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Relation</th>
+                    <th className="px-3.5 py-2.5 text-left font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Status</th>
+                    <th className="px-3.5 py-2.5 text-left font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px]">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {requests.map((req) => (
-                    <tr key={req.requestId} className="border-b border-[#DDE7D8] hover:bg-[#F7F9F4]">
-                      <td className="px-4 py-3 text-[#3B4953]">{req.userName}</td>
-                      <td className="px-4 py-3 text-[#3B4953]">{req.memberName}</td>
-                      <td className="px-4 py-3 text-[#3B4953]">{req.relation}</td>
-                      <td className="px-4 py-3">{getStatusBadge(req.status)}</td>
-                      <td className="px-4 py-3">
+                    <tr key={req.requestId} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition">
+                      <td className="px-3.5 py-2 text-slate-800 dark:text-slate-200 font-medium">{req.userName}</td>
+                      <td className="px-3.5 py-2 text-slate-800 dark:text-slate-200">{req.memberName}</td>
+                      <td className="px-3.5 py-2 text-slate-600 dark:text-slate-400">{req.relation}</td>
+                      <td className="px-3.5 py-2">{getStatusBadge(req.status)}</td>
+                      <td className="px-3.5 py-2">
                         {req.status === 'PENDING' && (
-                          <div className="flex gap-2">
+                          <div className="flex gap-1.5">
                             <button
                               onClick={() => handleApprove(req.userId, req.requestId)}
-                              className="p-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition"
+                              className="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 dark:text-blue-400 rounded-md transition"
                               title="Approve & Create User"
                             >
-                              <FaCheck />
+                              <FaCheck size={11} />
                             </button>
                             <button
                               onClick={() => handleReject(req.userId, req.requestId)}
-                              className="p-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition"
+                              className="p-1.5 bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/50 dark:text-red-400 rounded-md transition"
                               title="Reject"
                             >
-                              <FaTimes />
+                              <FaTimes size={11} />
                             </button>
                           </div>
                         )}
                         {req.status === 'APPROVED' && (
-                          <span className="text-xs text-green-600 flex items-center gap-1">
-                            <FaCheck className="text-green-500" /> Approved
+                          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <FaCheck className="text-emerald-500" size={10} /> Approved
                           </span>
                         )}
                         {req.status === 'REJECTED' && (
-                          <span className="text-xs text-red-600 flex items-center gap-1">
-                            <FaTimes className="text-red-500" /> Rejected
+                          <span className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
+                            <FaTimes className="text-red-500" size={10} /> Rejected
                           </span>
                         )}
                       </td>
@@ -144,7 +145,6 @@ const AdminFamilyRequests = () => {
             </div>
           </div>
         )}
-      </div>
 
       {/* Create User Modal */}
       {selectedRequest && (

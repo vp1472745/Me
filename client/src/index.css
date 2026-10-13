@@ -42,22 +42,119 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
 }
 
 /* =============================================================
-   DASHBOARD DARK MODE ENHANCEMENTS (BULLETPROOF ATTRIBUTE MATCH)
+   DASHBOARD BLUE THEME & COMPACT LAPTOP DESIGN SYSTEM
+   ============================================================= */
+
+/* Base font scaling for laptop screens: compact and high-density */
+@media (min-width: 1024px) {
+  .dark-dashboard-container {
+    font-size: 0.8125rem; /* 13px base */
+    line-height: 1.35rem;
+  }
+  .dark-dashboard-container button,
+  .dark-dashboard-container input,
+  .dark-dashboard-container select {
+    font-size: 0.75rem; /* 12px for interactive elements */
+  }
+  .dark-dashboard-container h1 {
+    font-size: 1.25rem !important;
+    line-height: 1.6rem !important;
+  }
+  .dark-dashboard-container h2 {
+    font-size: 1.05rem !important;
+    line-height: 1.4rem !important;
+  }
+  .dark-dashboard-container h3 {
+    font-size: 0.925rem !important;
+    line-height: 1.3rem !important;
+  }
+}
+
+/* ── Light Mode Blue Palette Overrides ── */
+[class*="bg-[#F7F9F4]"],
+[class*="bg-[#F6F8F5]"],
+[class*="bg-[#EEF3EC]"] {
+  background-color: #f8fafc !important;
+}
+
+[class*="from-[#F6F8F5]"],
+[class*="to-[#EEF3EC]"],
+[class*="from-[#F7F9F4]"] {
+  background-image: none !important;
+  background-color: #f8fafc !important;
+}
+
+[class*="bg-[#EBF4DD]"],
+[class*="bg-[#EEF6EC]"],
+[class*="bg-[#F4F8F1]"] {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+[class*="text-[#5A7863]"] {
+  color: #2563eb !important;
+}
+
+[class*="bg-[#5A7863]"] {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+[class*="border-[#5A7863]"] {
+  border-color: #2563eb !important;
+}
+
+[class*="border-[#DDE7D8]"],
+[class*="border-[#BFD0B7]"] {
+  border-color: #e2e8f0 !important;
+}
+
+[class*="text-[#2A382C]"] {
+  color: #0f172a !important;
+}
+
+[class*="text-[#3B4953]"] {
+  color: #334155 !important;
+}
+
+[class*="hover:bg-[#EBF4DD]"]:hover,
+[class*="hover:bg-[#EEF6EC]"]:hover {
+  background-color: #dbeafe !important;
+  color: #1d4ed8 !important;
+}
+
+[class*="hover:bg-[#5A7863]"]:hover,
+[class*="hover:bg-[#4A6853]"]:hover,
+[class*="hover:bg-[#4B6654]"]:hover {
+  background-color: #1d4ed8 !important;
+  color: #ffffff !important;
+}
+
+[class*="hover:text-[#5A7863]"]:hover {
+  color: #1d4ed8 !important;
+}
+
+[class*="focus:border-[#5A7863]"]:focus {
+  border-color: #2563eb !important;
+}
+
+/* =============================================================
+   DASHBOARD DARK MODE BLUE THEME ENHANCEMENTS
    ============================================================= */
 html.dark,
 html.dark body {
-  background-color: #09090B !important;
-  color: #F4F4F5;
+  background-color: #0B0F19 !important;
+  color: #F1F5F9;
 }
 
 .dark-dashboard-container.dark,
 .dark-dashboard-container.dark main,
 html.dark .dark-dashboard-container,
 html.dark main {
-  background-color: #09090B !important;
+  background-color: #0B0F19 !important;
 }
 
-/* Match any background containing light beige gradients */
+/* Match any background containing light beige gradients in dark */
 .dark [class*="from-[#F6F8F5]"],
 .dark [class*="to-[#EEF3EC]"],
 .dark [class*="from-[#F7F9F4]"],
@@ -68,16 +165,16 @@ html.dark main {
 .dark [class*="bg-[#F7F9F4]"],
 .dark [class*="bg-gradient-to-b from-[#F6F8F5]"] {
   background-image: none !important;
-  background-color: #09090B !important;
+  background-color: #0B0F19 !important;
 }
 
-/* Match any background containing bg-white, bg-white/80, etc. */
+/* Match any background containing bg-white, bg-white/80, etc. in dark */
 .dark [class*="bg-white"],
 .dark [class*="bg-white/80"],
 .dark [class*="bg-white/70"],
 .dark [class*="bg-white/60"] {
-  background-color: #121214 !important;
-  border-color: #1E1E22 !important;
+  background-color: #111827 !important;
+  border-color: #1E293B !important;
 }
 
 /* Stat cards & subtle tone cards */
@@ -85,8 +182,8 @@ html.dark main {
 .dark [class*="from-sky-50"],
 .dark [class*="from-violet-50"] {
   background-image: none !important;
-  background-color: #161619 !important;
-  border-color: #27272A !important;
+  background-color: #111827 !important;
+  border-color: #1E293B !important;
 }
 
 /* Match bg-gray-50, bg-slate-50, bg-slate-100, etc. */
@@ -96,30 +193,39 @@ html.dark main {
 .dark [class*="bg-gray-50"],
 .dark [class*="bg-gray-100"],
 .dark [class*="bg-gray-200"] {
-  background-color: #18181B !important;
-  border-color: #27272A !important;
+  background-color: #0F172A !important;
+  border-color: #1E293B !important;
 }
 
-/* Active user/card highlights */
+/* Active user/card highlights in dark */
 .dark [class*="bg-[#F4F8F1]"] {
-  background-color: #1A2519 !important;
-  border-color: #3C5732 !important;
+  background-color: rgba(30, 58, 138, 0.3) !important;
+  border-color: #2563EB !important;
 }
 
 .dark [class*="bg-[#EEF6EC]"],
 .dark [class*="bg-[#EBF4DD]"] {
-  background-color: #1E2519 !important;
-  color: #A7D18C !important;
+  background-color: rgba(37, 99, 235, 0.2) !important;
+  color: #93C5FD !important;
 }
 
-/* Text Overrides */
+/* Text Overrides in dark */
 .dark [class*="text-[#3B4953]"],
 .dark [class*="text-[#2d3748]"] {
-  color: #E4E4E7 !important;
+  color: #E2E8F0 !important;
 }
 
 .dark [class*="text-[#5A7863]"] {
-  color: #A7D18C !important;
+  color: #60A5FA !important;
+}
+
+.dark [class*="bg-[#5A7863]"] {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+}
+
+.dark [class*="border-[#5A7863]"] {
+  border-color: #3B82F6 !important;
 }
 
 .dark .text-slate-900,
@@ -134,7 +240,7 @@ html.dark main {
 .dark .text-zinc-900,
 .dark .text-zinc-800,
 .dark .text-zinc-700 {
-  color: #F4F4F5 !important;
+  color: #F1F5F9 !important;
 }
 
 .dark .text-slate-650,
@@ -144,15 +250,15 @@ html.dark main {
 .dark .text-gray-500,
 .dark .text-zinc-500,
 .dark .text-zinc-400 {
-  color: #A1A1AA !important;
+  color: #94A3B8 !important;
 }
 
 .dark .text-slate-400,
 .dark .text-gray-400 {
-  color: #71717A !important;
+  color: #64748B !important;
 }
 
-/* Border Overrides */
+/* Border Overrides in dark */
 .dark [class*="border-[#DDE7D8]"],
 .dark [class*="border-[#BFD0B7]"],
 .dark [class*="border-[#E8E8E8]"],
@@ -165,22 +271,22 @@ html.dark main {
 .dark [class*="border-slate-200"],
 .dark [class*="border-slate-300"],
 .dark [class*="border-slate-350"] {
-  border-color: #27272A !important;
+  border-color: #1E293B !important;
 }
 
-/* Hover Overrides */
+/* Hover Overrides in dark */
 .dark [class*="hover:bg-[#F7F9F4]"]:hover,
 .dark [class*="hover:bg-zinc-50"]:hover,
 .dark [class*="hover:bg-slate-50"]:hover,
 .dark [class*="hover:bg-gray-50"]:hover,
 .dark [class*="hover:bg-gray-100"]:hover {
-  background-color: #1E1E22 !important;
+  background-color: #1E293B !important;
 }
 
 .dark [class*="hover:bg-[#EBF4DD]"]:hover,
 .dark [class*="hover:bg-[#EEF6EC]"]:hover {
-  background-color: #1E2519 !important;
-  color: #A7D18C !important;
+  background-color: rgba(37, 99, 235, 0.3) !important;
+  color: #93C5FD !important;
 }
 
 /* Badges & Chips in dark mode */
@@ -193,6 +299,11 @@ html.dark main {
 .dark .bg-sky-100 {
   background-color: rgba(14, 165, 233, 0.15) !important;
   color: #7DD3FC !important;
+}
+.dark .bg-blue-50,
+.dark .bg-blue-100 {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+  color: #93C5FD !important;
 }
 .dark .bg-violet-50,
 .dark .bg-violet-100 {
@@ -214,12 +325,12 @@ html.dark main {
 .dark input:not([type="checkbox"]):not([type="radio"]),
 .dark textarea,
 .dark select {
-  background-color: #18181B !important;
-  border-color: #27272A !important;
-  color: #F4F4F5 !important;
+  background-color: #0F172A !important;
+  border-color: #1E293B !important;
+  color: #F1F5F9 !important;
 }
 
 .dark input::placeholder,
 .dark textarea::placeholder {
-  color: #71717A !important;
+  color: #64748B !important;
 }

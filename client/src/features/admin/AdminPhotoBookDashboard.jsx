@@ -316,7 +316,7 @@ const WeddingStoryDashboard = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#F7F9F4] text-[#3B4953]">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       {/* Custom Toast Container */}
       <ToastContainer
         position="top-right"
@@ -333,45 +333,37 @@ const WeddingStoryDashboard = () => {
         progressClassName="custom-progress"
       />
 
-      {/* Fixed Header & Tabs */}
-      <div className="flex-shrink-0 px-4 mt-4">
-        <div className="max-w-7xl mx-auto border-b border-[#DDE7D8] bg-white rounded-t-xl overflow-hidden shadow-sm">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab("create")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 border-r border-[#DDE7D8] ${activeTab === "create"
-                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-                }`}
-            >
-              Create Story
-            </button>
-            <button
-              onClick={() => setActiveTab("stories")}
-              className={`px-8 py-4 text-xs font-semibold uppercase tracking-[3px] transition-all duration-200 ${activeTab === "stories"
-                ? "bg-[#EBF4DD] text-[#5A7863] border-b-2 border-b-[#5A7863]"
-                : "text-[#3B4953]/70 hover:bg-[#F7F9F4] hover:text-[#3B4953]"
-                }`}
-            >
-              All Wedding Stories
-            </button>
-          </div>
-        </div>
+      {/* Tabs */}
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
+        <button
+          onClick={() => setActiveTab("create")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "create"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          Create Story
+        </button>
+        <button
+          onClick={() => setActiveTab("stories")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
+            activeTab === "stories"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          }`}
+        >
+          All Wedding Stories ({stories.length})
+        </button>
       </div>
 
-      {/* Scrollable Content Container */}
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-10 pb-6"
-      >
-        <div className="max-w-7xl mx-auto mt-6">
-          {/* CREATE TAB */}
-          {activeTab === "create" && (
-            <div className="bg-white rounded-2xl shadow-sm p-5 sm:p-6 md:p-8 border border-[#DDE7D8]">
-              <form onSubmit={handleCreateStory} className="space-y-6 md:space-y-8">
+      {/* CREATE TAB */}
+      {activeTab === "create" && (
+        <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-2xs">
+              <form onSubmit={handleCreateStory} className="space-y-4">
                 {/* TITLE */}
                 <div>
-                  <label className="block mb-2 text-[#3B4953]/80 uppercase tracking-[2px] text-[11px] font-bold">
+                  <label className="block mb-1.5 text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] font-bold">
                     Couple / Story Title
                   </label>
                   <input
@@ -379,35 +371,35 @@ const WeddingStoryDashboard = () => {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., Sarah & Michael - Elegant Estate Wedding"
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl px-5 py-3 text-[#3B4953] font-medium placeholder-[#3B4953]/40 outline-none focus:border-[#90AB8B] focus:ring-2 focus:ring-[#90AB8B]/20 transition"
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 sm:p-3 text-slate-800 dark:text-slate-100 font-medium placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm"
                     required
                   />
                 </div>
 
                 {/* DESCRIPTION */}
                 <div>
-                  <label className="block mb-2 text-[#3B4953]/80 uppercase tracking-[2px] text-[11px] font-bold">
+                  <label className="block mb-1.5 text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] font-bold">
                     Description
                   </label>
                   <textarea
-                    rows="4"
+                    rows="3"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Share the narrative, details, and mood of this beautiful day..."
-                    className="w-full bg-[#F7F9F4] border border-[#DDE7D8] rounded-xl px-5 py-3 text-[#3B4953] font-medium placeholder-[#3B4953]/40 outline-none focus:border-[#90AB8B] focus:ring-2 focus:ring-[#90AB8B]/20 transition"
+                    className="w-full bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700 rounded-lg p-2.5 sm:p-3 text-slate-800 dark:text-slate-100 font-medium placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition text-xs sm:text-sm resize-none"
                   />
                 </div>
 
                 {/* IMAGE ROW SECTIONS */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* COVER IMAGE */}
-                  <div className="p-5 bg-[#F7F9F4] rounded-xl border border-[#DDE7D8]">
-                    <label className="block mb-3 text-[#3B4953]/80 uppercase tracking-[2px] text-[11px] font-bold">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label className="block mb-2 text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] font-bold">
                       Cover Image
                     </label>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <label className="cursor-pointer bg-white hover:bg-[#EBF4DD]/40 text-[#5A7863] font-semibold px-5 py-2.5 rounded-xl border border-[#DDE7D8] transition-all duration-200 text-sm flex items-center gap-2 shadow-sm">
-                        <FaPlus size={12} /> Choose Cover
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="cursor-pointer bg-white dark:bg-slate-800 hover:bg-blue-50 text-blue-600 dark:text-blue-400 font-bold px-3.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-900 transition text-xs flex items-center gap-1.5 shadow-2xs">
+                        <FaPlus size={10} /> Choose Cover
                         <input
                           type="file"
                           accept="image/*"
@@ -417,7 +409,7 @@ const WeddingStoryDashboard = () => {
                         />
                       </label>
                       {coverImage && (
-                        <span className="text-xs bg-[#EBF4DD] text-[#5A7863] font-medium px-3 py-1 rounded-full border border-[#90AB8B]/30 truncate max-w-[200px]">
+                        <span className="text-[11px] bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 font-semibold px-2.5 py-0.5 rounded-md border border-blue-200 dark:border-blue-900 truncate max-w-[180px]">
                           {coverImage.name}
                         </span>
                       )}
@@ -425,13 +417,13 @@ const WeddingStoryDashboard = () => {
                   </div>
 
                   {/* GALLERY IMAGES */}
-                  <div className="p-5 bg-[#F7F9F4] rounded-xl border border-[#DDE7D8]">
-                    <label className="block mb-3 text-[#3B4953]/80 uppercase tracking-[2px] text-[11px] font-bold">
+                  <div className="p-3.5 bg-slate-50 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label className="block mb-2 text-slate-700 dark:text-slate-300 uppercase tracking-wider text-[11px] font-bold">
                       Gallery Images
                     </label>
-                    <div className="flex flex-wrap items-center gap-4">
-                      <label className="cursor-pointer bg-white hover:bg-[#EBF4DD]/40 text-[#5A7863] font-semibold px-5 py-2.5 rounded-xl border border-[#DDE7D8] transition-all duration-200 text-sm flex items-center gap-2 shadow-sm">
-                        <FaImages size={14} /> Select Album Photos
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="cursor-pointer bg-white dark:bg-slate-800 hover:bg-blue-50 text-blue-600 dark:text-blue-400 font-bold px-3.5 py-1.5 rounded-lg border border-blue-200 dark:border-blue-900 transition text-xs flex items-center gap-1.5 shadow-2xs">
+                        <FaImages size={12} /> Select Album Photos
                         <input
                           type="file"
                           accept="image/*"
@@ -441,7 +433,7 @@ const WeddingStoryDashboard = () => {
                         />
                       </label>
                       {galleryImages.length > 0 && (
-                        <span className="text-xs bg-[#5A7863] text-white font-semibold px-3 py-1 rounded-full shadow-sm">
+                        <span className="text-[11px] bg-blue-600 text-white font-bold px-2.5 py-0.5 rounded-md shadow-2xs">
                           {galleryImages.length} Frame(s) Loaded
                         </span>
                       )}
@@ -450,13 +442,13 @@ const WeddingStoryDashboard = () => {
                 </div>
 
                 {/* SUBMIT BUTTON */}
-                <div className="pt-4 border-t border-[#DDE7D8]">
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-700/80">
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center gap-2 bg-[#5A7863] hover:bg-[#4a6352] text-white px-8 py-3.5 rounded-xl uppercase tracking-[2px] text-xs font-semibold transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2.5 rounded-lg uppercase tracking-wider text-xs font-bold transition-all duration-200 shadow-xs hover:shadow disabled:opacity-50"
                   >
-                    <FaPlus size={12} />
+                    <FaPlus size={10} />
                     {loading ? "Publishing Album..." : "Publish Story"}
                   </button>
                 </div>
@@ -468,60 +460,60 @@ const WeddingStoryDashboard = () => {
           {activeTab === "stories" && (
             <>
               {stories.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-[#DDE7D8] px-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-[#F7F9F4] rounded-full mb-4 border border-[#DDE7D8]">
-                    <FaImages size={24} className="text-[#90AB8B]" />
+                <div className="text-center py-16 bg-white dark:bg-slate-800/90 rounded-xl border border-slate-200 dark:border-slate-700 px-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-50 dark:bg-blue-950/50 rounded-full mb-3 border border-blue-200 dark:border-blue-900">
+                    <FaImages size={18} className="text-blue-600 dark:text-blue-400" />
                   </div>
-                  <p className="text-[#3B4953] text-lg font-semibold mb-1">No collections logged</p>
-                  <p className="text-[#3B4953]/60 text-sm">Create your first cinematic wedding story structure.</p>
+                  <p className="text-slate-800 dark:text-slate-200 text-base font-bold mb-1">No collections logged</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs">Create your first cinematic wedding story structure.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                   {stories.map((story) => (
                     <div
                       key={story._id}
-                      className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-[#DDE7D8] transition-all duration-300 flex flex-col"
+                      className="group bg-white dark:bg-slate-800/90 rounded-xl overflow-hidden shadow-xs hover:shadow-md border border-slate-200 dark:border-slate-700/80 transition-all duration-300 flex flex-col"
                     >
                       {/* Cover Image Wrapper */}
-                      <div className="relative overflow-hidden h-52 bg-[#F7F9F4]">
+                      <div className="relative overflow-hidden h-44 sm:h-48 bg-slate-100 dark:bg-slate-900">
                         <img
                           src={story.coverImage}
                           alt={story.title}
-                          className="w-full h-full object-cover transition duration-500 group-hover:scale-102"
+                          className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                         />
-                        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-xs px-2.5 py-1 rounded-md border border-[#DDE7D8] flex items-center gap-1.5 text-[11px] font-bold text-[#3B4953]">
-                          <FaImages size={11} className="text-[#5A7863]" />
+                        <div className="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-xs px-2 py-0.5 rounded border border-white/10 flex items-center gap-1 text-[10px] font-bold text-white">
+                          <FaImages size={10} className="text-blue-400" />
                           <span>{story.galleryImages?.length || 0} Frames</span>
                         </div>
                       </div>
 
                       {/* Content Section */}
-                      <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div className="p-3.5 flex-1 flex flex-col justify-between">
                         <div>
-                          <h2 className="text-base font-bold text-[#3B4953] uppercase tracking-[0.5px] line-clamp-1 mb-1">
+                          <h2 className="text-xs font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide line-clamp-1 mb-1">
                             {story.title}
                           </h2>
-                          <p className="text-xs text-[#3B4953]/70 line-clamp-2 font-medium mb-4">
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2 font-medium mb-3">
                             {story.description || "No narrative snippet summary detailed."}
                           </p>
                         </div>
 
                         {/* Action Layouts */}
-                        <div className="flex gap-2.5 pt-3 border-t border-[#DDE7D8]/60">
+                        <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/80">
                           <button
                             onClick={() => openSlider(story)}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-[#F7F9F4] hover:bg-[#EBF4DD]/60 text-[#5A7863] border border-[#DDE7D8] py-2 rounded-lg text-xs font-bold uppercase tracking-[1px] transition-all duration-200"
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800/60 py-1.5 sm:py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200"
                           >
-                            <FaEye size={12} />
+                            <FaEye size={11} />
                             View
                           </button>
 
                           <button
                             onClick={() => handleDeleteClick(story._id, story.title)}
-                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100/80 text-red-600 border border-red-200/60 p-2 rounded-lg transition-all duration-200"
+                            className="inline-flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-950/40 dark:hover:bg-red-900/50 dark:text-red-400 border border-red-200 dark:border-red-800/60 p-2 rounded-lg transition-all duration-200"
                             title="Delete Collection"
                           >
-                            <FaTrash size={12} />
+                            <FaTrash size={11} />
                           </button>
                         </div>
                       </div>
@@ -531,30 +523,28 @@ const WeddingStoryDashboard = () => {
               )}
             </>
           )}
-        </div>
-      </div>
 
       {/* =========================================================
           FULLSCREEN PREVIEW ALBUM SLIDER – FIXED (with fallback)
       ========================================================= */}
       {selectedStory && (
         <div
-          className="fixed inset-0 z-[999] bg-[#3B4953]/95 backdrop-blur-md overflow-hidden flex items-center justify-center"
+          className="fixed inset-0 z-[999] bg-slate-950/90 backdrop-blur-xs overflow-hidden flex items-center justify-center"
           onClick={closeSlider}
         >
           <button
             onClick={closeSlider}
-            className="absolute top-6 right-6 z-50 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2 rounded-full transition"
+            className="absolute top-4 right-4 z-50 text-white/80 hover:text-white bg-black/60 hover:bg-black/80 p-2 rounded-full transition"
             aria-label="Close Preview"
           >
-            <FaTimes size={18} />
+            <FaTimes size={16} />
           </button>
 
-          <div className="absolute top-6 left-6 right-16 z-40 text-white">
-            <h1 className="text-lg md:text-xl font-bold uppercase tracking-[2px] truncate">
+          <div className="absolute top-4 left-4 right-16 z-40 text-white">
+            <h1 className="text-base md:text-lg font-bold uppercase tracking-wider truncate">
               {selectedStory.title}
             </h1>
-            <p className="text-xs text-white/60 tracking-wider font-light mt-0.5">
+            <p className="text-[11px] text-slate-300 tracking-wider font-light mt-0.5">
               {getSliderImages(selectedStory).length === 1 && !selectedStory.galleryImages?.length
                 ? "Cover Image (No gallery frames)"
                 : `Gallery Slider • ${getSliderImages(selectedStory).length} frames`
@@ -564,7 +554,7 @@ const WeddingStoryDashboard = () => {
 
           {/* Main Image Area */}
           <div
-            className="h-screen flex items-center justify-center relative px-12 w-full"
+            className="h-screen flex items-center justify-center relative px-8 w-full"
             onClick={(e) => e.stopPropagation()}
           >
             {(() => {
@@ -572,8 +562,8 @@ const WeddingStoryDashboard = () => {
               if (images.length === 0) {
                 return (
                   <div className="text-white/80 text-center">
-                    <FaImages size={48} className="mx-auto mb-3 opacity-40" />
-                    <p className="text-sm font-semibold tracking-wide">No media available for this story.</p>
+                    <FaImages size={40} className="mx-auto mb-2 opacity-40" />
+                    <p className="text-xs font-semibold tracking-wide">No media available for this story.</p>
                   </div>
                 );
               }
@@ -582,16 +572,16 @@ const WeddingStoryDashboard = () => {
                 <>
                   <button
                     onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                    className="absolute left-4 z-40 w-11 h-11 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-white/20 transition"
+                    className="absolute left-3 z-40 w-9 h-9 bg-black/60 backdrop-blur-xs rounded-full flex items-center justify-center text-white border border-white/10 hover:bg-black/80 transition"
                     aria-label="Previous View"
                   >
-                    <FaChevronLeft size={16} />
+                    <FaChevronLeft size={14} />
                   </button>
 
                   <img
                     src={images[currentImageIndex]}
                     alt={`${selectedStory.title} - Frame ${currentImageIndex + 1}`}
-                    className="max-w-full max-h-[82vh] object-contain rounded shadow-2xl border border-white/5"
+                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl border border-white/5"
                     onError={(e) => {
                       e.target.src = "https://via.placeholder.com/800x600?text=Image+Not+Found";
                     }}

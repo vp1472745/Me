@@ -153,76 +153,63 @@ function AdminUsers() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#DDE7D8] pb-5">
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-tight text-[#3B4953]">
-            User Directory & Access Control
-          </h2>
-          <p className="text-sm text-[#3B4953]/60 mt-1">
-            Manage application user accounts, configure editor roles, and approve pending signup requests.
-          </p>
-        </div>
-        <button
-          onClick={fetchData}
-          disabled={loading}
-          className="self-start md:self-auto px-4 py-2 text-xs font-semibold uppercase tracking-wider text-[#5A7863] bg-white border border-[#DDE7D8] rounded-xl hover:bg-[#EEF6EC]/30 transition disabled:opacity-50 flex items-center gap-2"
-        >
-          {loading ? <FaSpinner className="animate-spin" /> : "Refresh Directory"}
-        </button>
-      </div>
+
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-[#DDE7D8] pb-px">
+  return (
+    <div className="max-w-6xl mx-auto space-y-4 pb-8 text-xs sm:text-sm">
+      {/* Structural Navigation Tabs Module */}
+      <div className="flex border-b border-slate-200/80 dark:border-slate-800 gap-2 pb-2">
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
             activeTab === "users"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <FaUsers size={16} />
+          <FaUsers size={13} />
           Users
         </button>
         <button
           onClick={() => setActiveTab("editors")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
             activeTab === "editors"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <FaUserShield size={16} />
+          <FaUserShield size={13} />
           Editors
         </button>
         <button
           onClick={() => setActiveTab("pending")}
-          className={`flex items-center gap-2.5 px-5 py-3 text-sm font-semibold border-b-2 transition-all duration-200 relative ${
+          className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 relative ${
             activeTab === "pending"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-[#3B4953]/60 hover:text-[#5A7863]"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <FaClock size={16} />
+          <FaClock size={13} />
           Pending Approvals
         </button>
       </div>
 
       {/* Content Area */}
-      <div className="bg-white rounded-3xl border border-[#DDE7D8] shadow-sm overflow-hidden min-h-[300px]">
+      <div className="bg-white dark:bg-[#111827] rounded-xl border border-slate-200/80 dark:border-slate-800 shadow-2xs overflow-hidden min-h-[300px]">
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <FaSpinner className="text-[#5A7863] animate-spin text-3xl" />
-            <p className="text-sm text-[#3B4953]/60">Fetching directory listing...</p>
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <FaSpinner className="text-blue-600 animate-spin text-2xl" />
+            <p className="text-xs text-slate-500">Fetching directory listing...</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center px-4">
-            <div className="w-16 h-16 bg-[#F7F9F4] text-[#5A7863]/60 rounded-full flex items-center justify-center mb-4">
-              <FaUser size={24} />
+          <div className="flex flex-col items-center justify-center py-20 text-center px-4">
+            <div className="w-12 h-12 bg-blue-50 dark:bg-blue-950/40 text-blue-600 rounded-full flex items-center justify-center mb-3">
+              <FaUser size={20} />
             </div>
-            <h3 className="text-lg font-bold text-[#3B4953]">No users found</h3>
-            <p className="text-sm text-[#3B4953]/60 max-w-sm mt-1">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">No users found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mt-0.5">
               There are no accounts in this list. Any newly registered users requiring approval will show up here.
             </p>
           </div>
@@ -230,108 +217,108 @@ function AdminUsers() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F7F9F4] border-b border-[#DDE7D8]">
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">User Details</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Role</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Status</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60">Drive Connection</th>
+                <tr className="bg-slate-50/70 dark:bg-slate-800/50 border-b border-slate-200/80 dark:border-slate-800">
+                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">User Details</th>
+                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Role</th>
+                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                  <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Drive Connection</th>
                   {(activeTab === "pending" || activeTab === "users" || activeTab === "editors") && (
-                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-[#3B4953]/60 text-right">Actions</th>
+                    <th className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Actions</th>
                   )}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#DDE7D8]">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {users.map((item) => (
-                  <tr key={item._id} className="hover:bg-[#F7F9F4]/30 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-[#EBF4DD] text-[#5A7863] flex items-center justify-center font-bold text-sm">
+                  <tr key={item._id} className="hover:bg-slate-50/40 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-xs">
                           {item.name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-bold text-[#3B4953]">{item.name}</div>
-                          <div className="text-xs text-[#3B4953]/60 flex items-center gap-1 mt-0.5">
-                            <FaEnvelope size={10} />
+                          <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{item.name}</div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+                            <FaEnvelope size={9} />
                             {item.email}
                           </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full uppercase ${
+                    <td className="px-4 py-2.5">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-md uppercase ${
                         item.role === "ADMIN"
-                          ? "bg-purple-50 text-purple-700 border border-purple-100"
+                          ? "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/60"
                           : item.role === "EDITOR"
-                          ? "bg-blue-50 text-blue-700 border border-blue-100"
-                          : "bg-slate-50 text-slate-700 border border-slate-100"
+                          ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60"
                       }`}>
                         {item.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full uppercase ${
+                    <td className="px-4 py-2.5">
+                      <span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider rounded-md uppercase ${
                         item.status === "APPROVED"
-                          ? "bg-green-50 text-green-700 border border-green-100"
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60"
                           : item.status === "PENDING"
-                          ? "bg-amber-50 text-amber-700 border border-amber-100"
-                          : "bg-rose-50 text-rose-700 border border-rose-100"
+                          ? "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200/60"
+                          : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200/60"
                       }`}>
                         {item.status}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold tracking-wider rounded-full ${
+                    <td className="px-4 py-2.5">
+                      <span className={`px-2 py-0.5 text-[10px] font-semibold rounded-md ${
                         item.googleDrive?.connected
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
-                          : "bg-gray-50 text-gray-500 border border-gray-100"
+                          ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200/60"
+                          : "bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200/60"
                       }`}>
                         {item.googleDrive?.connected ? "Connected" : "Disconnected"}
                       </span>
                     </td>
                     {activeTab === "pending" && (
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2">
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex justify-end gap-1.5">
                           <button
                             onClick={() => handleApprove(item._id)}
                             disabled={actionLoading !== null}
-                            className="p-2 bg-green-50 text-green-700 border border-green-100 hover:bg-green-100 rounded-lg transition disabled:opacity-50"
+                            className="p-1.5 bg-emerald-600 text-white hover:bg-emerald-700 rounded-md transition disabled:opacity-50"
                             title="Approve Account"
                           >
                             {actionLoading === item._id ? (
-                              <FaSpinner className="animate-spin text-sm" />
+                              <FaSpinner className="animate-spin text-xs" />
                             ) : (
-                              <FaCheck size={14} />
+                              <FaCheck size={11} />
                             )}
                           </button>
                           <button
                             onClick={() => handleReject(item._id)}
                             disabled={actionLoading !== null}
-                            className="p-2 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-lg transition disabled:opacity-50"
+                            className="p-1.5 bg-white dark:bg-slate-800 text-rose-600 border border-rose-200 hover:bg-rose-50 rounded-md transition disabled:opacity-50"
                             title="Reject Account"
                           >
                             {actionLoading === item._id ? (
-                              <FaSpinner className="animate-spin text-sm" />
+                              <FaSpinner className="animate-spin text-xs" />
                             ) : (
-                              <FaTimes size={14} />
+                              <FaTimes size={11} />
                             )}
                           </button>
                         </div>
                       </td>
                     )}
                     {(activeTab === "users" || activeTab === "editors") && (
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-4 py-2.5 text-right">
                         {item.googleDrive?.connected ? (
                           <button
                             onClick={() => handleDisconnectDrive(item._id)}
-                            className="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-100 hover:bg-rose-100 rounded-xl text-xs font-semibold transition"
+                            className="px-2.5 py-1 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border border-rose-200/60 hover:bg-rose-100 rounded-md text-xs font-semibold transition"
                           >
                             Disconnect Drive
                           </button>
                         ) : (
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1.5">
                             <button
                               onClick={() => handleConnectDrive(item._id)}
-                              className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100 rounded-xl text-xs font-semibold transition"
+                              className="px-2.5 py-1 bg-blue-600 text-white hover:bg-blue-700 rounded-md text-xs font-semibold transition shadow-2xs"
                             >
                               Connect Drive
                             </button>
@@ -339,7 +326,7 @@ function AdminUsers() {
                               <button
                                 onClick={() => handleSendEmail(item._id)}
                                 disabled={actionLoading === item._id}
-                                className="px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 rounded-xl text-xs font-semibold transition disabled:opacity-50"
+                                className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 rounded-md text-xs font-medium transition disabled:opacity-50"
                               >
                                 {actionLoading === item._id ? "Sending..." : "Send Link"}
                               </button>

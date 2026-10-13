@@ -202,7 +202,7 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Title
           </label>
           <input
@@ -210,14 +210,14 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
             name="title"
             value={formData.title}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] bg-white focus:outline-none focus:ring-2 focus:ring-[#5A7863] transition"
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
         </div>
 
         {/* Couple */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Couple
           </label>
           <input
@@ -225,15 +225,15 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
             name="couple"
             value={formData.couple}
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] bg-white focus:outline-none focus:ring-2 focus:ring-[#5A7863] transition"
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
             required
           />
         </div>
 
         {/* Location & Date */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-[#3B4953] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
               Location
             </label>
             <input
@@ -241,12 +241,12 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
               name="location"
               value={formData.location}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] bg-white focus:outline-none focus:ring-2 focus:ring-[#5A7863] transition"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-[#3B4953] mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
               Date
             </label>
             <input
@@ -254,7 +254,7 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
               name="date"
               value={formData.date}
               onChange={handleChange}
-              className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] bg-white focus:outline-none focus:ring-2 focus:ring-[#5A7863] transition"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition"
               required
             />
           </div>
@@ -262,31 +262,31 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Description
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            rows={4}
-            className="w-full px-4 py-2 rounded-xl border border-[#DDE7D8] bg-white focus:outline-none focus:ring-2 focus:ring-[#5A7863] transition resize-y"
+            rows={3}
+            className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 text-xs sm:text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition resize-y"
           />
         </div>
 
         {/* Cover Image */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Cover Image
           </label>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {formData.coverImage && !newCoverFile && (
-              <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-[#DDE7D8]">
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img src={formData.coverImage} alt="Cover" className="w-full h-full object-cover" />
               </div>
             )}
             {newCoverFile && (
-              <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-[#DDE7D8]">
+              <div className="relative w-20 h-20 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img
                   src={URL.createObjectURL(newCoverFile)}
                   alt="New cover"
@@ -295,9 +295,9 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
                 <button
                   type="button"
                   onClick={() => setNewCoverFile(null)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-1 right-1 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
@@ -311,31 +311,31 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
             <button
               type="button"
               onClick={() => coverInputRef.current.click()}
-              className="px-4 py-2 border-2 border-dashed border-[#DDE7D8] rounded-xl text-[#5A7863] hover:bg-[#EBF4DD] transition flex items-center gap-2"
+              className="px-3.5 py-1.5 border border-dashed border-blue-300 dark:border-blue-800 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold"
             >
-              <Upload size={16} /> {newCoverFile ? "Change" : "Upload"}
+              <Upload size={14} /> {newCoverFile ? "Change" : "Upload"}
             </button>
           </div>
         </div>
 
         {/* Audio */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Audio
           </label>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {formData.audio && !newAudioFile && (
-              <div className="flex items-center gap-2 text-[#3B4953] bg-[#F7F9F4] px-3 py-1 rounded-full border border-[#DDE7D8]">
-                <Music size={16} className="text-[#5A7863]" />
-                <span className="text-sm truncate max-w-[150px]">
+              <div className="flex items-center gap-1.5 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full border border-slate-200 dark:border-slate-700 text-xs">
+                <Music size={14} className="text-blue-600 dark:text-blue-400" />
+                <span className="truncate max-w-[150px]">
                   {formData.audio.split("/").pop()}
                 </span>
               </div>
             )}
             {newAudioFile && (
-              <div className="flex items-center gap-2 text-[#3B4953] bg-[#EBF4DD] px-3 py-1 rounded-full border border-[#DDE7D8]">
-                <Music size={16} className="text-[#5A7863]" />
-                <span className="text-sm truncate max-w-[150px]">
+              <div className="flex items-center gap-1.5 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-900 text-xs">
+                <Music size={14} className="text-blue-600 dark:text-blue-400" />
+                <span className="truncate max-w-[150px]">
                   {newAudioFile.name}
                 </span>
                 <button
@@ -343,7 +343,7 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
                   onClick={() => setNewAudioFile(null)}
                   className="text-red-500 hover:text-red-700"
                 >
-                  <X size={14} />
+                  <X size={12} />
                 </button>
               </div>
             )}
@@ -357,40 +357,40 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
             <button
               type="button"
               onClick={() => audioInputRef.current.click()}
-              className="px-4 py-2 border-2 border-dashed border-[#DDE7D8] rounded-xl text-[#5A7863] hover:bg-[#EBF4DD] transition flex items-center gap-2"
+              className="px-3.5 py-1.5 border border-dashed border-blue-300 dark:border-blue-800 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold"
             >
-              <Upload size={16} /> {newAudioFile ? "Change" : "Upload"}
+              <Upload size={14} /> {newAudioFile ? "Change" : "Upload"}
             </button>
           </div>
         </div>
 
         {/* Gallery Images */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Gallery Images
           </label>
-          <div className="flex flex-wrap gap-3 mb-2">
+          <div className="flex flex-wrap gap-2.5 mb-2">
             {formData.galleryImages.map((url, idx) => (
-              <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#DDE7D8]">
+              <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => removeImage(idx)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={11} />
                 </button>
               </div>
             ))}
             {newImages.map((file, idx) => (
-              <div key={`new-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#DDE7D8]">
+              <div key={`new-${idx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                 <img src={URL.createObjectURL(file)} alt={`New ${idx}`} className="w-full h-full object-cover" />
                 <button
                   type="button"
                   onClick={() => setNewImages((prev) => prev.filter((_, i) => i !== idx))}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
-                  <X size={12} />
+                  <X size={11} />
                 </button>
               </div>
             ))}
@@ -406,39 +406,39 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
           <button
             type="button"
             onClick={() => imagesInputRef.current.click()}
-            className="px-4 py-2 border-2 border-dashed border-[#DDE7D8] rounded-xl text-[#5A7863] hover:bg-[#EBF4DD] transition flex items-center gap-2"
+            className="px-3.5 py-1.5 border border-dashed border-blue-300 dark:border-blue-800 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold"
           >
-            <Plus size={16} /> Add Images
+            <Plus size={14} /> Add Images
           </button>
         </div>
 
         {/* Gallery Videos */}
         <div>
-          <label className="block text-sm font-medium text-[#3B4953] mb-1">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 mb-1">
             Gallery Videos
           </label>
-          <div className="flex flex-wrap gap-3 mb-2">
+          <div className="flex flex-wrap gap-2.5 mb-2">
             {formData.galleryVideos.map((url, idx) => (
-              <div key={idx} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#DDE7D8] bg-black flex items-center justify-center">
-                <Video size={24} className="text-white" />
+              <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-black flex items-center justify-center">
+                <Video size={20} className="text-white" />
                 <button
                   type="button"
                   onClick={() => removeVideo(idx)}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
-                  <Trash2 size={12} />
+                  <Trash2 size={11} />
                 </button>
               </div>
             ))}
             {newVideos.map((file, idx) => (
-              <div key={`new-video-${idx}`} className="relative w-20 h-20 rounded-lg overflow-hidden border border-[#DDE7D8] bg-black flex items-center justify-center">
-                <Video size={24} className="text-white" />
+              <div key={`new-video-${idx}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 bg-black flex items-center justify-center">
+                <Video size={20} className="text-white" />
                 <button
                   type="button"
                   onClick={() => setNewVideos((prev) => prev.filter((_, i) => i !== idx))}
-                  className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                  className="absolute top-0.5 right-0.5 p-0.5 bg-red-500 text-white rounded-full hover:bg-red-600"
                 >
-                  <X size={12} />
+                  <X size={11} />
                 </button>
               </div>
             ))}
@@ -454,25 +454,25 @@ const EditStoryModal = ({ isOpen, onClose, story, onStoryUpdated }) => {
           <button
             type="button"
             onClick={() => videosInputRef.current.click()}
-            className="px-4 py-2 border-2 border-dashed border-[#DDE7D8] rounded-xl text-[#5A7863] hover:bg-[#EBF4DD] transition flex items-center gap-2"
+            className="px-3.5 py-1.5 border border-dashed border-blue-300 dark:border-blue-800 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition flex items-center gap-1.5 text-xs font-semibold"
           >
-            <Plus size={16} /> Add Videos
+            <Plus size={14} /> Add Videos
           </button>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-[#DDE7D8]">
+        <div className="flex justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-700/80">
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-2 rounded-xl border border-[#DDE7D8] text-[#3B4953] hover:bg-[#F7F9F4] transition"
+            className="px-4 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-xs font-bold uppercase tracking-wider"
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-6 py-2 rounded-xl bg-[#5A7863] text-white font-semibold hover:bg-[#4A6853] transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-5 py-1.5 rounded-lg bg-blue-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Update Story"}

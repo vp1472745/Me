@@ -393,23 +393,23 @@ const ProjectManagement = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 bg-[#F7F9F4] min-h-screen text-[#3B4953]">
+    <div className="animate-fade-in text-xs sm:text-sm space-y-4">
       <ToastContainer />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-[#DDE7D8] pb-5">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 border-b border-slate-200/80 dark:border-slate-800 pb-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#3B4953] flex items-center gap-2">
-            <FaFolder className="text-[#5A7863]" /> Project Assignments & Timelines
+          <h1 className="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <FaFolder className="text-blue-600 dark:text-blue-400" /> Project Assignments & Timelines
           </h1>
-          <p className="text-sm text-[#3B4953]/60 mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
             Assign client subfolders to editors, review timeline durations, and manage production workflow.
           </p>
         </div>
         {activeTab === "assignments" && (
           <button
             onClick={() => setAssignModalOpen(true)}
-            className="self-start sm:self-center px-5 py-2.5 bg-[#5A7863] text-white hover:bg-[#4B6654] text-sm font-bold rounded-2xl transition flex items-center gap-2 shadow-sm"
+            className="self-start sm:self-center px-3.5 py-1.5 bg-blue-600 text-white hover:bg-blue-700 text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-2xs"
           >
             <FaPlus /> Assign Work
           </button>
@@ -417,23 +417,23 @@ const ProjectManagement = () => {
       </div>
 
       {/* Tab Switcher */}
-      <div className="flex border-b border-[#DDE7D8] gap-6">
+      <div className="flex items-center gap-1.5 border-b border-slate-200/80 dark:border-slate-800 pb-2.5">
         <button
           onClick={() => setActiveTab("assignments")}
-          className={`pb-3 text-sm font-extrabold border-b-2 transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
             activeTab === "assignments"
-              ? "border-[#5A7863] text-[#5A7863]"
-              : "border-transparent text-slate-400 hover:text-slate-650"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           Assignments Overview ({projects.length})
         </button>
         <button
           onClick={() => setActiveTab("corrections")}
-          className={`pb-3 text-sm font-extrabold border-b-2 transition-all flex items-center gap-1.5 ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all duration-150 ${
             activeTab === "corrections"
-              ? "border-rose-500 text-rose-600"
-              : "border-transparent text-slate-400 hover:text-slate-650"
+              ? "bg-blue-600 text-white shadow-2xs"
+              : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
           Correction Feedback logs ({corrections.length})
@@ -442,72 +442,72 @@ const ProjectManagement = () => {
 
       {/* Dynamic Content */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-4">
-          <FaSpinner className="animate-spin text-[#5A7863] text-3xl" />
-          <p className="text-sm text-[#3B4953]/60">Loading production database...</p>
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <FaSpinner className="animate-spin text-blue-600 text-2xl" />
+          <p className="text-xs text-slate-500">Loading production database...</p>
         </div>
       ) : activeTab === "assignments" ? (
         /* ==================== ASSIGNMENTS TAB ==================== */
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Stats Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border border-[#DDE7D8] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center flex-shrink-0">
-                <FaTasks />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+            <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 shadow-2xs flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center flex-shrink-0">
+                <FaTasks size={13} />
               </div>
               <div>
-                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Total Assigned</span>
-                <span className="text-xl font-black text-slate-800">{totalAssigned}</span>
+                <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Total Assigned</span>
+                <span className="text-lg font-black text-slate-800 dark:text-slate-100">{totalAssigned}</span>
               </div>
             </div>
-            <div className="bg-white border border-[#DDE7D8] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center flex-shrink-0">
-                <FaClock />
+            <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 shadow-2xs flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center flex-shrink-0">
+                <FaClock size={13} />
               </div>
               <div>
-                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Wait Estimate</span>
-                <span className="text-xl font-black text-slate-850">{awaitingEstimates}</span>
+                <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Wait Estimate</span>
+                <span className="text-lg font-black text-slate-800 dark:text-slate-100">{awaitingEstimates}</span>
               </div>
             </div>
-            <div className="bg-white border border-[#DDE7D8] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                <FaHistory />
+            <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 shadow-2xs flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center flex-shrink-0">
+                <FaHistory size={13} />
               </div>
               <div>
-                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">Wait Approval</span>
-                <span className="text-xl font-black text-slate-850">{pendingApprovals}</span>
+                <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">Wait Approval</span>
+                <span className="text-lg font-black text-slate-800 dark:text-slate-100">{pendingApprovals}</span>
               </div>
             </div>
-            <div className="bg-white border border-[#DDE7D8] rounded-2xl p-4 shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                <FaFolderOpen />
+            <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 shadow-2xs flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center flex-shrink-0">
+                <FaFolderOpen size={13} />
               </div>
               <div>
-                <span className="text-xs text-slate-400 block font-semibold uppercase tracking-wider">In Progress</span>
-                <span className="text-xl font-black text-slate-850">{inProgress}</span>
+                <span className="text-[10px] text-slate-400 block font-semibold uppercase tracking-wider">In Progress</span>
+                <span className="text-lg font-black text-slate-800 dark:text-slate-100">{inProgress}</span>
               </div>
             </div>
           </div>
 
           {/* Search and Filters Action Panel */}
-          <div className="bg-white border border-[#DDE7D8] rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-80">
-              <FaSearch className="absolute left-3.5 top-3.5 text-slate-400" />
+          <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-3 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
+            <div className="relative w-full md:w-72">
+              <FaSearch className="absolute left-3 top-2.5 text-slate-400 text-xs" />
               <input
                 type="text"
                 placeholder="Search Client or Editor..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#5A7863] text-sm"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
               />
             </div>
-            <div className="flex flex-wrap gap-3 w-full md:w-auto">
-              <div className="flex items-center gap-2 bg-[#F7F9F4] px-3.5 py-1.5 rounded-xl border border-slate-200 w-full sm:w-auto">
-                <FaFilter className="text-slate-400 text-xs" />
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700 w-full sm:w-auto">
+                <FaFilter className="text-slate-400 text-[10px]" />
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-bold text-slate-700 w-full"
+                  className="bg-transparent outline-none text-xs font-semibold text-slate-700 dark:text-slate-200 w-full"
                 >
                   <option value="All">All Statuses</option>
                   <option value="WAITING_FOR_EDITOR">Awaiting Estimate</option>
@@ -518,12 +518,12 @@ const ProjectManagement = () => {
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 bg-[#F7F9F4] px-3.5 py-1.5 rounded-xl border border-slate-200 w-full sm:w-auto">
-                <FaFolder className="text-slate-400 text-xs" />
+              <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700 w-full sm:w-auto">
+                <FaFolder className="text-slate-400 text-[10px]" />
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-bold text-slate-700 w-full"
+                  className="bg-transparent outline-none text-xs font-semibold text-slate-700 dark:text-slate-200 w-full"
                 >
                   <option value="All">All Folders</option>
                   <option value="Wedding">Wedding</option>
@@ -542,92 +542,92 @@ const ProjectManagement = () => {
           </div>
 
           {/* Compact SaaS datatable */}
-          <div className="bg-white border border-[#DDE7D8] rounded-2xl shadow-sm overflow-x-auto">
+          <div className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl shadow-2xs overflow-x-auto">
             {filteredProjects.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-slate-400 font-semibold">No assigned works match the filters.</p>
+              <div className="text-center py-12">
+                <p className="text-slate-400 font-medium text-xs">No assigned works match the filters.</p>
               </div>
             ) : (
-              <table className="w-full border-collapse text-left text-sm text-slate-700">
+              <table className="w-full border-collapse text-left text-xs text-slate-700 dark:text-slate-200">
                 <thead>
-                  <tr className="border-b border-[#DDE7D8] bg-[#F7F9F4]">
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Client Details</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Assigned Editor</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Target Folder</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Target Date</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Duration Estimate</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500">Status</th>
-                    <th className="px-6 py-4 font-extrabold text-xs uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                  <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/50">
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Client Details</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Assigned Editor</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Target Folder</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Target Date</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Duration Estimate</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400">Status</th>
+                    <th className="px-3.5 py-2.5 font-bold text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {filteredProjects.map((proj) => (
-                    <tr key={proj._id} className="hover:bg-slate-50/50 transition">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-slate-800">{proj.client?.name || "Deleted User"}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">{proj.client?.email}</div>
+                    <tr key={proj._id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                      <td className="px-3.5 py-2.5">
+                        <div className="font-bold text-slate-800 dark:text-slate-100 text-xs">{proj.client?.name || "Deleted User"}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">{proj.client?.email}</div>
                         {proj.client?.googleDrive?.connected ? (
-                          <span className="inline-flex items-center gap-1 text-[9px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded mt-1 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-[9px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded mt-0.5 font-semibold">
                             <FaGoogleDrive /> Linked
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-[9px] text-rose-600 bg-rose-50 px-2 py-0.5 rounded mt-1 font-semibold">
+                          <span className="inline-flex items-center gap-1 text-[9px] text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 px-1.5 py-0.5 rounded mt-0.5 font-semibold">
                             <FaGoogleDrive /> Unlinked
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-800">{proj.editor?.name || "Deleted Editor"}</div>
-                        <div className="text-xs text-slate-400 mt-0.5">{proj.editor?.email}</div>
+                      <td className="px-3.5 py-2.5">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200 text-xs">{proj.editor?.name || "Deleted Editor"}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">{proj.editor?.email}</div>
                       </td>
-                      <td className="px-6 py-4 font-bold text-[#5A7863]">
-                        <span className="bg-[#EBF4DD] px-2.5 py-1 rounded-lg text-xs">
+                      <td className="px-3.5 py-2.5 font-bold text-blue-600 dark:text-blue-400">
+                        <span className="bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-md text-[11px] font-semibold">
                           {proj.category}
                         </span>
                       </td>
-                      <td className="px-6 py-4 font-semibold text-slate-600">
+                      <td className="px-3.5 py-2.5 font-semibold text-slate-600 dark:text-slate-300">
                         {proj.deliveryDate ? new Date(proj.deliveryDate).toLocaleDateString() : "N/A"}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-3.5 py-2.5">
                         {proj.duration?.estimated ? (
                           <div className="space-y-0.5">
-                            <div className="font-bold text-slate-800">{proj.duration.estimated}</div>
+                            <div className="font-bold text-slate-800 dark:text-slate-200">{proj.duration.estimated}</div>
                             <div className="text-[10px] text-slate-400">
                               Exp: {proj.duration.expectedCompletionDate ? new Date(proj.duration.expectedCompletionDate).toLocaleDateString() : "N/A"}
                             </div>
                           </div>
                         ) : (
-                          <span className="text-xs italic text-slate-400">Awaiting...</span>
+                          <span className="text-[11px] italic text-slate-400">Awaiting...</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">{getStatusBadge(proj.status)}</td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-3.5 py-2.5">{getStatusBadge(proj.status)}</td>
+                      <td className="px-3.5 py-2.5 text-right">
                         {proj.status === "WAITING_FOR_ADMIN_APPROVAL" ? (
                           <div className="flex justify-end gap-1.5">
                             <button
                               onClick={() => handleApprove(proj._id)}
                               title="Approve Estimate"
-                              className="w-8 h-8 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 flex items-center justify-center transition"
+                              className="w-7 h-7 rounded-lg bg-green-50 hover:bg-green-100 text-green-700 flex items-center justify-center transition"
                             >
-                              <FaCheck size={12} />
+                              <FaCheck size={11} />
                             </button>
                             <button
                               onClick={() => openEditModal(proj)}
                               title="Modify & Approve"
-                              className="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center transition"
+                              className="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 flex items-center justify-center transition"
                             >
-                              <FaEdit size={12} />
+                              <FaEdit size={11} />
                             </button>
                             <button
                               onClick={() => handleReject(proj._id)}
                               title="Reject Estimate"
-                              className="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center transition"
+                              className="w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center transition"
                             >
-                              <FaTimes size={12} />
+                              <FaTimes size={11} />
                             </button>
                           </div>
                         ) : (
-                          <span className="text-xs text-slate-400 italic">No pending action</span>
+                          <span className="text-[11px] text-slate-400 italic">No pending action</span>
                         )}
                       </td>
                     </tr>
@@ -640,58 +640,58 @@ const ProjectManagement = () => {
       ) : (
         /* ==================== CORRECTIONS TAB ==================== */
         corrections.length === 0 ? (
-          <div className="text-center py-20 bg-white border border-[#DDE7D8] rounded-3xl p-12">
-            <p className="text-[#3B4953]/60 font-semibold">No file correction requests found in history.</p>
+          <div className="text-center py-12 bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-6">
+            <p className="text-slate-400 font-medium text-xs">No file correction requests found in history.</p>
           </div>
         ) : (
-          <div className="space-y-6 max-w-5xl mx-auto">
+          <div className="space-y-4">
             {corrections.map((corr) => (
-              <div key={corr._id} className="bg-white border border-[#DDE7D8] rounded-3xl p-6 shadow-sm hover:shadow-md transition space-y-4 text-slate-800">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 pb-3">
+              <div key={corr._id} className="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl p-4 shadow-2xs space-y-3 text-slate-800 dark:text-slate-200">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5">
                   <div>
-                    <h3 className="font-extrabold text-slate-800 text-base">File: {corr.fileName}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">Project Category Folder: <b>{corr.workId?.category}</b></p>
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm">File: {corr.fileName}</h3>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Project Category Folder: <b>{corr.workId?.category}</b></p>
                   </div>
                   <div>
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
                       corr.status === "Pending"
-                        ? "bg-rose-50 text-rose-700 border-rose-100"
+                        ? "bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-950/40 dark:text-rose-400"
                         : corr.status === "In Progress"
-                        ? "bg-amber-50 text-amber-700 border-amber-100"
-                        : "bg-green-50 text-green-700 border-green-100"
+                        ? "bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-950/40 dark:text-amber-400"
+                        : "bg-green-50 text-green-700 border-green-100 dark:bg-green-950/40 dark:text-green-400"
                     }`}>
                       {corr.status}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-6">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {/* Left Column: Image Preview */}
                   <div className="flex-shrink-0">
                     <CorrectionImagePreview fileId={corr.fileId} workId={corr.workId?._id} />
                   </div>
 
                   {/* Right Column: User-Editor Notes */}
-                  <div className="flex-1 space-y-3">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-500">
+                  <div className="flex-1 space-y-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-500">
                       <div>
-                        <span className="font-semibold text-slate-400 block uppercase">Client Details</span>
-                        <span className="font-bold text-slate-800">{corr.workId?.client?.name || "N/A"}</span>
+                        <span className="font-semibold text-slate-400 block uppercase text-[10px]">Client Details</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{corr.workId?.client?.name || "N/A"}</span>
                       </div>
                       <div>
-                        <span className="font-semibold text-slate-400 block uppercase">Editor Assigned</span>
-                        <span className="font-bold text-slate-800">{corr.workId?.editor?.name || "N/A"}</span>
+                        <span className="font-semibold text-slate-400 block uppercase text-[10px]">Editor Assigned</span>
+                        <span className="font-bold text-slate-800 dark:text-slate-200 text-xs">{corr.workId?.editor?.name || "N/A"}</span>
                       </div>
                     </div>
 
-                    <div className="bg-rose-50/50 border border-rose-100/50 rounded-2xl p-4 text-sm">
-                      <span className="font-bold text-rose-800 text-[10px] uppercase tracking-wide block mb-1">Latest Client Request Comment:</span>
-                      <p className="italic text-slate-700 text-sm">"{corr.userComment}"</p>
+                    <div className="bg-rose-50/50 dark:bg-rose-950/30 border border-rose-100/50 dark:border-rose-900/40 rounded-xl p-3 text-xs">
+                      <span className="font-bold text-rose-800 dark:text-rose-400 text-[10px] uppercase tracking-wide block mb-1">Latest Client Request Comment:</span>
+                      <p className="italic text-slate-700 dark:text-slate-300">"{corr.userComment}"</p>
                     </div>
 
                     {corr.editorNotes && (
-                      <div className="bg-slate-50 border border-slate-200/50 rounded-2xl p-4 text-xs text-slate-600">
-                        <span className="font-bold text-slate-500 block uppercase tracking-wide mb-1">Latest Editor Response Note:</span>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-600 dark:text-slate-300">
+                        <span className="font-bold text-slate-500 dark:text-slate-400 block uppercase tracking-wide mb-1 text-[10px]">Latest Editor Response Note:</span>
                         <p className="italic">"{corr.editorNotes}"</p>
                       </div>
                     )}
@@ -699,9 +699,9 @@ const ProjectManagement = () => {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleDownloadFile(corr.fileId, corr.workId?._id, corr.fileName)}
-                        className="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                        className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
                       >
-                        <FaDownload /> Download Original
+                        <FaDownload size={11} /> Download Original
                       </button>
                     </div>
                   </div>
@@ -709,15 +709,15 @@ const ProjectManagement = () => {
 
                 {/* View History Button */}
                 {corr.history && corr.history.length > 0 && (
-                  <div className="pt-3 border-t border-slate-100 flex justify-end">
+                  <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex justify-end">
                     <button
                       onClick={() => {
                         setSelectedCorrection(corr);
                         setHistoryModalOpen(true);
                       }}
-                      className="px-4 py-2 bg-[#5A7863] hover:bg-[#4B6654] text-white text-xs font-bold rounded-xl transition flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-2xs"
                     >
-                      <FaHistory /> View Version & Message History ({corr.history.length})
+                      <FaHistory size={11} /> View Version & Message History ({corr.history.length})
                     </button>
                   </div>
                 )}
@@ -734,15 +734,15 @@ const ProjectManagement = () => {
         title="Assign New Project to Editor"
         size="md"
       >
-        <form onSubmit={handleAssignWork} className="space-y-4 text-slate-850">
+        <form onSubmit={handleAssignWork} className="space-y-3.5 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Select Client <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Client <span className="text-rose-500">*</span></label>
             <select
               name="client"
               value={form.client}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-350 outline-none focus:ring-2 focus:ring-[#5A7863] text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
             >
               <option value="">-- Choose Client --</option>
               {clients.map((c) => (
@@ -754,13 +754,13 @@ const ProjectManagement = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Select Editor <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Select Editor <span className="text-rose-500">*</span></label>
             <select
               name="editor"
               value={form.editor}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-350 outline-none focus:ring-2 focus:ring-[#5A7863] text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
             >
               <option value="">-- Choose Editor --</option>
               {editors.map((e) => (
@@ -773,19 +773,19 @@ const ProjectManagement = () => {
 
           {/* Multi-Select Target Subfolders */}
           <div className="relative" ref={subfolderDropdownRef}>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-sm font-semibold text-slate-700">
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Target Subfolders <span className="text-rose-500">*</span>
               </label>
-              <div className="flex items-center gap-2 text-xs">
+              <div className="flex items-center gap-2 text-[11px]">
                 <button
                   type="button"
                   onClick={handleSelectAllCategories}
-                  className="text-[#5A7863] hover:text-[#465E4D] font-semibold hover:underline"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 font-semibold hover:underline"
                 >
                   Select All
                 </button>
-                <span className="text-slate-300">|</span>
+                <span className="text-slate-300 dark:text-slate-600">|</span>
                 <button
                   type="button"
                   onClick={handleClearCategories}
@@ -799,17 +799,17 @@ const ProjectManagement = () => {
             {/* Selected Pills Display & Dropdown Trigger */}
             <div
               onClick={() => setSubfolderDropdownOpen((prev) => !prev)}
-              className={`w-full min-h-[44px] p-2 rounded-xl border transition-all cursor-pointer flex flex-wrap items-center gap-1.5 bg-white ${
+              className={`w-full min-h-[38px] p-1.5 rounded-lg border transition-all cursor-pointer flex flex-wrap items-center gap-1.5 bg-white dark:bg-slate-800 ${
                 subfolderDropdownOpen
-                  ? "border-[#5A7863] ring-2 ring-[#5A7863]/20"
-                  : "border-slate-300 hover:border-slate-400"
+                  ? "border-blue-500 ring-2 ring-blue-500/20"
+                  : "border-slate-200 dark:border-slate-700 hover:border-slate-300"
               }`}
             >
               {form.categories && form.categories.length > 0 ? (
                 form.categories.map((cat) => (
                   <span
                     key={cat}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#5A7863]/10 text-[#2C3E35] border border-[#5A7863]/25 rounded-lg text-xs font-semibold shadow-xs transition-all hover:bg-[#5A7863]/20"
+                    className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-md text-[11px] font-semibold transition-all hover:bg-blue-100"
                   >
                     <span>{cat}</span>
                     <button
@@ -818,30 +818,30 @@ const ProjectManagement = () => {
                       className="hover:text-rose-600 focus:outline-none rounded-full p-0.5 hover:bg-rose-50 transition-colors"
                       title={`Remove ${cat}`}
                     >
-                      <FaTimes className="text-[10px]" />
+                      <FaTimes className="text-[9px]" />
                     </button>
                   </span>
                 ))
               ) : (
-                <span className="text-sm text-slate-400 px-2">
+                <span className="text-xs text-slate-400 px-2">
                   -- Select one or more subfolders --
                 </span>
               )}
               <div className="ml-auto pr-1 text-slate-400 flex items-center gap-1">
                 {form.categories && form.categories.length > 0 && (
-                  <span className="text-[11px] font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md">
+                  <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-1.5 py-0.5 rounded">
                     {form.categories.length}
                   </span>
                 )}
-                <span className="text-[10px] text-slate-500">▼</span>
+                <span className="text-[9px] text-slate-500">▼</span>
               </div>
             </div>
 
             {/* Dropdown Menu */}
             {subfolderDropdownOpen && (
-              <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 space-y-2 max-h-72 overflow-y-auto">
+              <div className="absolute z-50 left-0 right-0 mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-2.5 space-y-2 max-h-60 overflow-y-auto">
                 {/* Custom Subfolder Adder */}
-                <div className="flex gap-2 pb-2 border-b border-slate-100">
+                <div className="flex gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
                   <input
                     type="text"
                     value={customCategory}
@@ -853,29 +853,29 @@ const ProjectManagement = () => {
                       }
                     }}
                     placeholder="Add custom subfolder (e.g. Sangeet)..."
-                    className="flex-1 px-3 py-1.5 text-xs rounded-lg border border-slate-300 outline-none focus:ring-1 focus:ring-[#5A7863]"
+                    className="flex-1 px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-1 focus:ring-blue-500 text-slate-800 dark:text-slate-100"
                   />
                   <button
                     type="button"
                     onClick={handleAddCustomCategory}
-                    className="px-3 py-1.5 bg-[#5A7863] text-white text-xs font-bold rounded-lg hover:bg-[#465E4D] transition"
+                    className="px-3 py-1 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition"
                   >
                     + Add
                   </button>
                 </div>
 
                 {/* Subfolders Grid / List */}
-                <div className="grid grid-cols-2 gap-1.5 pt-1">
+                <div className="grid grid-cols-2 gap-1 pt-1">
                   {Array.from(new Set([...SUBFOLDER_OPTIONS, ...form.categories])).map((cat) => {
                     const isSelected = form.categories.includes(cat);
                     return (
                       <div
                         key={cat}
                         onClick={() => handleToggleCategory(cat)}
-                        className={`flex items-center justify-between p-2 rounded-xl text-xs font-medium cursor-pointer transition select-none ${
+                        className={`flex items-center justify-between p-1.5 rounded-lg text-xs font-medium cursor-pointer transition select-none ${
                           isSelected
-                            ? "bg-[#5A7863]/15 text-[#2C3E35] border border-[#5A7863]/40 font-semibold"
-                            : "hover:bg-slate-50 text-slate-700 border border-transparent"
+                            ? "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 font-semibold"
+                            : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-transparent"
                         }`}
                       >
                         <div className="flex items-center gap-2 truncate">
@@ -883,9 +883,9 @@ const ProjectManagement = () => {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => {}}
-                            className="w-3.5 h-3.5 text-[#5A7863] rounded border-slate-300 focus:ring-[#5A7863] pointer-events-none accent-[#5A7863]"
+                            className="w-3.5 h-3.5 text-blue-600 rounded border-slate-300 focus:ring-blue-500 pointer-events-none accent-blue-600"
                           />
-                          <span className="truncate">{cat}</span>
+                          <span className="truncate text-xs">{cat}</span>
                         </div>
                         {isSelected && (
                           <button
@@ -894,7 +894,7 @@ const ProjectManagement = () => {
                             className="text-slate-400 hover:text-rose-600 ml-1 p-0.5 rounded transition"
                             title="Remove"
                           >
-                            <FaTimes className="text-[10px]" />
+                            <FaTimes className="text-[9px]" />
                           </button>
                         )}
                       </div>
@@ -906,31 +906,31 @@ const ProjectManagement = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1.5">Target Completion Date <span className="text-rose-500">*</span></label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Target Completion Date <span className="text-rose-500">*</span></label>
             <input
               type="date"
               name="deliveryDate"
               value={form.deliveryDate}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-350 outline-none focus:ring-2 focus:ring-[#5A7863] text-sm"
+              className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+          <div className="flex justify-end gap-2.5 pt-2.5 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
               onClick={() => setAssignModalOpen(false)}
-              className="px-4 py-2.5 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition text-xs font-bold"
+              className="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition text-xs font-semibold"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2.5 bg-[#5A7863] text-white rounded-xl font-bold hover:bg-[#4B6654] transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-sm text-xs"
+              className="px-4 py-1.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs text-xs"
             >
-              {submitting ? <FaSpinner className="animate-spin" /> : <FaUserCheck />} Confirm Assignment
+              {submitting ? <FaSpinner className="animate-spin text-xs" /> : <FaUserCheck size={12} />} Confirm Assignment
             </button>
           </div>
         </form>
@@ -944,14 +944,14 @@ const ProjectManagement = () => {
         size="md"
       >
         {selectedProject && (
-          <form onSubmit={handleEditConfirm} className="space-y-4 text-slate-800">
+          <form onSubmit={handleEditConfirm} className="space-y-3 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
             <div>
-              <p className="text-sm text-slate-500 mb-2">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1.5">
                 Project Category: <b>{selectedProject.category}</b> for Client <b>{selectedProject.client?.name}</b>
               </p>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Estimated Duration (e.g. 10 Days)
               </label>
               <input
@@ -959,44 +959,44 @@ const ProjectManagement = () => {
                 value={editForm.estimatedDuration}
                 onChange={(e) => setEditForm({ ...editForm, estimatedDuration: e.target.value })}
                 placeholder="e.g. 10 Days"
-                className="w-full h-11 px-4 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#5A7863]"
+                className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Expected Completion Date
               </label>
               <input
                 type="date"
                 value={editForm.expectedCompletionDate}
                 onChange={(e) => setEditForm({ ...editForm, expectedCompletionDate: e.target.value })}
-                className="w-full h-11 px-4 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#5A7863]"
+                className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-xs text-slate-800 dark:text-slate-100"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Notes / Remarks (optional)
               </label>
               <textarea
                 value={editForm.notes}
                 onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
                 placeholder="e.g. Adjusted timeline due to editor workload"
-                className="w-full p-3 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-[#5A7863] h-24 resize-none"
+                className="w-full p-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 h-20 resize-none text-xs text-slate-800 dark:text-slate-100"
               />
             </div>
-            <div className="flex justify-end gap-3 pt-2">
+            <div className="flex justify-end gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setEditModalOpen(false)}
-                className="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition text-xs font-semibold"
+                className="px-3.5 py-1.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition text-xs font-semibold"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-xs font-bold"
+                className="px-4 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs font-semibold shadow-2xs"
               >
                 Confirm Modify & Approve
               </button>
@@ -1013,22 +1013,22 @@ const ProjectManagement = () => {
         size="lg"
       >
         {selectedCorrection && (
-          <div className="space-y-6 text-slate-800">
+          <div className="space-y-4 text-xs sm:text-sm text-slate-800 dark:text-slate-200">
             <div>
-              <h3 className="font-extrabold text-base">File: {selectedCorrection.fileName}</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <h3 className="font-bold text-sm">File: {selectedCorrection.fileName}</h3>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                 Project Category Folder: <b>{selectedCorrection.workId?.category}</b> | Client: <b>{selectedCorrection.workId?.client?.name}</b> | Editor: <b>{selectedCorrection.workId?.editor?.name}</b>
               </p>
             </div>
 
-            <div className="border-t border-slate-200 pt-4 space-y-6 max-h-[60vh] overflow-y-auto pr-2">
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-3 space-y-4 max-h-[60vh] overflow-y-auto pr-1">
               {/* Loop over history array */}
               {selectedCorrection.history.map((hist, idx) => (
-                <div key={idx} className="border-b border-slate-100 pb-5 last:border-b-0 space-y-3">
-                  <div className="flex justify-between items-center bg-slate-50 px-4 py-2 rounded-xl">
-                    <span className="text-xs font-bold text-[#5A7863]">VERSION {hist.version}</span>
+                <div key={idx} className="border-b border-slate-100 dark:border-slate-800 pb-3 last:border-b-0 space-y-2">
+                  <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg">
+                    <span className="text-xs font-bold text-blue-600 dark:text-blue-400">VERSION {hist.version}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      hist.status === "Pending" ? "bg-rose-50 text-rose-700" : "bg-green-50 text-green-700"
+                      hist.status === "Pending" ? "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400" : "bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                     }`}>
                       {hist.status}
                     </span>
