@@ -1,10 +1,8 @@
+import "../config/loadEnv.js";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 
 import User from "../model/authModel.js";
-
-dotenv.config();
 
 mongoose
   .connect(process.env.MONGO_URI)

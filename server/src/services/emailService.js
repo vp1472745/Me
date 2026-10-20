@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../config/loadEnv.js";
 import dns from "node:dns";
 import nodemailer from "nodemailer";
 import { config } from "../config/config.js";

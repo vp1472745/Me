@@ -10,7 +10,7 @@ try {
   // Ignore
 }
 
-import "dotenv/config";
+import "./src/config/loadEnv.js";
 
 import express from "express";
 import mongoose from "mongoose";

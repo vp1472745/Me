@@ -4,9 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "seed:auth": "node src/seed/authSeed.js",
+    "start": "node index.js --production",
+    "dev": "nodemon index.js --development",
+    "start:dev": "node index.js --development",
+    "start:prod": "node index.js --production",
+    "dev:prod": "nodemon index.js --production",
+    "seed:auth": "node src/seed/authSeed.js --development",
+    "seed:auth:prod": "node src/seed/authSeed.js --production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
