@@ -16,25 +16,25 @@ export const config = {
 
   CLIENT_URL: cleanUrl(
     process.env.CLIENT_URL ||
-      (isProd
-        ? process.env.PROD_CLIENT_URL || "https://me-lyart-xi.vercel.app"
-        : process.env.LOCAL_CLIENT_URL || "http://localhost:5173")
+    (isProd
+      ? process.env.PROD_CLIENT_URL || "https://me-lyart-xi.vercel.app"
+      : process.env.LOCAL_CLIENT_URL || "http://localhost:5173")
   ),
 
   SERVER_URL: cleanUrl(
     process.env.SERVER_URL ||
-      (isProd
-        ? process.env.PROD_SERVER_URL || "https://me-tkrs.onrender.com"
-        : process.env.LOCAL_SERVER_URL || "http://localhost:5000")
+    (isProd
+      ? process.env.PROD_SERVER_URL || "https://me-tkrs.onrender.com"
+      : process.env.LOCAL_SERVER_URL || "http://localhost:5000")
   ),
 
   GOOGLE_REDIRECT_URI:
     process.env.GOOGLE_REDIRECT_URI?.trim() ||
     (isProd
       ? process.env.PROD_GOOGLE_REDIRECT_URI?.trim() ||
-        "https://me-su0u.onrender.com/api/google/callback"
+      "https://me-su0u.onrender.com/api/google/callback"
       : process.env.LOCAL_GOOGLE_REDIRECT_URI?.trim() ||
-        "http://localhost:5000/api/google/callback"),
+      "http://localhost:5000/api/google/callback"),
 };
 
 export default config;

@@ -322,7 +322,11 @@ export const createGallery = async (data) => {
   return API.post("/image/create", data);
 };
 
-export const getAllGalleries = async () => {
+export const getAllGalleries = async (forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/image");
+    return API.get("/image/all");
+  }
   return cachedGet("/image/all");
 };
 

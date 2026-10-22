@@ -138,7 +138,7 @@ const GalleryUpload = () => {
             await createGallery({ images: uploadedUrls });
             toast.success("Gallery uploaded successfully! 🎉");
             clearAllFiles();
-            fetchGalleries();
+            fetchGalleries(true);
             setActiveTab("all");
         } catch (error) {
             console.error("Upload error:", error);
@@ -149,9 +149,9 @@ const GalleryUpload = () => {
         }
     };
 
-    const fetchGalleries = async () => {
+    const fetchGalleries = async (forceFresh = false) => {
         try {
-            const res = await getAllGalleries();
+            const res = await getAllGalleries(forceFresh);
             setGalleries(res?.data?.data || []);
         } catch (error) {
             console.log(error);
@@ -166,17 +166,23 @@ const GalleryUpload = () => {
 
     const handleConfirmDelete = async () => {
         if (!galleryToDelete) return;
+        const targetId = galleryToDelete._id;
         setIsDeleting(true);
         try {
-            await deleteGallery(galleryToDelete._id);
+            await deleteGallery(targetId);
             toast.success("Gallery deleted successfully");
-            fetchGalleries();
         } catch (error) {
-            toast.error("Delete failed");
+            if (error?.response?.status === 404) {
+                toast.success("Gallery was already removed from database");
+            } else {
+                toast.error(error?.response?.data?.message || "Delete failed");
+            }
         } finally {
+            setGalleries((prev) => prev.filter((g) => g._id !== targetId));
             setIsDeleting(false);
             setDeleteModalOpen(false);
             setGalleryToDelete(null);
+            fetchGalleries(true);
         }
     };
 
@@ -227,7 +233,7 @@ const GalleryUpload = () => {
     }, [viewModalOpen, selectedGallery]);
 
     useEffect(() => {
-        fetchGalleries();
+        fetchGalleries(true);
     }, []);
 
     useEffect(() => {

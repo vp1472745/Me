@@ -11,5 +11,6 @@ router.post("/create", upload.array("images", 20), createGallery);
 router.get("/all", getAllGalleries);
 router.get("/:id", getSingleGallery);
 router.delete("/delete/:id", deleteGallery);
+router.delete("/:id", deleteGallery);
 
 export default router;

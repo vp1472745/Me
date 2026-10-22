@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Gallery from "../../model/imageModel.js";
 import { deletePublicAssetFromDrive } from "../../services/googleDriveService.js";
 import { getCleanMediaUrl } from "../../utils/cleanUrl.js";
@@ -97,8 +98,15 @@ export const getSingleGallery = async (req, res) => {
 // ==============================
 export const deleteGallery = async (req, res) => {
   try {
-    const gallery = await Gallery.findById(req.params.id);
+    const { id } = req.params;
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      serverCache.clearPattern("gallery");
+      return res.status(404).json({ success: false, message: "Gallery Not Found" });
+    }
+
+    const gallery = await Gallery.findById(id);
     if (!gallery) {
+      serverCache.clearPattern("gallery");
       return res.status(404).json({ success: false, message: "Gallery Not Found" });
     }
 
@@ -113,7 +121,7 @@ export const deleteGallery = async (req, res) => {
       await Promise.all(deletePromises);
     }
 
-    await Gallery.findByIdAndDelete(req.params.id);
+    await Gallery.findByIdAndDelete(id);
 
     serverCache.clearPattern("gallery");
 
