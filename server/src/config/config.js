@@ -32,7 +32,7 @@ export const config = {
     process.env.GOOGLE_REDIRECT_URI?.trim() ||
     (isProd
       ? process.env.PROD_GOOGLE_REDIRECT_URI?.trim() ||
-        "https://me-tkrs.onrender.com/api/google/callback"
+        "https://me-su0u.onrender.com/api/google/callback"
       : process.env.LOCAL_GOOGLE_REDIRECT_URI?.trim() ||
         "http://localhost:5000/api/google/callback"),
 };
