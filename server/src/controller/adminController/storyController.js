@@ -236,9 +236,10 @@ export const deleteStory = async (req, res) => {
     const story = await Story.findById(req.params.id);
 
     if (!story) {
-      return res.status(404).json({
-        success: false,
-        message: "Story Not Found",
+      serverCache.clearPattern("stories");
+      return res.status(200).json({
+        success: true,
+        message: "Story does not exist or was already removed.",
       });
     }
 

@@ -151,9 +151,10 @@ export const deleteVideo = async (req, res) => {
   try {
     const video = await Video.findById(req.params.id);
     if (!video) {
-      return res.status(404).json({
-        success: false,
-        message: "Video Not Found",
+      serverCache.clearPattern("films");
+      return res.status(200).json({
+        success: true,
+        message: "Video does not exist or was already removed.",
       });
     }
 

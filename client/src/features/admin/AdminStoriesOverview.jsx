@@ -68,12 +68,12 @@ const StoryManager = () => {
     };
   }, [coverPreview, audioPreview, videoPreviews]);
 
-  const fetchStories = useCallback(async () => {
+  const fetchStories = useCallback(async (forceFresh = false) => {
     setViewLoading(true);
     setModalMessage("Fetching stories...");
     setViewError(null);
     try {
-      const response = await getAllStories();
+      const response = await getAllStories(forceFresh);
       let storiesArray = [];
       if (response.data?.stories) {
         storiesArray = response.data.stories;
@@ -96,7 +96,7 @@ const StoryManager = () => {
 
   useEffect(() => {
     if (activeTab === "view") {
-      fetchStories();
+      fetchStories(true);
     }
   }, [activeTab, fetchStories]);
 
@@ -303,7 +303,7 @@ const StoryManager = () => {
 
       });
       resetForm();
-      if (activeTab === "view") fetchStories();
+      fetchStories(true);
     } catch (error) {
       console.error("Submission Error:", error);
       console.error("Error response:", error?.response);
@@ -353,15 +353,23 @@ const StoryManager = () => {
       setStories((prev) => prev.filter((s) => s._id !== storyToDelete._id));
       toast.success(" Story deleted successfully!", {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
-
       });
       setDeleteModalOpen(false);
       setStoryToDelete(null);
+      fetchStories(true);
     } catch (err) {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Failed to delete story", {
-        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
-      });
+      if (err?.response?.status === 404) {
+        setStories((prev) => prev.filter((s) => s._id !== storyToDelete._id));
+        setDeleteModalOpen(false);
+        setStoryToDelete(null);
+        fetchStories(true);
+        toast.info("Story was already removed from database.");
+      } else {
+        console.error(err);
+        toast.error(err?.response?.data?.message || "Failed to delete story", {
+          style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        });
+      }
     } finally {
       setIsDeleting(false);
     }

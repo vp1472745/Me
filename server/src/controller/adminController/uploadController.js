@@ -46,27 +46,11 @@ const uploadPublicAssetBackground = async (originalName, mimeType, folderName, u
       accessToken = await getAccessTokenFromRefreshToken(envRefreshToken);
     }
 
-    // Always save local disk copy to uploads/ folder for instant sub-millisecond local streaming
-    try {
-      const fs = await import("fs");
-      const path = await import("path");
-      const uploadsDir = path.join(process.cwd(), "uploads");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      const fileName = localId.replace("local-", "");
-      const filePath = path.join(uploadsDir, fileName);
-      fs.writeFileSync(filePath, buffer);
-      console.log(`Local disk cache saved for ${localId} -> ${filePath}`);
-    } catch (err) {
-      console.warn("Failed to write local disk cache:", err.message);
-    }
-
     if (!accessToken) {
-      console.log("⚠️ No Google Drive connected. Writing public asset to local uploads folder.");
+      console.warn("⚠️ No Google Drive connected. Cloud sync cannot proceed.");
       await TempFile.findOneAndUpdate(
         { localId },
-        { status: "COMPLETED" }
+        { status: "FAILED", error: "Google Drive not connected" }
       );
       tempMemoryCache.delete(localId);
       return;
@@ -117,42 +101,12 @@ const uploadDeliverableBackground = async (originalName, mimeType, subFolder, cl
     const Work = (await import("../../model/workModel.js")).default;
     const clientUser = await User.findById(clientId);
     if (!clientUser || !clientUser.googleDrive?.connected) {
-      console.log("⚠️ Client's Google Drive is not connected. Saving deliverable to local uploads folder.");
-      const fs = await import("fs");
-      const path = await import("path");
-      const uploadsDir = path.join(process.cwd(), "uploads");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-      }
-      const fileName = localId.replace("local-", "");
-      const filePath = path.join(uploadsDir, fileName);
-      fs.writeFileSync(filePath, buffer);
-
-      // Update TempFile tracking
+      console.warn("⚠️ Client Google Drive is not connected. Deliverable upload skipped (no local disk writes).");
       await TempFile.findOneAndUpdate(
         { localId },
-        { status: "COMPLETED" }
+        { status: "FAILED", error: "Client Google Drive is not connected" }
       );
-
-      // Delete from RAM cache immediately to free memory!
       tempMemoryCache.delete(localId);
-
-      // Log History
-      await History.create({
-        workId,
-        action: "Upload Completed",
-        remarks: `Local fallback sync completed for file '${originalName}'`,
-      });
-
-      // Notify Client User
-      await Notification.create({
-        recipient: clientId,
-        message: `A new file '${originalName}' has been successfully uploaded to local storage.`,
-        type: "UPLOAD_COMPLETED",
-        link: `/dashboard/gallery`,
-      });
-
-      console.log(`Local fallback deliverable upload completed for ${localId} -> Local Disk: ${filePath}`);
       return;
     }
 
@@ -378,7 +332,7 @@ export const uploadMultipleFiles = async (req, res) => {
   }
 };
 
-// 3. Upload Public Asset
+// 3. Upload Public Asset (Directly to Google Drive, ZERO local disk saving)
 export const uploadPublicAsset = async (req, res) => {
   try {
     const file = req.file;
@@ -390,36 +344,26 @@ export const uploadPublicAsset = async (req, res) => {
 
     const folderName = subFolder || "General Assets";
 
-    // Generate local temp ID
-    const fileExt = file.originalname.split(".").pop();
-    const localFileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.${fileExt}`;
-    const localId = `local-${localFileName}`;
-    
-    // Save in RAM cache (Zero Disk Writes)
-    tempMemoryCache.set(localId, file.buffer, file.mimetype);
+    // Directly upload to Google Drive synchronously
+    const uploadResult = await uploadPublicAssetToDrive(
+      file.originalname,
+      file.buffer,
+      file.mimetype,
+      folderName,
+      req.user
+    );
 
-    // Create tracking doc
-    await TempFile.create({
-      localId,
-      status: "PENDING",
-    });
-
-    // Start background sync
-    const userContext = req.user ? { _id: req.user._id, role: req.user.role } : null;
-    
-    uploadPublicAssetBackground(file.originalname, file.mimetype, folderName, userContext, localId)
-      .catch(err => console.error(`Background upload fail for ${localId}:`, err));
-
-    // Respond immediately to the frontend
-    const instantUrl = `https://drive.google.com/uc?export=view&id=${localId}`;
     return res.status(200).json({
       success: true,
-      message: "Asset uploaded successfully (local caching pending Google Drive sync)",
-      url: instantUrl,
-      public_id: localId,
+      message: "Asset uploaded directly to Google Drive successfully",
+      url: uploadResult.url,
+      public_id: uploadResult.id,
     });
   } catch (error) {
     console.error("Public asset upload controller error:", error);
-    return res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({
+      success: false,
+      message: error.message || "Failed to upload file to Google Drive",
+    });
   }
 };

@@ -28,9 +28,9 @@ function AdminFilms() {
   // ==========================
   // FETCH VIDEOS
   // ==========================
-  const fetchVideos = async () => {
+  const fetchVideos = async (forceFresh = false) => {
     try {
-      const res = await getAllVideos();
+      const res = await getAllVideos(forceFresh);
       setVideos(Array.isArray(res?.data?.videos) ? res.data.videos : []);
     } catch (error) {
       console.error("Error fetching video assets:", error);
@@ -43,7 +43,7 @@ function AdminFilms() {
   // USE EFFECT
   // ==========================
   useEffect(() => {
-    fetchVideos();
+    fetchVideos(true);
   }, []);
 
   // ==========================
@@ -74,7 +74,7 @@ function AdminFilms() {
       toast.success("Video added successfully!");
       setCategory("");
       setYoutubeUrl("");
-      await fetchVideos();
+      await fetchVideos(true);
       setActiveTab("all");
     } catch (error) {
       console.error("Video submission sequence interrupted:", error);
@@ -94,21 +94,27 @@ function AdminFilms() {
 
   const handleConfirmDelete = async () => {
     if (!videoToDelete) return;
+    const targetId = videoToDelete._id;
     setIsDeleting(true);
     try {
       setLoadingMessage("Purging stream asset mappings...");
       setLoading(true);
-      await deleteVideo(videoToDelete._id);
+      await deleteVideo(targetId);
       toast.success("Video deleted successfully");
-      await fetchVideos();
     } catch (error) {
-      console.error("Deletion lifecycle failure:", error);
-      toast.error("Failed to delete video resource.");
+      if (error?.response?.status === 404) {
+        toast.info("Video was already removed from database.");
+      } else {
+        console.error("Deletion lifecycle failure:", error);
+        toast.error("Failed to delete video resource.");
+      }
     } finally {
+      setVideos((prev) => prev.filter((v) => v._id !== targetId));
       setIsDeleting(false);
       setDeleteModalOpen(false);
       setVideoToDelete(null);
       setLoading(false);
+      fetchVideos(true);
     }
   };
 

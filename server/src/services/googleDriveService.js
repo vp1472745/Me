@@ -173,9 +173,74 @@ export const setupClientFolders = async (accessToken, rootFolderId) => {
 };
 
 /**
- * Upload file directly to Google Drive via multipart REST API request
+ * Delete a file permanently from Google Drive
+ */
+export const deleteFile = async (accessToken, fileId) => {
+  if (!accessToken || !fileId) return false;
+  try {
+    await axios.delete(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      timeout: 15000,
+    });
+    console.log(`Successfully deleted file ${fileId} from Google Drive.`);
+    return true;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      console.log(`File ${fileId} was already removed or not found in Google Drive.`);
+      return true;
+    }
+    console.error(`Error deleting file ${fileId} from Drive:`, error.response?.data || error.message);
+    return false;
+  }
+};
+
+/**
+ * Upload file directly to Google Drive via resumable upload (large files/videos) or multipart (small files)
  */
 export const uploadFile = async (accessToken, parentId, fileName, fileBuffer, mimeType) => {
+  // Use Google Drive Resumable Upload for files > 5MB (handles large videos, raw files up to 500MB without memory overhead)
+  if (fileBuffer.length > 5 * 1024 * 1024) {
+    try {
+      const initRes = await axios.post(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
+        {
+          name: fileName,
+          parents: [parentId],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json; charset=UTF-8",
+            "X-Upload-Content-Type": mimeType,
+            "X-Upload-Content-Length": fileBuffer.length,
+          },
+          timeout: 30000,
+        }
+      );
+
+      const location = initRes.headers.location;
+      if (!location) {
+        throw new Error("Failed to obtain resumable upload location from Google Drive");
+      }
+
+      const uploadRes = await axios.put(location, fileBuffer, {
+        headers: {
+          "Content-Type": mimeType,
+          "Content-Length": fileBuffer.length,
+        },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        timeout: 600000, // 10 minutes timeout for large video uploads
+      });
+
+      return uploadRes.data;
+    } catch (error) {
+      console.error(`Resumable upload failed for ${fileName}:`, error.response?.data || error.message);
+      throw new Error(`Failed to upload ${fileName} to Google Drive: ${error.message}`);
+    }
+  }
+
+  // Small file upload via multipart (<= 5MB)
   const boundary = "-------314159265358979323846";
   const delimiter = `\r\n--${boundary}\r\n`;
   const closeDelimiter = `\r\n--${boundary}--`;
@@ -205,6 +270,9 @@ export const uploadFile = async (accessToken, parentId, fileName, fileBuffer, mi
           "Content-Type": `multipart/related; boundary=${boundary}`,
           "Content-Length": multipartRequestBody.length,
         },
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        timeout: 60000,
       }
     );
     return response.data;
@@ -273,21 +341,6 @@ export const getFileStream = async (accessToken, fileId, rangeHeader = null) => 
   }
 
   throw new Error("Failed to retrieve file content from Google Drive");
-};
-
-/**
- * Delete file directly from Google Drive
- */
-export const deleteFile = async (accessToken, fileId) => {
-  try {
-    await axios.delete(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    return true;
-  } catch (error) {
-    console.error(`Error deleting file ${fileId} from Drive:`, error.response?.data || error.message);
-    return false;
-  }
 };
 
 /**

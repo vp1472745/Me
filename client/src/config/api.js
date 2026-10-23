@@ -241,7 +241,11 @@ export const createHeroSection = async (data) => {
   return API.post("/hero/create", data);
 };
 
-export const getAllHeroSections = async (params) => {
+export const getAllHeroSections = async (params = {}, forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/hero");
+    return API.get("/hero/all", { params });
+  }
   return cachedGet("/hero/all", { params });
 };
 
@@ -268,7 +272,11 @@ export const createStory = async (data) => {
   return API.post("/story/create", data);
 };
 
-export const getAllStories = async () => {
+export const getAllStories = async (forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/story");
+    return API.get("/story/all");
+  }
   return cachedGet("/story/all");
 };
 
@@ -295,7 +303,11 @@ export const createWeddingStory = async (data) => {
   return API.post("/photo-book/create", data);
 };
 
-export const getAllWeddingStories = async () => {
+export const getAllWeddingStories = async (forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/photo-book");
+    return API.get("/photo-book/all");
+  }
   return cachedGet("/photo-book/all");
 };
 
@@ -353,7 +365,11 @@ export const createVideo = async (data) => {
   return API.post("/film/create", data);
 };
 
-export const getAllVideos = async () => {
+export const getAllVideos = async (forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/film");
+    return API.get("/film/all");
+  }
   return cachedGet("/film/all");
 };
 
@@ -380,7 +396,11 @@ export const createPreWeddingStory = async (data) => {
   return API.post("/pre-wedding/create", data);
 };
 
-export const getAllPreWeddingStories = async () => {
+export const getAllPreWeddingStories = async (forceFresh = false) => {
+  if (forceFresh) {
+    clearClientCache("/pre-wedding");
+    return API.get("/pre-wedding/all");
+  }
   return cachedGet("/pre-wedding/all");
 };
 

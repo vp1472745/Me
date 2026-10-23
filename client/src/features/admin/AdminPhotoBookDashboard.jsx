@@ -129,7 +129,7 @@ const WeddingStoryDashboard = () => {
       setCoverImage(null);
       setGalleryImages([]);
       setActiveTab("stories");
-      getStories();
+      getStories(true);
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message || "Something went wrong during upload", {
@@ -143,10 +143,10 @@ const WeddingStoryDashboard = () => {
   /* =========================
       GET STORIES
   ========================= */
-  const getStories = async () => {
+  const getStories = async (forceFresh = false) => {
     try {
-      const response = await getAllWeddingStories();
-      setStories(response.data.data);
+      const response = await getAllWeddingStories(forceFresh);
+      setStories(response?.data?.data || []);
     } catch (error) {
       console.log(error);
       toast.error("Failed to load stories", {
@@ -154,6 +154,10 @@ const WeddingStoryDashboard = () => {
       });
     }
   };
+
+  useEffect(() => {
+    getStories(true);
+  }, []);
 
   /* =========================
       DELETE – OPEN CONFIRMATION
@@ -168,24 +172,30 @@ const WeddingStoryDashboard = () => {
   ========================= */
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
+    const targetId = itemToDelete.id;
     setLoading(true);
     setModalMessage("Deleting story...");
     try {
-      await deleteWeddingStory(itemToDelete.id);
+      await deleteWeddingStory(targetId);
       toast.success("🗑️ Story deleted successfully", {
         style: { background: "#1a7d4a", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
         icon: false,
       });
-      getStories();
     } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "Failed to delete", {
-        style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
-      });
+      if (error?.response?.status === 404) {
+        toast.info("Story was already removed from database.");
+      } else {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Failed to delete", {
+          style: { background: "#b91c1c", color: "#fff", borderRadius: "12px", padding: "16px 24px" },
+        });
+      }
     } finally {
+      setStories((prev) => (prev ? prev.filter((s) => s._id !== targetId) : []));
       setLoading(false);
       setDeleteModalOpen(false);
       setItemToDelete(null);
+      getStories(true);
     }
   };
 

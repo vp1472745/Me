@@ -113,10 +113,10 @@ const HeroManager = () => {
   // ==============================
   // FETCH HEROES
   // ==============================
-  const fetchHeroes = async () => {
+  const fetchHeroes = async (forceFresh = false) => {
     try {
       setLoading(true);
-      const res = await getAllHeroSections();
+      const res = await getAllHeroSections({}, forceFresh);
       const rawHeroes = res?.data?.data || [];
       const cleanHeroes = rawHeroes.map((hero) => ({
         ...hero,
@@ -132,7 +132,7 @@ const HeroManager = () => {
   };
 
   useEffect(() => {
-    fetchHeroes();
+    fetchHeroes(true);
   }, []);
 
   // ==============================
@@ -177,11 +177,12 @@ const HeroManager = () => {
 
       setSelectedFile(null);
       setPreviewUrl(null);
-      fetchHeroes();
+      fetchHeroes(true);
       setSelectedFilterCategory(category);
       setActiveTab("all");
     } catch (error) {
-      toast.error("Upload failed. Please try again.", {
+      const errorMsg = error?.response?.data?.message || error?.message || "Upload failed. Please try again.";
+      toast.error(errorMsg, {
         style: {
           background: "#b91c1c",
           color: "#fff",
@@ -219,13 +220,13 @@ const HeroManager = () => {
         },
       });
       setHeroes((prev) => prev.filter((h) => h._id !== deletedId));
-      fetchHeroes();
+      fetchHeroes(true);
       setDeleteModalOpen(false);
       setHeroToDelete(null);
     } catch (error) {
       if (error?.response?.status === 404) {
         setHeroes((prev) => prev.filter((h) => h._id !== deletedId));
-        fetchHeroes();
+        fetchHeroes(true);
         setDeleteModalOpen(false);
         setHeroToDelete(null);
         toast.info("Media was already removed from database.");

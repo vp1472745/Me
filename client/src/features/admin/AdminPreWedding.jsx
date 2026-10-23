@@ -69,10 +69,9 @@ const PreWedding = () => {
   // ======================================================
   // FETCH STORIES
   // ======================================================
-  const fetchStories = async () => {
+  const fetchStories = async (forceFresh = false) => {
     try {
-
-      const response = await getAllPreWeddingStories();
+      const response = await getAllPreWeddingStories(forceFresh);
       setStories(response?.data?.data || []);
     } catch (error) {
       console.log(error);
@@ -81,7 +80,7 @@ const PreWedding = () => {
   };
 
   useEffect(() => {
-    fetchStories();
+    fetchStories(true);
   }, []);
 
   // ======================================================
@@ -225,7 +224,7 @@ const PreWedding = () => {
       setCoverImage(null);
       setGalleryImages([]);
       setUploadProgress({});
-      fetchStories();
+      fetchStories(true);
       setActiveTab("all");
     } catch (error) {
       console.error("Upload error:", error);
@@ -246,18 +245,24 @@ const PreWedding = () => {
 
   const handleConfirmDelete = async () => {
     if (!storyToDelete) return;
+    const targetId = storyToDelete._id;
     setIsDeleting(true);
     try {
-      await deletePreWeddingStory(storyToDelete._id);
+      await deletePreWeddingStory(targetId);
       toast.success("Story deleted successfully");
-      fetchStories();
     } catch (error) {
-      console.log(error);
-      toast.error("Delete failed");
+      if (error?.response?.status === 404) {
+        toast.info("Story was already removed from database.");
+      } else {
+        console.log(error);
+        toast.error("Delete failed");
+      }
     } finally {
+      setStories((prev) => prev.filter((s) => s._id !== targetId));
       setIsDeleting(false);
       setDeleteModalOpen(false);
       setStoryToDelete(null);
+      fetchStories(true);
     }
   };
 

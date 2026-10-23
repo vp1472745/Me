@@ -101,13 +101,13 @@ export const deleteGallery = async (req, res) => {
     const { id } = req.params;
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       serverCache.clearPattern("gallery");
-      return res.status(404).json({ success: false, message: "Gallery Not Found" });
+      return res.status(200).json({ success: true, message: "Gallery already removed or invalid ID." });
     }
 
     const gallery = await Gallery.findById(id);
     if (!gallery) {
       serverCache.clearPattern("gallery");
-      return res.status(404).json({ success: false, message: "Gallery Not Found" });
+      return res.status(200).json({ success: true, message: "Gallery does not exist or was already removed." });
     }
 
     if (gallery.images && gallery.images.length > 0) {
